@@ -91,79 +91,83 @@ export default function VolunteerDashboardPage() {
 
   return (
     <div className="space-y-6">
-      {/* 1. Operational Hero Header with Subtle Environmental Artwork Visual */}
+      {/* 1. Large, Premium Integrated Dashboard Hero (approx 310–340px height) */}
       <SectionErrorBoundary sectionTitle="Command Header">
-        <div className="relative overflow-hidden rounded-2xl border border-border bg-surface p-5 sm:p-6 shadow-xs">
-          {/* Subtle environmental artwork occupying ~35–45% on the right */}
-          <PrarohaHeroVisual
-            variant="dashboard-hero"
-            className="w-[36%] lg:w-[40%] xl:w-[44%] hidden md:block opacity-90"
-            fadeDirection="both"
-            objectPosition="right center"
-            priority
-          />
-
-          {/* Primary Operational Content Layer */}
-          <div className="relative z-10 max-w-2xl space-y-4">
-            <div className="space-y-1">
-              <div className="inline-flex items-center gap-1.5 rounded-full bg-accent-mint px-2.5 py-0.5 text-[11px] font-bold text-accent-mint-text mb-1">
-                <Sparkles className="h-3 w-3 text-primary" />
+        <div className="relative overflow-hidden rounded-[24px] border border-border bg-surface shadow-xs min-h-[300px] md:min-h-[320px] lg:h-[330px] flex flex-col md:flex-row justify-between">
+          {/* LEFT ~55% Operational Content Layer */}
+          <div className="relative z-10 w-full md:w-[54%] lg:w-[52%] xl:w-[50%] p-6 sm:p-8 lg:p-9 flex flex-col justify-center space-y-4">
+            <div className="space-y-1.5">
+              <div className="inline-flex items-center gap-1.5 rounded-full bg-accent-mint px-3 py-1 text-xs font-bold text-accent-mint-text">
+                <Sparkles className="h-3.5 w-3.5 text-primary" />
                 PRAROHA&apos;26 Outreach Active
               </div>
-              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-text-primary">
+              <h1 className="text-2xl sm:text-3xl lg:text-[32px] font-black tracking-tight text-text-primary leading-tight">
                 {greeting}, {firstName}
               </h1>
-              <p className="text-xs sm:text-sm text-text-secondary leading-relaxed max-w-xl">
+              <p className="text-xs sm:text-sm text-text-secondary leading-relaxed max-w-lg">
                 Connect with corporate sponsors, confirm corporate deliverables, and advance deals through your pipeline.
               </p>
             </div>
 
-            {/* Quick Summary Badges */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-1">
-              <div className="rounded-xl border border-border-subtle bg-surface-subtle/50 p-2.5 backdrop-blur-xs">
-                <span className="text-[10px] font-semibold uppercase tracking-wider text-text-muted flex items-center gap-1">
+            {/* 4 Compact Operational Statistics */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-2">
+              <div className="rounded-xl border border-border-subtle bg-surface-subtle/80 p-3 backdrop-blur-xs">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-text-muted flex items-center gap-1">
                   <Users className="h-3 w-3 text-primary" />
                   Assigned
                 </span>
-                <p className="mt-1 text-lg font-bold text-text-primary">
+                <p className="mt-1 text-xl font-black text-text-primary">
                   {metrics ? metrics.totalAssigned : leads.length}
                 </p>
               </div>
 
-              <div className="rounded-xl border border-border-subtle bg-surface-subtle/50 p-2.5 backdrop-blur-xs">
-                <span className="text-[10px] font-semibold uppercase tracking-wider text-text-muted flex items-center gap-1">
+              <div className="rounded-xl border border-border-subtle bg-surface-subtle/80 p-3 backdrop-blur-xs">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-800 flex items-center gap-1">
                   <PhoneCall className="h-3 w-3 text-emerald-600" />
                   Today&apos;s Calls
                 </span>
-                <p className="mt-1 text-lg font-bold text-emerald-700">
+                <p className="mt-1 text-xl font-black text-emerald-700">
                   {displayMetrics.callsCompleted}{" "}
-                  <span className="text-[11px] font-medium text-text-muted">
+                  <span className="text-xs font-semibold text-text-muted">
                     / {displayMetrics.dailyTarget}
                   </span>
                 </p>
               </div>
 
-              <div className="rounded-xl border border-border-subtle bg-surface-subtle/50 p-2.5 backdrop-blur-xs">
-                <span className="text-[10px] font-semibold uppercase tracking-wider text-text-muted flex items-center gap-1">
+              <div className="rounded-xl border border-border-subtle bg-surface-subtle/80 p-3 backdrop-blur-xs">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-amber-800 flex items-center gap-1">
                   <Calendar className="h-3 w-3 text-amber-600" />
                   Follow-ups Due
                 </span>
-                <p className="mt-1 text-lg font-bold text-amber-700">
+                <p className="mt-1 text-xl font-black text-amber-700">
                   {displayMetrics.todayFollowUps}
                 </p>
               </div>
 
-              <div className="rounded-xl border border-border-subtle bg-surface-subtle/50 p-2.5 backdrop-blur-xs">
-                <span className="text-[10px] font-semibold uppercase tracking-wider text-text-muted flex items-center gap-1">
+              <div className="rounded-xl border border-border-subtle bg-surface-subtle/80 p-3 backdrop-blur-xs">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-teal-800 flex items-center gap-1">
                   <Trophy className="h-3 w-3 text-amber-500" />
                   Total Points
                 </span>
-                <p className="mt-1 text-lg font-bold text-text-primary">
+                <p className="mt-1 text-xl font-black text-text-primary">
                   {pointsSummary?.totalPoints ?? 0}
                 </p>
               </div>
             </div>
           </div>
+
+          {/* RIGHT ~45% Integrated Editorial Artwork (Desktop / Tablet) */}
+          <PrarohaHeroVisual
+            variant="dashboard-hero"
+            className="w-[46%] lg:w-[48%] xl:w-[50%]"
+            priority
+          />
+
+          {/* Mobile Bottom Visual (< 768px: 160–190px tall) */}
+          <PrarohaHeroVisual
+            variant="dashboard-mobile"
+            priority
+          />
         </div>
       </SectionErrorBoundary>
 
