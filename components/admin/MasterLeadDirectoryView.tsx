@@ -34,16 +34,21 @@ import {
   Users2,
   Edit3,
   Trash2,
+  Archive,
+  ArchiveRestore,
 } from "lucide-react";
 
 export function MasterLeadDirectoryView() {
   const { user } = useAuthUser();
   const deleteLeadMutation = useMutation(api.companies.deleteLead);
+  const archiveLeadMutation = useMutation(api.companies.archiveCompany);
+  const restoreLeadMutation = useMutation(api.companies.restoreCompany);
 
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedIndustry, setSelectedIndustry] = useState("all");
   const [selectedStatus, setSelectedStatus] = useState("all");
   const [selectedPriority, setSelectedPriority] = useState("all");
+  const [showArchived, setShowArchived] = useState(false);
 
   // Modals
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
@@ -51,6 +56,7 @@ export function MasterLeadDirectoryView() {
   const [selectedCompanyForDossier, setSelectedCompanyForDossier] = useState<any | null>(null);
   const [selectedCompanyForEdit, setSelectedCompanyForEdit] = useState<any | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [archivingId, setArchivingId] = useState<string | null>(null);
 
   // Convex Queries
   const metrics = useQuery(api.companies.getCompanyMetrics, {}) || {
@@ -67,6 +73,7 @@ export function MasterLeadDirectoryView() {
     industry: selectedIndustry || undefined,
     status: selectedStatus || undefined,
     priority: selectedPriority || undefined,
+    includeArchived: showArchived,
   }) || [];
 
   const handleDownloadTemplate = () => {
@@ -104,6 +111,47 @@ export function MasterLeadDirectoryView() {
       alert(`Failed to delete lead: ${err.message}`);
     } finally {
       setDeletingId(null);
+    }
+  };
+
+  const handleArchiveLead = async (companyId: any, companyName: string) => {
+    if (!user?.id) return;
+    if (
+      !window.confirm(
+        `Archive "${companyName}"? This will safely remove it from active volunteer outreach while preserving historical records.`
+      )
+    ) {
+      return;
+    }
+
+    try {
+      setArchivingId(companyId);
+      await archiveLeadMutation({
+        adminClerkId: user.id,
+        companyId,
+      });
+      if (selectedCompanyForDossier && selectedCompanyForDossier._id === companyId) {
+        setSelectedCompanyForDossier(null);
+      }
+    } catch (err: any) {
+      alert(`Failed to archive lead: ${err.message}`);
+    } finally {
+      setArchivingId(null);
+    }
+  };
+
+  const handleRestoreLead = async (companyId: any, companyName: string) => {
+    if (!user?.id) return;
+    try {
+      setArchivingId(companyId);
+      await restoreLeadMutation({
+        adminClerkId: user.id,
+        companyId,
+      });
+    } catch (err: any) {
+      alert(`Failed to restore lead: ${err.message}`);
+    } finally {
+      setArchivingId(null);
     }
   };
 
@@ -340,10 +388,23 @@ export function MasterLeadDirectoryView() {
               <option value="Low">Low</option>
             </select>
 
+            <button
+              onClick={() => setShowArchived((prev) => !prev)}
+              className={`h-8 px-2.5 rounded-lg border text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer ${
+                showArchived
+                  ? "bg-amber-100 text-amber-900 border-amber-300 font-bold"
+                  : "bg-surface border-border text-text-secondary hover:text-text-primary"
+              }`}
+            >
+              <Archive className="h-3.5 w-3.5" />
+              <span>{showArchived ? "Archived View (Active)" : "Show Archived"}</span>
+            </button>
+
             {(searchQuery ||
               selectedIndustry !== "all" ||
               selectedStatus !== "all" ||
-              selectedPriority !== "all") && (
+              selectedPriority !== "all" ||
+              showArchived) && (
               <Button
                 variant="ghost"
                 size="sm"
@@ -352,6 +413,7 @@ export function MasterLeadDirectoryView() {
                   setSelectedIndustry("all");
                   setSelectedStatus("all");
                   setSelectedPriority("all");
+                  setShowArchived(false);
                 }}
                 className="h-8 text-xs text-rose-600 hover:text-rose-700 hover:bg-rose-50"
               >
@@ -506,6 +568,29 @@ export function MasterLeadDirectoryView() {
                         <Edit3 className="h-3 w-3 mr-1" />
                         Edit
                       </Button>
+                      {comp.isArchived ? (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          isLoading={archivingId === comp._id}
+                          onClick={() => handleRestoreLead(comp._id, comp.companyName)}
+                          className="h-7 px-2 text-xs text-amber-700 hover:bg-amber-50 border-amber-200"
+                        >
+                          <ArchiveRestore className="h-3 w-3 mr-1" />
+                          Restore
+                        </Button>
+                      ) : (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          isLoading={archivingId === comp._id}
+                          onClick={() => handleArchiveLead(comp._id, comp.companyName)}
+                          className="h-7 px-2 text-xs text-amber-600 hover:bg-amber-50 border-amber-200"
+                        >
+                          <Archive className="h-3 w-3 mr-1" />
+                          Archive
+                        </Button>
+                      )}
                       <Button
                         variant="outline"
                         size="sm"

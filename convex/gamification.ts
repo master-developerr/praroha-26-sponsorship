@@ -2,6 +2,107 @@ import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 import { Id } from "./_generated/dataModel";
 
+export const DEFAULT_POINT_RULES = [
+  { eventType: "call_completed", points: 5, label: "Call Completed", description: "Logged structured call outcome" },
+  { eventType: "lead_contacted", points: 10, label: "Lead Contacted", description: "First contact established with company" },
+  { eventType: "positive_response", points: 15, label: "Positive Response", description: "Decision maker expressed interest" },
+  { eventType: "meeting_obtained", points: 30, label: "Meeting Scheduled", description: "Formal sponsorship meeting booked" },
+  { eventType: "proposal_generated", points: 40, label: "Proposal Dispatched", description: "Formal pitch proposal sent" },
+  { eventType: "sponsorship_won", points: 100, label: "Sponsorship Ratified", description: "Corporate sponsorship deal confirmed" },
+];
+
+/**
+ * Get all configurable point weights.
+ * Auto-seeds defaults if table is empty.
+ */
+export const getPointConfigurations = query({
+  args: {},
+  handler: async (ctx) => {
+    const existing = await ctx.db.query("pointConfigurations").collect();
+    if (existing.length === 0) {
+      return DEFAULT_POINT_RULES.map((rule) => ({
+        ...rule,
+        _id: rule.eventType as any,
+        updatedAt: Date.now(),
+      }));
+    }
+    return existing;
+  },
+});
+
+/**
+ * Admin action: Update point weight for a specific operational milestone.
+ */
+export const updatePointConfiguration = mutation({
+  args: {
+    eventType: v.string(),
+    points: v.number(),
+    label: v.optional(v.string()),
+    description: v.optional(v.string()),
+    adminClerkId: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const admin = await ctx.db
+      .query("users")
+      .withIndex("by_clerk_id", (q) => q.eq("clerkId", args.adminClerkId))
+      .first();
+
+    if (!admin || admin.role !== "admin") {
+      throw new Error("Unauthorized: Only verified administrators can configure point weights.");
+    }
+
+    if (args.points < 0 || args.points > 1000) {
+      throw new Error("Point values must be between 0 and 1000.");
+    }
+
+    const now = Date.now();
+    const existing = await ctx.db
+      .query("pointConfigurations")
+      .withIndex("by_event_type", (q) => q.eq("eventType", args.eventType))
+      .first();
+
+    const defaultRule = DEFAULT_POINT_RULES.find((r) => r.eventType === args.eventType);
+    const label = defaultRule?.label || args.eventType;
+    const description = defaultRule?.description || "Milestone points award";
+
+    let prevPoints = defaultRule?.points || 0;
+
+    if (existing) {
+      prevPoints = existing.points;
+      await ctx.db.patch(existing._id, {
+        points: args.points,
+        updatedBy: admin.clerkId,
+        updatedAt: now,
+      });
+    } else {
+      await ctx.db.insert("pointConfigurations", {
+        eventType: args.eventType,
+        points: args.points,
+        label,
+        description,
+        updatedBy: admin.clerkId,
+        updatedAt: now,
+      });
+    }
+
+    // Insert into immutable audit log
+    await ctx.db.insert("auditLogs", {
+      actorId: admin.clerkId,
+      action: "UPDATE_POINT_RULE",
+      entityType: "pointConfigurations",
+      entityId: args.eventType,
+      changes: JSON.stringify({
+        eventType: args.eventType,
+        previousPoints: prevPoints,
+        newPoints: args.points,
+      }),
+      timestamp: now,
+    });
+
+    return { success: true, eventType: args.eventType, points: args.points };
+  },
+});
+
 /**
  * Idempotently awards gamification points to a student SDR.
  * Checks if a transaction with the same sourceId already exists to eliminate double-awarding.
@@ -29,7 +130,6 @@ export const awardPoints = mutation({
       .first();
 
     if (existing) {
-      console.log(`[Gamification] Skipped duplicate point award for sourceId: ${args.sourceId}`);
       return existing._id;
     }
 
@@ -61,26 +161,73 @@ export const awardPoints = mutation({
 });
 
 /**
- * Real-time Team Leaderboard with Podium calculation.
+ * Real-time Honors Leaderboard with timeframe filtering (Today, This Week, This Month, All Time)
  */
 export const getLeaderboard = query({
-  args: {},
-  handler: async (ctx) => {
+  args: {
+    timeframe: v.optional(
+      v.union(
+        v.literal("today"),
+        v.literal("this_week"),
+        v.literal("this_month"),
+        v.literal("all_time")
+      )
+    ),
+  },
+  handler: async (ctx, args) => {
+    const timeframe = args.timeframe || "all_time";
+    const now = new Date();
+    let startTime = 0;
+
+    if (timeframe === "today") {
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      startTime = today.getTime();
+    } else if (timeframe === "this_week") {
+      const day = now.getDay() || 7; // Monday = 1
+      const monday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - day + 1);
+      startTime = monday.getTime();
+    } else if (timeframe === "this_month") {
+      const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+      startTime = monthStart.getTime();
+    }
+
     // 1. Fetch approved volunteers and active SDRs
     const users = await ctx.db
       .query("users")
       .filter((q) => q.eq(q.field("verificationStatus"), "approved"))
       .collect();
 
-    // 2. Fetch calls and commitments to compute stats
+    // 2. Fetch calls, commitments, proposals, and transactions
     const allCalls = await ctx.db.query("calls").collect();
     const allCommitments = await ctx.db.query("sponsorshipCommitments").collect();
+    const allTransactions = await ctx.db.query("pointTransactions").collect();
+
+    // Filter by timeframe
+    const timeCalls = startTime > 0 ? allCalls.filter((c) => c.createdAt >= startTime) : allCalls;
+    const timeDeals = startTime > 0 ? allCommitments.filter((d) => d.createdAt >= startTime) : allCommitments;
+    const timeTx = startTime > 0 ? allTransactions.filter((t) => t.createdAt >= startTime) : allTransactions;
 
     // Map metrics per volunteer
     const volunteerStats = users.map((u) => {
-      const userCalls = allCalls.filter((c) => c.volunteerId === u._id);
-      const userDeals = allCommitments.filter((cm) => cm.volunteerId === u._id);
-      const totalPoints = u.totalPoints || 0;
+      const userCalls = timeCalls.filter((c) => c.volunteerId === u._id);
+      const userDeals = timeDeals.filter((cm) => cm.volunteerId === u._id);
+      const userTransactions = timeTx.filter((t) => t.userId === u._id);
+
+      // Points earned in the timeframe
+      const periodPoints = startTime > 0
+        ? userTransactions.reduce((acc, t) => acc + t.points, 0)
+        : u.totalPoints || 0;
+
+      // Unique leads contacted
+      const leadsContacted = new Set(userCalls.map((c) => c.companyId)).size;
+
+      // Positive responses
+      const positiveResponses = userCalls.filter((c) =>
+        ["Interested", "Asked for proposal", "Meeting requested"].includes(c.quickOutcome)
+      ).length;
+
+      // Meetings obtained
+      const meetingsCount = userCalls.filter((c) => c.quickOutcome === "Meeting requested").length;
 
       const totalValuationWon = userDeals.reduce((sum, d) => sum + (d.totalValuation || 0), 0);
       const conversionRate = userCalls.length > 0
@@ -91,24 +238,31 @@ export const getLeaderboard = query({
         _id: u._id,
         name: u.name,
         email: u.email,
+        phone: u.phone,
         semester: u.semester,
         department: u.department,
         role: u.role,
-        totalPoints,
+        totalPoints: periodPoints,
         callsCount: userCalls.length,
+        leadsContacted,
+        positiveResponses,
+        meetingsCount,
         dealsWonCount: userDeals.length,
         totalValuationWon,
         conversionRate,
       };
     });
 
-    // Sort descending by totalPoints, then by dealsWon, then by calls
+    // Sort descending by totalPoints, then by dealsWon, then by positive responses, then by calls
     volunteerStats.sort((a, b) => {
       if (b.totalPoints !== a.totalPoints) {
         return b.totalPoints - a.totalPoints;
       }
       if (b.dealsWonCount !== a.dealsWonCount) {
         return b.dealsWonCount - a.dealsWonCount;
+      }
+      if (b.positiveResponses !== a.positiveResponses) {
+        return b.positiveResponses - a.positiveResponses;
       }
       return b.callsCount - a.callsCount;
     });

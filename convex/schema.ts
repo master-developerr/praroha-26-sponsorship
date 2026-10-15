@@ -70,6 +70,7 @@ export default defineSchema({
     ),
     notes: v.optional(v.string()),
     lastContactedAt: v.optional(v.number()),
+    isArchived: v.optional(v.boolean()),
     createdAt: v.number(),
     updatedAt: v.optional(v.number()),
   })
@@ -77,7 +78,8 @@ export default defineSchema({
     .index("by_dedup_hash", ["deduplicationHash"])
     .index("by_lead_status", ["leadStatus"])
     .index("by_priority", ["priority"])
-    .index("by_industry", ["industry"]),
+    .index("by_industry", ["industry"])
+    .index("by_archived", ["isArchived"]),
 
   contacts: defineTable({
     companyId: v.id("companies"),
@@ -117,6 +119,10 @@ export default defineSchema({
       v.literal("reassigned"),
       v.literal("released")
     ),
+    priority: v.optional(v.string()),
+    dueDate: v.optional(v.number()),
+    dailyTarget: v.optional(v.number()),
+    instructions: v.optional(v.string()),
     reassignReason: v.optional(v.string()),
     assignedAt: v.number(),
     updatedAt: v.optional(v.number()),
@@ -344,6 +350,15 @@ export default defineSchema({
     .index("by_user_id", ["userId"])
     .index("by_user_and_read", ["userId", "read"])
     .index("by_created_at", ["createdAt"]),
+
+  pointConfigurations: defineTable({
+    eventType: v.string(), // e.g. "call_completed", "lead_contacted", "positive_response", "meeting_obtained", "proposal_generated", "sponsorship_won"
+    points: v.number(),
+    label: v.string(),
+    description: v.string(),
+    updatedBy: v.optional(v.string()),
+    updatedAt: v.number(),
+  }).index("by_event_type", ["eventType"]),
 });
 
 

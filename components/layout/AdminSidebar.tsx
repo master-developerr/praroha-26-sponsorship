@@ -69,8 +69,8 @@ export function AdminSidebar() {
     {
       label: "Honors Leaderboard",
       icon: Award,
-      href: "/admin",
-      isActive: false,
+      href: "/admin/leaderboard",
+      isActive: pathname.startsWith("/admin/leaderboard"),
       badge: "Live",
     },
   ];

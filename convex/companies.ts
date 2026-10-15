@@ -34,9 +34,15 @@ export const getAllCompanies = query({
     industry: v.optional(v.string()),
     status: v.optional(v.string()),
     priority: v.optional(v.string()),
+    includeArchived: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
     let companies = await ctx.db.query("companies").order("desc").collect();
+
+    // Hide archived companies by default unless specifically requested
+    if (!args.includeArchived) {
+      companies = companies.filter((c) => !c.isArchived);
+    }
 
     // In-memory multi-attribute filtering for real-time reactivity
     if (args.industry && args.industry !== "all") {
@@ -759,6 +765,117 @@ export const deleteLead = mutation({
       changes: JSON.stringify({
         deletedCompanyName: company.companyName,
         deletedAt: now,
+      }),
+      timestamp: now,
+    });
+
+    return { success: true };
+  },
+});
+
+/**
+ * Archive a company lead to remove it from active SDR workflows while preserving history
+ */
+export const archiveCompany = mutation({
+  args: {
+    adminClerkId: v.string(),
+    companyId: v.id("companies"),
+    reason: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const admin = await ctx.db
+      .query("users")
+      .withIndex("by_clerk_id", (q) => q.eq("clerkId", args.adminClerkId))
+      .unique();
+
+    if (!admin || admin.role !== "admin") {
+      throw new Error("Unauthorized: Only administrators can archive company leads");
+    }
+
+    const company = await ctx.db.get(args.companyId);
+    if (!company) {
+      throw new Error("Company lead not found");
+    }
+
+    const now = Date.now();
+
+    // Mark company as archived
+    await ctx.db.patch(args.companyId, {
+      isArchived: true,
+      updatedAt: now,
+    });
+
+    // Mark any active assignments as unassigned
+    const activeAssignments = await ctx.db
+      .query("leadAssignments")
+      .withIndex("by_company_id", (q) => q.eq("companyId", args.companyId))
+      .filter((q) => q.eq(q.field("status"), "active"))
+      .collect();
+
+    for (const a of activeAssignments) {
+      await ctx.db.patch(a._id, {
+        status: "released",
+        updatedAt: now,
+      });
+    }
+
+    // Audit Log
+    await ctx.db.insert("auditLogs", {
+      actorId: admin._id,
+      action: "archive_lead",
+      entityType: "companies",
+      entityId: args.companyId,
+      changes: JSON.stringify({
+        companyName: company.companyName,
+        reason: args.reason || "Archived by Administrator",
+        archivedAt: now,
+      }),
+      timestamp: now,
+    });
+
+    return { success: true };
+  },
+});
+
+/**
+ * Restore an archived company lead back to active directory
+ */
+export const restoreCompany = mutation({
+  args: {
+    adminClerkId: v.string(),
+    companyId: v.id("companies"),
+  },
+  handler: async (ctx, args) => {
+    const admin = await ctx.db
+      .query("users")
+      .withIndex("by_clerk_id", (q) => q.eq("clerkId", args.adminClerkId))
+      .unique();
+
+    if (!admin || admin.role !== "admin") {
+      throw new Error("Unauthorized: Only administrators can restore company leads");
+    }
+
+    const company = await ctx.db.get(args.companyId);
+    if (!company) {
+      throw new Error("Company lead not found");
+    }
+
+    const now = Date.now();
+
+    await ctx.db.patch(args.companyId, {
+      isArchived: false,
+      updatedAt: now,
+    });
+
+    // Audit Log
+    await ctx.db.insert("auditLogs", {
+      actorId: admin._id,
+      action: "restore_lead",
+      entityType: "companies",
+      entityId: args.companyId,
+      changes: JSON.stringify({
+        companyName: company.companyName,
+        restoredAt: now,
       }),
       timestamp: now,
     });

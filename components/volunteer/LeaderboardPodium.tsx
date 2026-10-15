@@ -26,7 +26,7 @@ interface LeaderboardPodiumProps {
 
 export function LeaderboardPodium({ compact = false }: LeaderboardPodiumProps) {
   const { user, role } = useAuthUser();
-  const leaderboard = useQuery(api.gamification.getLeaderboard);
+  const leaderboard = useQuery(api.gamification.getLeaderboard, {});
 
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedUserForAdjustment, setSelectedUserForAdjustment] = useState<{

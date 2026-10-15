@@ -130,6 +130,17 @@ export const assignLeadsBatch = mutation({
     adminClerkId: v.string(),
     companyIds: v.array(v.id("companies")),
     volunteerId: v.id("users"),
+    priority: v.optional(
+      v.union(
+        v.literal("High"),
+        v.literal("Medium"),
+        v.literal("Normal"),
+        v.literal("Low")
+      )
+    ),
+    dueDate: v.optional(v.number()),
+    dailyTarget: v.optional(v.number()),
+    instructions: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const admin = await ctx.db
@@ -153,19 +164,24 @@ export const assignLeadsBatch = mutation({
       const company = await ctx.db.get(companyId);
       if (!company) continue;
 
-      // Create active lead assignment
+      // Create active lead assignment with operational directives
       await ctx.db.insert("leadAssignments", {
         companyId,
         volunteerId: args.volunteerId,
         assignedBy: admin._id,
         status: "active",
+        priority: args.priority || company.priority,
+        dueDate: args.dueDate,
+        dailyTarget: args.dailyTarget,
+        instructions: args.instructions,
         assignedAt: now,
         updatedAt: now,
       });
 
-      // Advance company leadStatus to ASSIGNED if currently UNASSIGNED
+      // Advance company leadStatus to ASSIGNED if currently UNASSIGNED, and optionally update priority
       await ctx.db.patch(companyId, {
         leadStatus: company.leadStatus === "UNASSIGNED" ? "ASSIGNED" : company.leadStatus,
+        ...(args.priority ? { priority: args.priority } : {}),
         updatedAt: now,
       });
 
@@ -280,6 +296,72 @@ export const reassignLead = mutation({
       success: true,
       newVolunteerName: newVolunteer.name,
     };
+  },
+});
+
+/**
+ * Admin action: Remove assignment and return lead to UNASSIGNED pool
+ */
+export const unassignLead = mutation({
+  args: {
+    adminClerkId: v.string(),
+    companyId: v.id("companies"),
+    reason: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const admin = await ctx.db
+      .query("users")
+      .withIndex("by_clerk_id", (q) => q.eq("clerkId", args.adminClerkId))
+      .unique();
+
+    if (!admin || admin.role !== "admin") {
+      throw new Error("Unauthorized: Only administrators can unassign leads");
+    }
+
+    const company = await ctx.db.get(args.companyId);
+    if (!company) {
+      throw new Error("Company lead not found");
+    }
+
+    const now = Date.now();
+
+    // Mark all active assignments for this company as unassigned
+    const activeAssignments = await ctx.db
+      .query("leadAssignments")
+      .withIndex("by_company_id", (q) => q.eq("companyId", args.companyId))
+      .filter((q) => q.eq(q.field("status"), "active"))
+      .collect();
+
+    for (const a of activeAssignments) {
+      await ctx.db.patch(a._id, {
+        status: "released",
+        updatedAt: now,
+      });
+    }
+
+    // Revert company lead status to UNASSIGNED if it was ASSIGNED
+    if (company.leadStatus === "ASSIGNED") {
+      await ctx.db.patch(args.companyId, {
+        leadStatus: "UNASSIGNED",
+        updatedAt: now,
+      });
+    }
+
+    // Audit log
+    await ctx.db.insert("auditLogs", {
+      actorId: admin._id,
+      action: "lead_unassigned",
+      entityType: "companies",
+      entityId: args.companyId,
+      changes: JSON.stringify({
+        companyName: company.companyName,
+        reason: args.reason || "Unassigned by Admin",
+        unassignedAt: now,
+      }),
+      timestamp: now,
+    });
+
+    return { success: true };
   },
 });
 
