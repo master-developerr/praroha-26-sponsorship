@@ -14,7 +14,7 @@ import { Sparkles, CheckCircle2, LogOut, ShieldCheck, ArrowRight } from "lucide-
 
 export default function RegisterProfilePage() {
   const router = useRouter();
-  const { user, profile, hasProfile, verificationStatus, isAuthenticated, isLoading: authLoading, signOut } = useAuthUser();
+  const { user, authState, signOut } = useAuthUser();
   const registerProfile = useMutation(api.users.registerVolunteerProfile);
 
   const [fullName, setFullName] = useState("");
@@ -38,18 +38,29 @@ export default function RegisterProfilePage() {
 
   // If user already has a complete profile, route them accordingly
   useEffect(() => {
-    if (!authLoading && hasProfile) {
-      if (verificationStatus === "approved") {
+    switch (authState) {
+      case "APPROVED_VOLUNTEER":
         router.push("/workspace");
-      } else if (verificationStatus === "pending") {
+        break;
+      case "ADMIN":
+        router.push("/admin");
+        break;
+      case "PENDING":
         router.push("/pending");
-      } else if (verificationStatus === "rejected") {
+        break;
+      case "REJECTED":
         router.push("/rejected");
-      } else if (verificationStatus === "suspended") {
+        break;
+      case "SUSPENDED":
         router.push("/suspended");
-      }
+        break;
+      case "UNAUTHENTICATED":
+        router.push("/sign-in");
+        break;
+      default:
+        break;
     }
-  }, [authLoading, hasProfile, verificationStatus, router]);
+  }, [authState, router]);
 
   const semesterOptions = [
     { label: "Semester 1 (S1)", value: "S1" },

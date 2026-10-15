@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { useAuthUser } from "@/components/providers/AuthProvider";
+import { useAuthUser, devLog } from "@/components/providers/AuthProvider";
+import { AuthErrorFallback } from "@/components/ui/error-boundary";
 
 interface RouteGuardProps {
   children: React.ReactNode;
@@ -12,96 +13,130 @@ interface RouteGuardProps {
 /**
  * Authoritative Route Guard for PRAROHA'26.
  * Enforces live database verification status and role permissions,
- * eliminating client bypass via URL manipulation.
+ * eliminating client bypass via URL manipulation or infinite wait states.
  */
 export function RouteGuard({ children, requiredRole }: RouteGuardProps) {
   const router = useRouter();
   const pathname = usePathname();
   const {
-    isAuthenticated,
-    hasProfile,
+    authState,
+    authError,
+    retryAuth,
+    signOut,
     role,
-    verificationStatus,
-    isLoading,
   } = useAuthUser();
+  const [guardElapsed, setGuardElapsed] = useState(false);
+
+  // Safety timer for route guard verification
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setGuardElapsed(true);
+    }, 6000);
+    return () => clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
-    if (isLoading) return;
+    devLog("AUTH", `RouteGuard on "${pathname}": Current authState = ${authState}`);
 
-    // 1. Not Authenticated
-    if (!isAuthenticated) {
-      if (pathname !== "/sign-in" && pathname !== "/sign-up" && pathname !== "/") {
-        router.push("/sign-in");
-      }
-      return;
-    }
+    switch (authState) {
+      case "UNAUTHENTICATED":
+        if (pathname !== "/sign-in" && pathname !== "/sign-up" && pathname !== "/") {
+          router.push("/sign-in");
+        }
+        break;
 
-    // 2. Profile Incomplete
-    if (!hasProfile) {
-      if (pathname !== "/register/profile") {
-        router.push("/register/profile");
-      }
-      return;
-    }
+      case "PROFILE_MISSING":
+        if (pathname !== "/register/profile") {
+          router.push("/register/profile");
+        }
+        break;
 
-    // 3. Verification State Enforcements
-    if (verificationStatus === "pending") {
-      if (pathname !== "/pending") {
-        router.push("/pending");
-      }
-      return;
-    }
+      case "PENDING":
+        if (pathname !== "/pending") {
+          router.push("/pending");
+        }
+        break;
 
-    if (verificationStatus === "rejected") {
-      if (pathname !== "/rejected") {
-        router.push("/rejected");
-      }
-      return;
-    }
+      case "REJECTED":
+        if (pathname !== "/rejected") {
+          router.push("/rejected");
+        }
+        break;
 
-    if (verificationStatus === "suspended") {
-      if (pathname !== "/suspended") {
-        router.push("/suspended");
-      }
-      return;
-    }
+      case "SUSPENDED":
+        if (pathname !== "/suspended") {
+          router.push("/suspended");
+        }
+        break;
 
-    // 4. Approved Users Handling
-    if (verificationStatus === "approved") {
-      // If approved user is currently on an onboarding/holding route, redirect them forward
-      if (
-        pathname === "/pending" ||
-        pathname === "/rejected" ||
-        pathname === "/suspended" ||
-        pathname === "/register/profile" ||
-        pathname === "/"
-      ) {
-        if (role === "admin") {
-          router.push("/admin");
-        } else {
+      case "APPROVED_VOLUNTEER":
+        // If volunteer is currently on a holding page, forward to workspace
+        if (
+          pathname === "/pending" ||
+          pathname === "/rejected" ||
+          pathname === "/suspended" ||
+          pathname === "/register/profile" ||
+          pathname === "/"
+        ) {
+          router.push("/workspace");
+          return;
+        }
+
+        // Lock out non-admins from admin routes
+        if (requiredRole === "admin") {
           router.push("/workspace");
         }
-        return;
-      }
+        break;
 
-      // 5. Admin Route Lockout for Volunteers
-      if (requiredRole === "admin" && role !== "admin") {
-        router.push("/workspace");
-        return;
-      }
+      case "ADMIN":
+        // If admin is on a holding page, forward to admin portal
+        if (
+          pathname === "/pending" ||
+          pathname === "/rejected" ||
+          pathname === "/suspended" ||
+          pathname === "/register/profile" ||
+          pathname === "/"
+        ) {
+          router.push("/admin");
+        }
+        break;
+
+      case "AUTH_LOADING":
+      case "PROFILE_LOADING":
+      case "ERROR":
+      default:
+        break;
     }
-  }, [
-    isAuthenticated,
-    hasProfile,
-    role,
-    verificationStatus,
-    isLoading,
-    pathname,
-    requiredRole,
-    router,
-  ]);
+  }, [authState, pathname, requiredRole, router]);
 
-  if (isLoading) {
+  // If in an explicit error state, render recovery UI
+  if (authState === "ERROR") {
+    return (
+      <AuthErrorFallback
+        error={authError}
+        onRetry={retryAuth}
+        onSignOut={signOut}
+        title="Unable to verify credentials"
+        description="A connection error occurred while loading your profile from the PRAROHA'26 database."
+      />
+    );
+  }
+
+  // If loading exceeds 6 seconds, show safety fallback
+  if (guardElapsed && (authState === "AUTH_LOADING" || authState === "PROFILE_LOADING")) {
+    return (
+      <AuthErrorFallback
+        error="Verification request is taking longer than expected."
+        onRetry={retryAuth}
+        onSignOut={signOut}
+        title="Verifying PRAROHA'26 credentials..."
+        description="Still attempting to reach the database. You can retry the connection or sign out."
+      />
+    );
+  }
+
+  // Standard loading indicator while resolving auth
+  if (authState === "AUTH_LOADING" || authState === "PROFILE_LOADING") {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-3">
@@ -115,17 +150,14 @@ export function RouteGuard({ children, requiredRole }: RouteGuardProps) {
   }
 
   // Prevent flash of protected content while redirecting
-  if (!isAuthenticated && pathname !== "/sign-in" && pathname !== "/sign-up" && pathname !== "/") {
+  if (authState === "UNAUTHENTICATED" && pathname !== "/sign-in" && pathname !== "/sign-up" && pathname !== "/") {
     return null;
   }
-
-  if (isAuthenticated) {
-    if (!hasProfile && pathname !== "/register/profile") return null;
-    if (verificationStatus === "pending" && pathname !== "/pending") return null;
-    if (verificationStatus === "rejected" && pathname !== "/rejected") return null;
-    if (verificationStatus === "suspended" && pathname !== "/suspended") return null;
-    if (requiredRole === "admin" && role !== "admin") return null;
-  }
+  if (authState === "PROFILE_MISSING" && pathname !== "/register/profile") return null;
+  if (authState === "PENDING" && pathname !== "/pending") return null;
+  if (authState === "REJECTED" && pathname !== "/rejected") return null;
+  if (authState === "SUSPENDED" && pathname !== "/suspended") return null;
+  if (requiredRole === "admin" && role !== "admin") return null;
 
   return <>{children}</>;
 }

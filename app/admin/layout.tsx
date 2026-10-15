@@ -2,11 +2,12 @@
 
 import React, { Suspense, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useAuthUser } from "@/components/providers/AuthProvider";
+import { useAuthUser, devLog } from "@/components/providers/AuthProvider";
 import { AdminSidebar } from "@/components/layout/AdminSidebar";
 import { Navbar } from "@/components/layout/Navbar";
 import { ShieldAlert, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { AuthErrorFallback } from "@/components/ui/error-boundary";
 import Link from "next/link";
 
 function AdminLayoutContent({
@@ -16,16 +17,32 @@ function AdminLayoutContent({
 }) {
   const router = useRouter();
   const {
-    isAuthenticated,
+    authState,
+    authError,
+    retryAuth,
+    signOut,
     role,
     isLoading,
   } = useAuthUser();
 
   useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
+    devLog("AUTH", `AdminLayout: authState = ${authState}, role = ${role}`);
+    if (authState === "UNAUTHENTICATED") {
       router.push("/sign-in");
     }
-  }, [isLoading, isAuthenticated, router]);
+  }, [authState, role, router]);
+
+  if (authState === "ERROR") {
+    return (
+      <AuthErrorFallback
+        error={authError}
+        onRetry={retryAuth}
+        onSignOut={signOut}
+        title="Admin Portal Unavailable"
+        description="Unable to verify administrative authorization from the PRAROHA'26 database."
+      />
+    );
+  }
 
   if (isLoading) {
     return (
@@ -40,7 +57,7 @@ function AdminLayoutContent({
     );
   }
 
-  if (!isAuthenticated) return null;
+  if (authState === "UNAUTHENTICATED") return null;
 
   // Security Gate: Non-admin users are strictly denied
   if (role !== "admin") {

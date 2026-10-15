@@ -1,10 +1,22 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useState, useTransition } from "react";
+import React, { createContext, useContext, useEffect, useState, useRef, useCallback } from "react";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { UserProfile, UserRole, VolunteerVerificationStatus } from "@/types";
 import { useUser, useClerk } from "@clerk/nextjs";
+
+export type AuthState =
+  | "AUTH_LOADING"
+  | "UNAUTHENTICATED"
+  | "PROFILE_LOADING"
+  | "PROFILE_MISSING"
+  | "PENDING"
+  | "APPROVED_VOLUNTEER"
+  | "REJECTED"
+  | "SUSPENDED"
+  | "ADMIN"
+  | "ERROR";
 
 export type DevPersonaKey =
   | "clerk"
@@ -15,6 +27,24 @@ export type DevPersonaKey =
   | "admin_lead"
   | "new_user"
   | "logged_out";
+
+/**
+ * Structured diagnostic logger for development.
+ * Automatically stripped/no-op in production builds.
+ */
+export function devLog(
+  tag: "AUTH" | "PROFILE" | "ROLE" | "STATUS" | "WORKSPACE" | "LEADS",
+  message: string,
+  data?: unknown
+) {
+  if (process.env.NODE_ENV !== "production") {
+    if (data !== undefined) {
+      console.log(`[${tag}] ${message}`, data);
+    } else {
+      console.log(`[${tag}] ${message}`);
+    }
+  }
+}
 
 interface AuthContextType {
   user: {
@@ -29,10 +59,13 @@ interface AuthContextType {
   hasProfile: boolean;
   isLoading: boolean;
   isAuthenticated: boolean;
+  authState: AuthState;
+  authError: string | null;
   activePersona: DevPersonaKey;
   setActivePersona: (key: DevPersonaKey) => void;
   signOut: () => Promise<void>;
   refetchProfile: () => void;
+  retryAuth: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -135,6 +168,8 @@ const DEV_PERSONAS: Record<
   },
 };
 
+const AUTH_TIMEOUT_MS = 8000;
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   let clerkUser = null;
   let clerkLoaded = true;
@@ -151,20 +186,44 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     clerkLoaded = true;
   }
 
-  // Default strictly to real Clerk identity in all normal operation
-  const [activePersona, setActivePersona] = useState<DevPersonaKey>("clerk");
-  const [isPending, startTransition] = useTransition();
+  // Strictly enforce real auth in production
+  const isProduction = process.env.NODE_ENV === "production";
+  const isDevSwitcherEnabled = !isProduction && process.env.NEXT_PUBLIC_ENABLE_DEV_SWITCHER === "true";
 
-  const isDevSwitcherEnabled = process.env.NEXT_PUBLIC_ENABLE_DEV_SWITCHER === "true";
+  // Default strictly to real Clerk identity
+  const [activePersona, setActivePersonaState] = useState<DevPersonaKey>("clerk");
+  const [timedOut, setTimedOut] = useState(false);
+  const [customError, setCustomError] = useState<string | null>(null);
+  const [retryKey, setRetryKey] = useState(0);
 
-  // If Clerk user is logged in, ensure clerk mode is active
+  const setActivePersona = useCallback(
+    (key: DevPersonaKey) => {
+      if (!isDevSwitcherEnabled) {
+        console.warn("[AUTH] Dev persona switching is disabled in production.");
+        return;
+      }
+      setActivePersonaState(key);
+      setTimedOut(false);
+      setCustomError(null);
+    },
+    [isDevSwitcherEnabled]
+  );
+
+  const retryAuth = useCallback(() => {
+    devLog("AUTH", "Retrying authentication and profile loading...");
+    setTimedOut(false);
+    setCustomError(null);
+    setRetryKey((k) => k + 1);
+  }, []);
+
+  // If real Clerk user logs in, ensure clerk persona is active
   useEffect(() => {
     if (clerkUser) {
-      setActivePersona("clerk");
+      setActivePersonaState("clerk");
     }
   }, [clerkUser]);
 
-  // Determine current active clerkId
+  // Determine active clerk ID
   const currentClerkId =
     !isDevSwitcherEnabled || activePersona === "clerk"
       ? clerkUser?.id ?? ""
@@ -172,13 +231,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       ? ""
       : DEV_PERSONAS[activePersona]?.id ?? "";
 
-  // Query Convex for the active clerkId
+  // Query Convex for live profile
   const convexProfile = useQuery(
     api.users.getCurrentUser,
     currentClerkId ? { clerkId: currentClerkId } : "skip"
   );
 
-  // If in dev persona mode and profile doesn't exist yet in convex, seed it
+  // Fallback timer: NEVER let the UI wait indefinitely
+  useEffect(() => {
+    // If not authenticated or profile has cleanly resolved, no timeout needed
+    if (!currentClerkId || convexProfile !== undefined) {
+      setTimedOut(false);
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      devLog("AUTH", `Auth initialization timed out after ${AUTH_TIMEOUT_MS}ms`);
+      setTimedOut(true);
+    }, AUTH_TIMEOUT_MS);
+
+    return () => clearTimeout(timer);
+  }, [currentClerkId, convexProfile, retryKey]);
+
+  // Dev mode: automatic seeding of test personas
   const registerMutation = useMutation(api.users.registerVolunteerProfile);
   const setRoleMutation = useMutation(api.users.setUserRole);
   const seedStatusMutation = useMutation(api.users.seedDevUserStatus);
@@ -217,24 +292,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               });
             }
           });
-        } else if (
-          convexProfile &&
-          convexProfile.verificationStatus !== persona.defaultProfile.verificationStatus &&
-          activePersona === "rejected_volunteer"
-        ) {
-          seedStatusMutation({
-            clerkId: persona.id,
-            verificationStatus: persona.defaultProfile.verificationStatus,
-            rejectionReason: persona.defaultProfile.rejectionReason,
-          });
         }
       }
     }
-  }, [activePersona, convexProfile, registerMutation, setRoleMutation, seedStatusMutation]);
+  }, [activePersona, convexProfile, registerMutation, setRoleMutation, seedStatusMutation, isDevSwitcherEnabled]);
 
-  const isAuthenticated = activePersona !== "logged_out" && !!currentClerkId;
+  const isAuthenticated =
+    (activePersona !== "logged_out" && !!currentClerkId) ||
+    (isDevSwitcherEnabled && activePersona !== "logged_out" && activePersona !== "clerk");
 
-  // Active user representation
+  // User presentation
   const user = isAuthenticated
     ? isDevSwitcherEnabled && activePersona !== "clerk" && DEV_PERSONAS[activePersona as keyof typeof DEV_PERSONAS]
       ? {
@@ -253,7 +320,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       : null
     : null;
 
-  // Resolved profile
+  // Resolved database profile
   const profile: UserProfile | null | undefined =
     isDevSwitcherEnabled && activePersona === "new_user"
       ? convexProfile === undefined
@@ -265,30 +332,100 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       ? DEV_PERSONAS[activePersona as keyof typeof DEV_PERSONAS]?.defaultProfile
       : undefined;
 
-  const hasProfile =
-    !!profile &&
-    (profile.role === "admin" ||
-      (!!profile.name &&
+  // Derive explicit application state
+  let authState: AuthState = "AUTH_LOADING";
+  let authError: string | null = customError;
+
+  if (timedOut) {
+    authState = "ERROR";
+    authError =
+      "Connection to PRAROHA'26 services timed out. Please check your network connection or verify that the Convex backend is accessible.";
+  } else if (!clerkLoaded) {
+    authState = "AUTH_LOADING";
+  } else if (!isAuthenticated) {
+    authState = "UNAUTHENTICATED";
+  } else if (profile === undefined) {
+    // Waiting for Convex query
+    authState = "PROFILE_LOADING";
+  } else if (profile === null) {
+    // Authenticated in Clerk, but no record in Convex DB yet -> needs onboarding
+    authState = "PROFILE_MISSING";
+  } else if (profile.role === "admin") {
+    // Admin role takes precedence
+    authState = "ADMIN";
+  } else {
+    // Check if mandatory volunteer registration fields are complete
+    const hasCompleteFields = Boolean(
+      profile.name &&
         profile.name.trim() !== "" &&
-        !!profile.phone &&
+        profile.phone &&
         profile.phone.trim() !== "" &&
-        !!profile.department &&
+        profile.department &&
         profile.department.trim() !== "" &&
-        !!profile.semester &&
-        profile.semester.trim() !== ""));
-  const role = profile?.role ?? null;
-  const verificationStatus = profile?.verificationStatus ?? null;
-  const isLoading = !clerkLoaded || (isAuthenticated && profile === undefined);
+        profile.semester &&
+        profile.semester.trim() !== ""
+    );
+
+    if (!hasCompleteFields) {
+      authState = "PROFILE_MISSING";
+    } else {
+      const status = profile.verificationStatus;
+      if (status === "approved") {
+        authState = "APPROVED_VOLUNTEER";
+      } else if (status === "rejected") {
+        authState = "REJECTED";
+      } else if (status === "suspended") {
+        authState = "SUSPENDED";
+      } else {
+        authState = "PENDING";
+      }
+    }
+  }
+
+  const role: UserRole | null = profile?.role ?? (authState === "ADMIN" ? "admin" : null);
+  const verificationStatus: VolunteerVerificationStatus | null =
+    profile?.verificationStatus ?? (authState === "ADMIN" ? "approved" : null);
+
+  const hasProfile =
+    authState === "APPROVED_VOLUNTEER" ||
+    authState === "PENDING" ||
+    authState === "REJECTED" ||
+    authState === "SUSPENDED" ||
+    authState === "ADMIN";
+
+  const isLoading = authState === "AUTH_LOADING" || authState === "PROFILE_LOADING";
+
+  // Structured dev logging
+  const prevLogState = useRef<string>("");
+  useEffect(() => {
+    const logKey = `${authState}-${role}-${verificationStatus}`;
+    if (prevLogState.current !== logKey) {
+      prevLogState.current = logKey;
+      devLog("AUTH", `Resolved Auth State: ${authState}`, {
+        role,
+        verificationStatus,
+        hasProfile,
+        clerkId: currentClerkId,
+      });
+    }
+  }, [authState, role, verificationStatus, hasProfile, currentClerkId]);
 
   const signOut = async () => {
+    devLog("AUTH", "Signing out...");
     if (activePersona === "clerk" && clerkSignOut) {
-      await clerkSignOut();
+      try {
+        await clerkSignOut();
+      } catch (err) {
+        console.error("[AUTH] Clerk signOut error:", err);
+      }
     }
-    setActivePersona("logged_out");
+    setActivePersonaState("logged_out");
+    setTimedOut(false);
+    setCustomError(null);
   };
 
   const refetchProfile = () => {
-    // Convex queries are reactive, automatic updates happen via subscription
+    // Convex queries are reactive and automatically update via WebSockets
   };
 
   return (
@@ -301,10 +438,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         hasProfile,
         isLoading,
         isAuthenticated,
+        authState,
+        authError,
         activePersona,
         setActivePersona,
         signOut,
         refetchProfile,
+        retryAuth,
       }}
     >
       {children}

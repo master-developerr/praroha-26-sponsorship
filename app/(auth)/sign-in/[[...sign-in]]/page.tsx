@@ -14,9 +14,28 @@ function SignInContent() {
   const { setActivePersona } = useAuthUser();
   const [showDemoOptions, setShowDemoOptions] = useState(false);
 
+  const isDevSwitcherEnabled =
+    process.env.NODE_ENV !== "production" &&
+    process.env.NEXT_PUBLIC_ENABLE_DEV_SWITCHER === "true";
+
   const handleSelectDemo = (persona: DevPersonaKey) => {
+    if (!isDevSwitcherEnabled) return;
     setActivePersona(persona);
-    router.push("/");
+    if (persona === "admin_lead") {
+      router.push("/admin");
+    } else if (persona === "approved_volunteer") {
+      router.push("/workspace");
+    } else if (persona === "pending_volunteer") {
+      router.push("/pending");
+    } else if (persona === "rejected_volunteer") {
+      router.push("/rejected");
+    } else if (persona === "suspended_volunteer") {
+      router.push("/suspended");
+    } else if (persona === "new_user") {
+      router.push("/register/profile");
+    } else {
+      router.push("/");
+    }
   };
 
   return (
@@ -86,90 +105,92 @@ function SignInContent() {
           />
         </div>
 
-        {/* Quick Demo Evaluation Panel */}
-        <div className="rounded-xl border border-border-subtle bg-surface-subtle p-4 text-xs space-y-2.5">
-          <div className="flex items-center justify-between">
-            <span className="font-semibold text-text-primary flex items-center gap-1.5">
-              <Sparkles className="h-3.5 w-3.5 text-primary" />
-              Quick Testing & Verification Access
-            </span>
-            <button
-              onClick={() => setShowDemoOptions(!showDemoOptions)}
-              className="text-[11px] font-semibold text-primary hover:underline cursor-pointer"
-            >
-              {showDemoOptions ? "Hide" : "Show Options"}
-            </button>
-          </div>
-
-          {showDemoOptions && (
-            <div className="pt-2 space-y-2 animate-in fade-in">
-              <p className="text-[11px] text-text-secondary leading-relaxed">
-                Test each Feature 01 workflow immediately:
-              </p>
-              <div className="grid grid-cols-1 gap-1.5">
-                <button
-                  onClick={() => handleSelectDemo("approved_volunteer")}
-                  className="flex items-center justify-between rounded-lg border border-border bg-surface px-3 py-2 text-left hover:bg-surface-subtle transition-colors cursor-pointer"
-                >
-                  <span className="font-medium text-text-primary">
-                    1. Approved Volunteer (Arjun Nair)
-                  </span>
-                  <span className="text-[10px] text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded font-semibold">
-                    /workspace
-                  </span>
-                </button>
-
-                <button
-                  onClick={() => handleSelectDemo("pending_volunteer")}
-                  className="flex items-center justify-between rounded-lg border border-border bg-surface px-3 py-2 text-left hover:bg-surface-subtle transition-colors cursor-pointer"
-                >
-                  <span className="font-medium text-text-primary">
-                    2. Pending Volunteer (Rahul Sharma)
-                  </span>
-                  <span className="text-[10px] text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded font-semibold">
-                    Holding Screen
-                  </span>
-                </button>
-
-                <button
-                  onClick={() => handleSelectDemo("rejected_volunteer")}
-                  className="flex items-center justify-between rounded-lg border border-border bg-surface px-3 py-2 text-left hover:bg-surface-subtle transition-colors cursor-pointer"
-                >
-                  <span className="font-medium text-text-primary">
-                    3. Rejected Volunteer (Ananya Sen)
-                  </span>
-                  <span className="text-[10px] text-rose-700 bg-rose-50 px-1.5 py-0.5 rounded font-semibold">
-                    Rejection Screen
-                  </span>
-                </button>
-
-                <button
-                  onClick={() => handleSelectDemo("admin_lead")}
-                  className="flex items-center justify-between rounded-lg border border-border bg-surface px-3 py-2 text-left hover:bg-surface-subtle transition-colors cursor-pointer"
-                >
-                  <span className="font-medium text-text-primary">
-                    4. Admin Lead (Siddharth Menon)
-                  </span>
-                  <span className="text-[10px] text-sky-700 bg-sky-50 px-1.5 py-0.5 rounded font-semibold">
-                    /admin
-                  </span>
-                </button>
-
-                <button
-                  onClick={() => handleSelectDemo("new_user")}
-                  className="flex items-center justify-between rounded-lg border border-border bg-surface px-3 py-2 text-left hover:bg-surface-subtle transition-colors cursor-pointer"
-                >
-                  <span className="font-medium text-text-primary">
-                    5. New User (Registration Modal)
-                  </span>
-                  <span className="text-[10px] text-purple-700 bg-purple-50 px-1.5 py-0.5 rounded font-semibold">
-                    4-Field Modal
-                  </span>
-                </button>
-              </div>
+        {/* Quick Demo Evaluation Panel - Dev Only */}
+        {isDevSwitcherEnabled && (
+          <div className="rounded-xl border border-border-subtle bg-surface-subtle p-4 text-xs space-y-2.5">
+            <div className="flex items-center justify-between">
+              <span className="font-semibold text-text-primary flex items-center gap-1.5">
+                <Sparkles className="h-3.5 w-3.5 text-primary" />
+                Quick Testing & Verification Access
+              </span>
+              <button
+                onClick={() => setShowDemoOptions(!showDemoOptions)}
+                className="text-[11px] font-semibold text-primary hover:underline cursor-pointer"
+              >
+                {showDemoOptions ? "Hide" : "Show Options"}
+              </button>
             </div>
-          )}
-        </div>
+
+            {showDemoOptions && (
+              <div className="pt-2 space-y-2 animate-in fade-in">
+                <p className="text-[11px] text-text-secondary leading-relaxed">
+                  Test each Feature 01 workflow immediately:
+                </p>
+                <div className="grid grid-cols-1 gap-1.5">
+                  <button
+                    onClick={() => handleSelectDemo("approved_volunteer")}
+                    className="flex items-center justify-between rounded-lg border border-border bg-surface px-3 py-2 text-left hover:bg-surface-subtle transition-colors cursor-pointer"
+                  >
+                    <span className="font-medium text-text-primary">
+                      1. Approved Volunteer (Arjun Nair)
+                    </span>
+                    <span className="text-[10px] text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded font-semibold">
+                      /workspace
+                    </span>
+                  </button>
+
+                  <button
+                    onClick={() => handleSelectDemo("pending_volunteer")}
+                    className="flex items-center justify-between rounded-lg border border-border bg-surface px-3 py-2 text-left hover:bg-surface-subtle transition-colors cursor-pointer"
+                  >
+                    <span className="font-medium text-text-primary">
+                      2. Pending Volunteer (Rahul Sharma)
+                    </span>
+                    <span className="text-[10px] text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded font-semibold">
+                      Holding Screen
+                    </span>
+                  </button>
+
+                  <button
+                    onClick={() => handleSelectDemo("rejected_volunteer")}
+                    className="flex items-center justify-between rounded-lg border border-border bg-surface px-3 py-2 text-left hover:bg-surface-subtle transition-colors cursor-pointer"
+                  >
+                    <span className="font-medium text-text-primary">
+                      3. Rejected Volunteer (Ananya Sen)
+                    </span>
+                    <span className="text-[10px] text-rose-700 bg-rose-50 px-1.5 py-0.5 rounded font-semibold">
+                      Rejection Screen
+                    </span>
+                  </button>
+
+                  <button
+                    onClick={() => handleSelectDemo("admin_lead")}
+                    className="flex items-center justify-between rounded-lg border border-border bg-surface px-3 py-2 text-left hover:bg-surface-subtle transition-colors cursor-pointer"
+                  >
+                    <span className="font-medium text-text-primary">
+                      4. Admin Lead (Siddharth Menon)
+                    </span>
+                    <span className="text-[10px] text-sky-700 bg-sky-50 px-1.5 py-0.5 rounded font-semibold">
+                      /admin
+                    </span>
+                  </button>
+
+                  <button
+                    onClick={() => handleSelectDemo("new_user")}
+                    className="flex items-center justify-between rounded-lg border border-border bg-surface px-3 py-2 text-left hover:bg-surface-subtle transition-colors cursor-pointer"
+                  >
+                    <span className="font-medium text-text-primary">
+                      5. New User (Registration Modal)
+                    </span>
+                    <span className="text-[10px] text-purple-700 bg-purple-50 px-1.5 py-0.5 rounded font-semibold">
+                      4-Field Modal
+                    </span>
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
 
         <p className="text-center text-[11px] text-text-muted">
           PRAROHA'26 • Civil Engineering Department • SOE CUSAT

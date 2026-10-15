@@ -10,22 +10,33 @@ import { Clock, ShieldCheck, Mail, Phone, GraduationCap, Building2, LogOut, Refr
 
 export default function PendingVerificationPage() {
   const router = useRouter();
-  const { profile, verificationStatus, role, isLoading, isAuthenticated, signOut } = useAuthUser();
+  const { profile, authState, signOut } = useAuthUser();
 
   // Automatic real-time transition when Admin approves the volunteer in Convex
   useEffect(() => {
-    if (!isLoading && isAuthenticated && verificationStatus === "approved") {
-      if (role === "admin") {
-        router.push("/admin");
-      } else {
+    switch (authState) {
+      case "APPROVED_VOLUNTEER":
         router.push("/workspace");
-      }
-    } else if (!isLoading && isAuthenticated && verificationStatus === "rejected") {
-      router.push("/rejected");
-    } else if (!isLoading && isAuthenticated && verificationStatus === "suspended") {
-      router.push("/suspended");
+        break;
+      case "ADMIN":
+        router.push("/admin");
+        break;
+      case "REJECTED":
+        router.push("/rejected");
+        break;
+      case "SUSPENDED":
+        router.push("/suspended");
+        break;
+      case "PROFILE_MISSING":
+        router.push("/register/profile");
+        break;
+      case "UNAUTHENTICATED":
+        router.push("/sign-in");
+        break;
+      default:
+        break;
     }
-  }, [isLoading, isAuthenticated, verificationStatus, role, router]);
+  }, [authState, router]);
 
   return (
     <div className="min-h-screen bg-background flex flex-col justify-between p-4 sm:p-8">
