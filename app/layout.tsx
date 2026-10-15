@@ -30,8 +30,8 @@ export default function RootLayout({
     <ClerkProvider publishableKey={clerkPublishableKey}>
       <ConvexClientProvider>
         <AuthProvider>
-          <html lang="en" className={`${inter.variable} h-full antialiased`}>
-            <body className="min-h-full flex flex-col bg-background text-text-primary">
+          <html lang="en" className={`${inter.variable} h-full antialiased`} suppressHydrationWarning>
+            <body className="min-h-full flex flex-col bg-background text-text-primary" suppressHydrationWarning>
               {children}
               {process.env.NEXT_PUBLIC_ENABLE_DEV_SWITCHER === "true" && <DevPersonaSwitcher />}
             </body>
