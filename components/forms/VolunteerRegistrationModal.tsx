@@ -90,11 +90,16 @@ export function VolunteerRegistrationModal({
     e.preventDefault();
     if (!validate()) return;
 
+    if (!user?.id || !user?.email) {
+      setErrors({ fullName: "Authentication required. Please sign in first." });
+      return;
+    }
+
     setIsLoading(true);
     try {
       await registerProfile({
-        clerkId: user?.id ?? "user_dev_new_unregistered",
-        email: user?.email ?? "volunteer@cusat.ac.in",
+        clerkId: user.id,
+        email: user.email,
         name: fullName.trim(),
         phone: phone.trim(),
         semester,

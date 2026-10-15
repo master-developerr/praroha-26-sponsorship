@@ -44,6 +44,7 @@ export function AdminVerificationView() {
   const [rejectionReason, setRejectionReason] = useState("");
   const [rejectError, setRejectError] = useState("");
   const [isRejecting, setIsRejecting] = useState(false);
+  const [actionLoadingId, setActionLoadingId] = useState<Id<"users"> | null>(null);
 
   // Convex Queries and Mutations
   const allUsers = useQuery(api.users.getUsersByVerification, {});
@@ -52,11 +53,13 @@ export function AdminVerificationView() {
   const suspendMutation = useMutation(api.users.suspendVolunteer);
   const restoreMutation = useMutation(api.users.restoreVolunteer);
 
-  const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
-
-  const adminClerkId = user?.id ?? "user_dev_admin_lead";
+  const adminClerkId = user?.id || "";
 
   const handleApprove = async (userId: Id<"users">) => {
+    if (!user?.id) {
+      alert("Unauthorized: Administrator session required.");
+      return;
+    }
     setActionLoadingId(userId);
     try {
       await approveMutation({
@@ -76,6 +79,11 @@ export function AdminVerificationView() {
   const handleConfirmReject = async () => {
     if (!rejectionReason.trim()) {
       setRejectError("A rejection reason is required for feedback.");
+      return;
+    }
+
+    if (!user?.id) {
+      setRejectError("Unauthorized: Administrator session required.");
       return;
     }
 
@@ -101,6 +109,10 @@ export function AdminVerificationView() {
   };
 
   const handleSuspend = async (userId: Id<"users">) => {
+    if (!user?.id) {
+      alert("Unauthorized: Administrator session required.");
+      return;
+    }
     setActionLoadingId(userId);
     try {
       await suspendMutation({
@@ -118,6 +130,10 @@ export function AdminVerificationView() {
   };
 
   const handleRestore = async (userId: Id<"users">) => {
+    if (!user?.id) {
+      alert("Unauthorized: Administrator session required.");
+      return;
+    }
     setActionLoadingId(userId);
     try {
       await restoreMutation({

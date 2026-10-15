@@ -102,11 +102,16 @@ export default function RegisterProfilePage() {
     e.preventDefault();
     if (!validate()) return;
 
+    if (!user?.id || !user?.email) {
+      setErrors({ fullName: "Authentication required. Please sign in with your student account first." });
+      return;
+    }
+
     setIsSubmitting(true);
     try {
       await registerProfile({
-        clerkId: user?.id ?? "user_volunteer",
-        email: user?.email ?? "volunteer@cusat.ac.in",
+        clerkId: user.id,
+        email: user.email,
         name: fullName.trim(),
         phone: phone.trim(),
         semester,

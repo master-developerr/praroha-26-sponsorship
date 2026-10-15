@@ -4,7 +4,6 @@ import "./globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
 import { ConvexClientProvider } from "@/components/providers/ConvexClientProvider";
 import { AuthProvider } from "@/components/providers/AuthProvider";
-import { DevPersonaSwitcher } from "@/components/layout/DevPersonaSwitcher";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -33,7 +32,6 @@ export default function RootLayout({
           <html lang="en" className={`${inter.variable} h-full antialiased`} suppressHydrationWarning>
             <body className="min-h-full flex flex-col bg-background text-text-primary" suppressHydrationWarning>
               {children}
-              {process.env.NEXT_PUBLIC_ENABLE_DEV_SWITCHER === "true" && <DevPersonaSwitcher />}
             </body>
           </html>
         </AuthProvider>

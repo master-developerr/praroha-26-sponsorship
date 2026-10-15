@@ -206,89 +206,112 @@ export function LeaderboardPodium({ compact = false }: LeaderboardPodiumProps) {
               </tr>
             </thead>
             <tbody className="divide-y divide-border-subtle">
-              {filteredLeaderboard.map((v) => {
-                const isTop = v.rank <= 3;
-                return (
-                  <tr
-                    key={v._id}
-                    className={`hover:bg-surface-subtle/60 transition-colors ${
-                      v.rank === 1
-                        ? "bg-amber-500/5 font-semibold"
-                        : v.rank === 2
-                        ? "bg-slate-50/50"
-                        : v.rank === 3
-                        ? "bg-amber-700/5"
-                        : ""
-                    }`}
+              {filteredLeaderboard.length === 0 ? (
+                <tr>
+                  <td
+                    colSpan={role === "admin" ? 9 : 8}
+                    className="py-10 text-center text-text-muted"
                   >
-                    <td className="py-2.5 px-3 font-extrabold">
-                      {v.rank === 1 ? (
-                        <span className="inline-flex items-center gap-1 text-amber-600">
-                          <Crown className="h-3.5 w-3.5" /> #1
-                        </span>
-                      ) : v.rank === 2 ? (
-                        <span className="text-slate-600 font-bold">#2</span>
-                      ) : v.rank === 3 ? (
-                        <span className="text-amber-800 font-bold">#3</span>
-                      ) : (
-                        <span className="text-text-muted">#{v.rank}</span>
-                      )}
-                    </td>
-
-                    <td className="py-2.5 px-3">
-                      <div className="font-bold text-text-primary">{v.name}</div>
-                      <div className="text-[10px] text-text-muted">{v.email}</div>
-                    </td>
-
-                    <td className="py-2.5 px-3 text-text-secondary">
-                      {v.department} (Sem {v.semester})
-                    </td>
-
-                    <td className="py-2.5 px-3 text-right">
-                      <span className="inline-block px-2 py-0.5 rounded-md font-bold text-[11px] bg-teal-500/10 text-teal-700 dark:text-teal-300 border border-teal-500/20">
-                        {v.totalPoints} pts
-                      </span>
-                    </td>
-
-                    <td className="py-2.5 px-3 text-right text-text-secondary">
-                      {v.callsCount}
-                    </td>
-
-                    <td className="py-2.5 px-3 text-right font-bold text-emerald-600">
-                      {v.dealsWonCount}
-                    </td>
-
-                    <td className="py-2.5 px-3 text-right font-semibold text-text-primary">
-                      {v.totalValuationWon > 0
-                        ? formatCurrencyINR(v.totalValuationWon)
-                        : "—"}
-                    </td>
-
-                    <td className="py-2.5 px-3 text-right text-text-secondary">
-                      {v.conversionRate}%
-                    </td>
-
-                    {role === "admin" && (
-                      <td className="py-2.5 px-3 text-center">
-                        <button
-                          onClick={() =>
-                            setSelectedUserForAdjustment({
-                              _id: v._id,
-                              name: v.name,
-                              totalPoints: v.totalPoints,
-                              department: v.department,
-                            })
-                          }
-                          className="px-2 py-1 rounded border border-border hover:bg-surface text-[10px] font-bold text-text-secondary hover:text-text-primary transition-colors cursor-pointer"
-                          title="Adjust points"
-                        >
-                          Adjust
-                        </button>
+                    <div className="flex flex-col items-center justify-center gap-2">
+                      <Trophy className="h-8 w-8 text-text-muted/40" />
+                      <p className="text-xs font-semibold text-text-primary">
+                        {leaderboard.length === 0
+                          ? "No ranking data yet."
+                          : "No volunteers match your search."}
+                      </p>
+                      <p className="text-[11px] text-text-secondary max-w-sm">
+                        {leaderboard.length === 0
+                          ? "Ranking will appear once outreach activity begins."
+                          : "Try adjusting your search criteria to find team members."}
+                      </p>
+                    </div>
+                  </td>
+                </tr>
+              ) : (
+                filteredLeaderboard.map((v) => {
+                  const isTop = v.rank <= 3;
+                  return (
+                    <tr
+                      key={v._id}
+                      className={`hover:bg-surface-subtle/60 transition-colors ${
+                        v.rank === 1
+                          ? "bg-amber-500/5 font-semibold"
+                          : v.rank === 2
+                          ? "bg-slate-50/50"
+                          : v.rank === 3
+                          ? "bg-amber-700/5"
+                          : ""
+                      }`}
+                    >
+                      <td className="py-2.5 px-3 font-extrabold">
+                        {v.rank === 1 ? (
+                          <span className="inline-flex items-center gap-1 text-amber-600">
+                            <Crown className="h-3.5 w-3.5" /> #1
+                          </span>
+                        ) : v.rank === 2 ? (
+                          <span className="text-slate-600 font-bold">#2</span>
+                        ) : v.rank === 3 ? (
+                          <span className="text-amber-800 font-bold">#3</span>
+                        ) : (
+                          <span className="text-text-muted">#{v.rank}</span>
+                        )}
                       </td>
-                    )}
-                  </tr>
-                );
-              })}
+
+                      <td className="py-2.5 px-3">
+                        <div className="font-bold text-text-primary">{v.name}</div>
+                        <div className="text-[10px] text-text-muted">{v.email}</div>
+                      </td>
+
+                      <td className="py-2.5 px-3 text-text-secondary">
+                        {v.department} (Sem {v.semester})
+                      </td>
+
+                      <td className="py-2.5 px-3 text-right">
+                        <span className="inline-block px-2 py-0.5 rounded-md font-bold text-[11px] bg-teal-500/10 text-teal-700 dark:text-teal-300 border border-teal-500/20">
+                          {v.totalPoints} pts
+                        </span>
+                      </td>
+
+                      <td className="py-2.5 px-3 text-right text-text-secondary">
+                        {v.callsCount}
+                      </td>
+
+                      <td className="py-2.5 px-3 text-right font-bold text-emerald-600">
+                        {v.dealsWonCount}
+                      </td>
+
+                      <td className="py-2.5 px-3 text-right font-semibold text-text-primary">
+                        {v.totalValuationWon > 0
+                          ? formatCurrencyINR(v.totalValuationWon)
+                          : "—"}
+                      </td>
+
+                      <td className="py-2.5 px-3 text-right text-text-secondary">
+                        {v.conversionRate}%
+                      </td>
+
+                      {role === "admin" && (
+                        <td className="py-2.5 px-3 text-center">
+                          <button
+                            onClick={() =>
+                              setSelectedUserForAdjustment({
+                                _id: v._id,
+                                name: v.name,
+                                totalPoints: v.totalPoints,
+                                department: v.department,
+                              })
+                            }
+                            className="px-2 py-1 rounded border border-border hover:bg-surface text-[10px] font-bold text-text-secondary hover:text-text-primary transition-colors cursor-pointer"
+                            title="Adjust points"
+                          >
+                            Adjust
+                          </button>
+                        </td>
+                      )}
+                    </tr>
+                  );
+                })
+              )}
             </tbody>
           </table>
         </div>

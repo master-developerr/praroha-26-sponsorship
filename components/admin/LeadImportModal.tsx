@@ -197,9 +197,14 @@ export function LeadImportModal({
       };
     });
 
+    if (!user?.id) {
+      alert("Authentication error: Administrator session required.");
+      return;
+    }
+
     try {
       const res = await importMutation({
-        adminClerkId: user?.id ?? "user_dev_admin_lead",
+        adminClerkId: user.id,
         rows: payload,
       });
       setImportResult(res);

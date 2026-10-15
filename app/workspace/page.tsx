@@ -90,84 +90,84 @@ export default function VolunteerDashboardPage() {
 
   return (
     <div className="space-y-6">
-      {/* 1. Contained Split-Hero Header with Strategic Banner Illustration */}
+      {/* 1. Operational Hero Header with Subtle Blended Illustration */}
       <SectionErrorBoundary sectionTitle="Command Header">
         <div className="relative overflow-hidden rounded-2xl border border-border bg-surface p-5 sm:p-6 shadow-xs">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
-            {/* Left Column: Personalized Command Summary */}
-            <div className="lg:col-span-8 space-y-4">
-              <div className="space-y-1">
-                <div className="inline-flex items-center gap-1.5 rounded-full bg-accent-mint px-2.5 py-0.5 text-[11px] font-bold text-accent-mint-text mb-1">
-                  <Sparkles className="h-3 w-3 text-primary" />
-                  PRAROHA'26 Outreach Active
-                </div>
-                <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-text-primary">
-                  {greeting}, {firstName}
-                </h1>
-                <p className="text-xs sm:text-sm text-text-secondary leading-relaxed">
-                  Connect with corporate sponsors, confirm corporate deliverables, and advance deals through your pipeline.
+          {/* Subtle decorative background illustration positioned in top-right */}
+          <div className="pointer-events-none absolute -right-2 -top-2 bottom-0 w-[240px] sm:w-[300px] lg:w-[350px] hidden sm:block select-none overflow-hidden opacity-85">
+            <div className="relative h-full w-full">
+              <Image
+                src="/images/praroha-outreach-banner.png"
+                alt=""
+                fill
+                sizes="(max-width: 640px) 0vw, 350px"
+                className="object-contain object-right-top mix-blend-multiply dark:mix-blend-lighten"
+                priority
+              />
+              {/* Soft gradient fades on left & bottom edges to seamlessly blend into background */}
+              <div className="absolute inset-0 bg-gradient-to-r from-surface via-surface/40 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-surface via-transparent to-transparent" />
+            </div>
+          </div>
+
+          {/* Primary Operational Content Layer */}
+          <div className="relative z-10 max-w-2xl space-y-4">
+            <div className="space-y-1">
+              <div className="inline-flex items-center gap-1.5 rounded-full bg-accent-mint px-2.5 py-0.5 text-[11px] font-bold text-accent-mint-text mb-1">
+                <Sparkles className="h-3 w-3 text-primary" />
+                PRAROHA&apos;26 Outreach Active
+              </div>
+              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-text-primary">
+                {greeting}, {firstName}
+              </h1>
+              <p className="text-xs sm:text-sm text-text-secondary leading-relaxed max-w-xl">
+                Connect with corporate sponsors, confirm corporate deliverables, and advance deals through your pipeline.
+              </p>
+            </div>
+
+            {/* Quick Summary Badges */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-1">
+              <div className="rounded-xl border border-border-subtle bg-surface-subtle/50 p-2.5 backdrop-blur-xs">
+                <span className="text-[10px] font-semibold uppercase tracking-wider text-text-muted flex items-center gap-1">
+                  <Users className="h-3 w-3 text-primary" />
+                  Assigned
+                </span>
+                <p className="mt-1 text-lg font-bold text-text-primary">
+                  {metrics ? metrics.totalAssigned : leads.length}
                 </p>
               </div>
 
-              {/* Quick Summary Badges */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-1">
-                <div className="rounded-xl border border-border-subtle bg-surface-subtle/50 p-2.5">
-                  <span className="text-[10px] font-semibold uppercase tracking-wider text-text-muted flex items-center gap-1">
-                    <Users className="h-3 w-3 text-primary" />
-                    Assigned
+              <div className="rounded-xl border border-border-subtle bg-surface-subtle/50 p-2.5 backdrop-blur-xs">
+                <span className="text-[10px] font-semibold uppercase tracking-wider text-text-muted flex items-center gap-1">
+                  <PhoneCall className="h-3 w-3 text-emerald-600" />
+                  Today&apos;s Calls
+                </span>
+                <p className="mt-1 text-lg font-bold text-emerald-700">
+                  {displayMetrics.callsCompleted}{" "}
+                  <span className="text-[11px] font-medium text-text-muted">
+                    / {displayMetrics.dailyTarget}
                   </span>
-                  <p className="mt-1 text-lg font-bold text-text-primary">
-                    {metrics ? metrics.totalAssigned : leads.length}
-                  </p>
-                </div>
-
-                <div className="rounded-xl border border-border-subtle bg-surface-subtle/50 p-2.5">
-                  <span className="text-[10px] font-semibold uppercase tracking-wider text-text-muted flex items-center gap-1">
-                    <PhoneCall className="h-3 w-3 text-emerald-600" />
-                    Today's Calls
-                  </span>
-                  <p className="mt-1 text-lg font-bold text-emerald-700">
-                    {displayMetrics.callsCompleted}{" "}
-                    <span className="text-[11px] font-medium text-text-muted">
-                      / {displayMetrics.dailyTarget}
-                    </span>
-                  </p>
-                </div>
-
-                <div className="rounded-xl border border-border-subtle bg-surface-subtle/50 p-2.5">
-                  <span className="text-[10px] font-semibold uppercase tracking-wider text-text-muted flex items-center gap-1">
-                    <Calendar className="h-3 w-3 text-amber-600" />
-                    Follow-ups Due
-                  </span>
-                  <p className="mt-1 text-lg font-bold text-amber-700">
-                    {displayMetrics.todayFollowUps}
-                  </p>
-                </div>
-
-                <div className="rounded-xl border border-border-subtle bg-surface-subtle/50 p-2.5">
-                  <span className="text-[10px] font-semibold uppercase tracking-wider text-text-muted flex items-center gap-1">
-                    <Trophy className="h-3 w-3 text-amber-500" />
-                    Total Points
-                  </span>
-                  <p className="mt-1 text-lg font-bold text-text-primary">
-                    {pointsSummary?.totalPoints ?? 0}
-                  </p>
-                </div>
+                </p>
               </div>
-            </div>
 
-            {/* Right Column: Strategic PRAROHA Illustration */}
-            <div className="lg:col-span-4 hidden lg:block">
-              <div className="relative h-44 w-full rounded-xl overflow-hidden border border-[#BEE3D3] shadow-xs">
-                <Image
-                  src="/images/praroha-outreach-banner.png"
-                  alt="PRAROHA'26 Outreach"
-                  fill
-                  sizes="(max-width: 1024px) 100vw, 33vw"
-                  className="object-cover object-center"
-                  priority
-                />
-                <div className="absolute inset-0 bg-gradient-to-r from-surface/40 via-transparent to-transparent pointer-events-none" />
+              <div className="rounded-xl border border-border-subtle bg-surface-subtle/50 p-2.5 backdrop-blur-xs">
+                <span className="text-[10px] font-semibold uppercase tracking-wider text-text-muted flex items-center gap-1">
+                  <Calendar className="h-3 w-3 text-amber-600" />
+                  Follow-ups Due
+                </span>
+                <p className="mt-1 text-lg font-bold text-amber-700">
+                  {displayMetrics.todayFollowUps}
+                </p>
+              </div>
+
+              <div className="rounded-xl border border-border-subtle bg-surface-subtle/50 p-2.5 backdrop-blur-xs">
+                <span className="text-[10px] font-semibold uppercase tracking-wider text-text-muted flex items-center gap-1">
+                  <Trophy className="h-3 w-3 text-amber-500" />
+                  Total Points
+                </span>
+                <p className="mt-1 text-lg font-bold text-text-primary">
+                  {pointsSummary?.totalPoints ?? 0}
+                </p>
               </div>
             </div>
           </div>

@@ -60,10 +60,15 @@ export function ManualLeadCreateModal({
     e.preventDefault();
     if (!validate()) return;
 
+    if (!user?.id) {
+      setErrors({ companyName: "Unauthorized. Admin session required." });
+      return;
+    }
+
     setIsLoading(true);
     try {
       await createLeadMutation({
-        adminClerkId: user?.id ?? "user_dev_admin_lead",
+        adminClerkId: user.id,
         companyName: companyName.trim(),
         industry: industry.trim(),
         niche: niche.trim(),
