@@ -11,6 +11,7 @@ import { TodayWorkBar } from "@/components/volunteer/TodayWorkBar";
 import { LeadsTable } from "@/components/volunteer/LeadsTable";
 import { SectionErrorBoundary } from "@/components/ui/error-boundary";
 import { Button } from "@/components/ui/button";
+import { PrarohaHeroVisual } from "@/components/ui/PrarohaHeroVisual";
 import {
   PhoneCall,
   Calendar,
@@ -90,25 +91,17 @@ export default function VolunteerDashboardPage() {
 
   return (
     <div className="space-y-6">
-      {/* 1. Operational Hero Header with Subtle Blended Illustration */}
+      {/* 1. Operational Hero Header with Subtle Environmental Artwork Visual */}
       <SectionErrorBoundary sectionTitle="Command Header">
         <div className="relative overflow-hidden rounded-2xl border border-border bg-surface p-5 sm:p-6 shadow-xs">
-          {/* Subtle decorative background illustration positioned in top-right */}
-          <div className="pointer-events-none absolute -right-2 -top-2 bottom-0 w-[240px] sm:w-[300px] lg:w-[350px] hidden sm:block select-none overflow-hidden opacity-85">
-            <div className="relative h-full w-full">
-              <Image
-                src="/images/praroha-outreach-banner.png"
-                alt=""
-                fill
-                sizes="(max-width: 640px) 0vw, 350px"
-                className="object-contain object-right-top mix-blend-multiply dark:mix-blend-lighten"
-                priority
-              />
-              {/* Soft gradient fades on left & bottom edges to seamlessly blend into background */}
-              <div className="absolute inset-0 bg-gradient-to-r from-surface via-surface/40 to-transparent" />
-              <div className="absolute inset-0 bg-gradient-to-t from-surface via-transparent to-transparent" />
-            </div>
-          </div>
+          {/* Subtle environmental artwork occupying ~35–45% on the right */}
+          <PrarohaHeroVisual
+            variant="dashboard-hero"
+            className="w-[36%] lg:w-[40%] xl:w-[44%] hidden md:block opacity-90"
+            fadeDirection="both"
+            objectPosition="right center"
+            priority
+          />
 
           {/* Primary Operational Content Layer */}
           <div className="relative z-10 max-w-2xl space-y-4">

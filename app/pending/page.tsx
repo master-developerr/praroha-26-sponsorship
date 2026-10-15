@@ -76,10 +76,10 @@ export default function PendingVerificationPage() {
           <div className="relative overflow-hidden rounded-2xl border border-border bg-surface shadow-xs text-center p-6 sm:p-8 space-y-4">
             <div className="relative h-28 w-full rounded-xl overflow-hidden bg-accent-mint/20 mb-2">
               <Image
-                src="/images/praroha-outreach-banner.png"
+                src="/images/praroha26-sponsorship-hero.png"
                 alt="PRAROHA'26 Outreach"
                 fill
-                className="object-cover object-center opacity-85"
+                className="object-cover object-center opacity-90"
                 priority
               />
               <div className="absolute inset-0 bg-gradient-to-t from-surface via-surface/30 to-transparent" />

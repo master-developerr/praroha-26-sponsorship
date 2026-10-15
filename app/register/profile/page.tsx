@@ -176,7 +176,7 @@ export default function RegisterProfilePage() {
             <div className="relative overflow-hidden rounded-2xl border border-border bg-surface shadow-xs">
               <div className="relative h-44 w-full bg-accent-mint/20">
                 <Image
-                  src="/images/praroha-outreach-banner.png"
+                  src="/images/praroha26-sponsorship-hero.png"
                   alt="PRAROHA'26 Sponsorship Outreach Team"
                   fill
                   className="object-cover object-center"
