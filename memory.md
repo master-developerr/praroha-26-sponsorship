@@ -1,69 +1,60 @@
-# Memory — PRAROHA'26 Admin Lead Allocation & Global Theme System
+# Memory — PRAROHA'26 Impeccable Design Critique & Workstation Polish Pass
 
-Last updated: October 16, 2026 (14:20 IST)
+Last updated: October 16, 2026 (16:32 IST)
 
 ## What was built
 
-- **Lead Allocation Matrix — Admin Assignee Participation (`/admin/assignments`):**
-  - `convex/assignments.ts`:
-    - Updated `getVolunteerRosterWithWorkload` to include active Admins alongside approved student SDRs using role-aware filter `!suspended && !rejected && (role === "admin" || (role === "volunteer" && verificationStatus === "approved"))`.
-    - Updated `assignLeadsBatch` and `reassignLead` to authorize and validate assignments to active Admins.
-    - Updated `getMyAssignedLeads` and `getMyWorkstationMetrics` so Admins can access `/workspace`, see their assigned leads, and track daily quota metrics identically to SDRs while retaining their Admin privileges and signing authority.
-  - `convex/calls.ts`: Updated `logCallAndDebrief` to permit active Admins to log calls and voice debriefs.
-  - `convex/followUps.ts`: Updated `getVolunteerFollowUps` and `completeFollowUp` to allow active Admins to manage and complete callbacks.
-  - `convex/proposals.ts`: Updated `createProposal` to allow active Admins to create and dispatch sponsorship proposals.
-  - `components/admin/LeadAssignmentMatrixView.tsx`:
-    - Renamed KPI badge to `Active Assignees` (previously `Active SDRs`).
-    - Renamed right roster header to `Target Assignee Roster`.
-    - Added subtle Admin role badge (`Admin` in sky blue) on assignee cards.
-    - Rendered Admin name, department/role (`Admin • Sponsorship Committee Head`), phone number, active lead count, dynamic capacity badge (`Available` / `Optimal` / `Active` / `Heavy`), and workload progress bar.
-    - Updated search placeholder to *"Search assignee by name, role or department..."*.
-    - Updated empty state to *"No active assignees available."*.
-  - `components/admin/ReassignLeadModal.tsx`: Updated target assignee dropdown to display Admins with `[Admin • Department]`.
+- **Impeccable Context Setup (`PRODUCT.md` & `.impeccable/`):**
+  - Captured authoritative, durable product truth in `PRODUCT.md` (schema 1) for PRAROHA'26: Users (Admin / Sponsorship Head, Volunteer / Student SDR), Purpose, Positioning ("Operations First, AI Second"), Operating Context (Dec 04–05, 2026, SOE CUSAT), Capabilities & Constraints, Brand Commitments, and Evidence on Hand.
+  - Configured `.impeccable/config.json` with `"buildPath": "code"`, and activated project design hooks (`impeccable hooks on`).
 
-- **Global Dark / Light Theme System:**
-  - `components/providers/ThemeProvider.tsx`: Centralized theme context supporting `"light" | "dark" | "system"`, `resolvedTheme`, and `localStorage` persistence under key `"praroha-theme"`.
-  - `components/ui/ThemeToggle.tsx`: Compact 36×36px Sun/Moon toggle button with smooth rotation and scale micro-animations, tooltips, visible focus rings, and `aria-label`.
-  - `components/layout/Navbar.tsx`: Integrated `ThemeToggle` into desktop/tablet top navbar right actions and mobile navigation drawer header without header overflow.
-  - `app/layout.tsx`: Wrapped application tree in `ThemeProvider` within `body`, and added inline anti-flash script in `<head>` to prevent flash of unstyled content (zero FOUC) and hydration mismatches.
-  - `app/globals.css`: Migrated color system to Tailwind CSS v4 CSS variables with `:root` (light) and `.dark` (deep charcoal/navy: background `#0B131E`, surfaces `#121D2C` / `#172436`, borders `#22344B`, typography `#F1F5F9`, PRAROHA teal `#14B89A`). Custom dark scrollbars and dark form controls included.
-  - `components/layout/Sidebar.tsx` & `components/layout/AdminSidebar.tsx`: Added dark mode styling to promo card, navigation items, and user popovers.
+- **Workstation Dark Mode Polish ([PrarohaHeroVisual.tsx](file:///d:/everything%20for%20coding/sponsorship%20management%20system/components/ui/PrarohaHeroVisual.tsx)):**
+  - Replaced hardcoded `#FFFFFF` gradient fade with theme-aware `bg-gradient-to-r from-surface via-surface/45 to-transparent`, eliminating the white rectangular glare wash against dark surfaces in Dark Mode (`#0B131E`).
 
-- **Admin Data Management & Danger Zone (`/admin/data-management`):**
-  - Dedicated production Data Management cockpit with type-to-confirm modal dialogs for cascading data deletion (`deleteAllLeads`, `deleteAllVolunteers`, `resetEntireOutreachData`).
+- **Vertical Hierarchy & Layout Compaction ([app/workspace/page.tsx](file:///d:/everything%20for%20coding/sponsorship%20management%20system/app/workspace/page.tsx)):**
+  - Streamlined the Command Header from ~330px down to ~200px (`min-h-[160px] md:h-[195px] lg:h-[205px]`).
+  - Replaced redundant metrics (Today's Calls, Follow-ups Due) with distinct pipeline indicators (`Assigned`, `High Priority`, `In Progress`, `Total Points`), cleanly separating long-term account ownership from the daily shift dial quotas in `TodayWorkBar`.
+  - Brings the primary `My Assigned Leads` queue directly into view above the fold on standard 1366×768 and 1440×900 laptop displays.
 
-- **Authoritative Event Data Replacement:**
-  - Reconciled all event data, dates (December 04–05, SOE CUSAT), tier deliverables, and audience demographics to match the authoritative PRAROHA'26 festival brochure.
+- **Search UX Enhancement ([LeadsTable.tsx](file:///d:/everything%20for%20coding/sponsorship%20management%20system/components/volunteer/LeadsTable.tsx)):**
+  - Added an instant-clear (`×`) button in the search bar when query text is active, improving query control and keyboard navigability.
+
+- **Detector Slop Elimination ([LeaderboardPodium.tsx](file:///d:/everything%20for%20coding/sponsorship%20management%20system/components/volunteer/LeaderboardPodium.tsx)):**
+  - Resolved 3× `border-accent-on-rounded` findings: replaced clashing `border-t-4` stripes on `rounded-t-lg` / `rounded-2xl` podium cards with cohesive subtle borders (`border border-border border-b-0` and `border border-amber-400/30`).
+  - Resolved 1× `bounce-easing`: replaced tacky continuous `animate-bounce` on the first-place crown/trophy with smooth deceleration hover micro-interactions (`transition-transform duration-300 hover:scale-110 drop-shadow-xs`).
+  - Re-ran `impeccable detect` across the workspace target tree: returned **0 findings** (exit code 0).
+
+- **Design Critique Snapshots ([.impeccable/critique/](file:///d:/everything%20for%20coding/sponsorship%20management%20system/.impeccable/critique/)):**
+  - Baseline critique: 31/40 (Good).
+  - Post-polish critique: **39/40 (Excellent)**.
+  - Trend recorded: `31 → 39 (out of 40)`.
 
 ## Decisions made
 
-- **Role-Aware Allocation without Account Downgrade:** Admins are made eligible allocation targets by recognizing `user.role === "admin"` in assignment queries and validation logic. Admins retain full executive permissions and signing authority across the entire application without converting them into volunteers.
-- **Tailwind CSS v4 Semantic Variable Mapping:** Used `@theme` variables (`--color-background`, `--color-surface`, `--color-text-primary`, `--color-border`) mapped to `--bg-canvas`, `--bg-surface`, etc., allowing `:root` and `.dark` classes on `<html>` to seamlessly swap theme colors globally without touching individual utility classes across 30+ pages.
-- **Zero-FOUC Inline Head Script:** An inline IIFE executes before DOM render to read `localStorage` and OS color preference (`prefers-color-scheme`), applying the `.dark` class to `document.documentElement` before first paint to eliminate theme flickering.
-- **Real Database Users Only:** Lead allocation matrix queries live Convex user accounts; no mock or dummy admin accounts are created.
+- **Non-Redundant Metric Hierarchy:** The Command Header displays cumulative account portfolio metrics (`Assigned`, `High Priority`, `In Progress`, `Total Points`), while `TodayWorkBar` strictly focuses on daily shift execution (`Daily Quota`, `Overdue`, `Due Today`, `To Contact`).
+- **Tailwind Surface-Aware Artwork Blending:** Replaced static hex color gradients with `from-surface via-surface/45 to-transparent` so backgrounds automatically inherit CSS variable swaps between Light mode (`#FFFFFF`) and Dark mode (`#121D2C`).
 
 ## Problems solved
 
-- **Next.js Root Layout Provider Structure:** Restructured `app/layout.tsx` so `<html>` and `<body>` remain the top-level returned tags in the Server Component RootLayout, placing client providers (`ConvexClientProvider`, `AuthProvider`, `ThemeProvider`) inside `<body>`, eliminating Next.js App Router tree errors.
-- **PowerShell Command Separator:** Used `;` instead of `&&` in Windows PowerShell terminal execution for chaining git commands.
-- **Admin Lead Execution Gaps:** Resolved authorization checks in `convex/calls.ts`, `convex/followUps.ts`, and `convex/proposals.ts` so that when an Admin owns a lead, they can log calls, record debriefs, and manage follow-ups from `/workspace` without being blocked by SDR-only guard clauses.
+- **Dark Mode Washout:** Eliminated hardcoded `#FFFFFF` linear-gradient wash on the right side of the dashboard hero card.
+- **Below-the-Fold Queue Friction:** Solved vertical viewport competition by cutting ~130px from the hero container, allowing student SDRs to view and act on leads immediately upon opening `/workspace`.
+- **Slop Anti-Patterns:** Removed straight `border-t-4` lines clashing with rounded card geometry and replaced distracting bounce animations with subtle purposeful transitions.
 
 ## Current state
 
-- **Build & TypeScript Status:** `npx tsc --noEmit` passed with 0 errors. `npm run build` compiled all 30 routes (static, dynamic, API) cleanly in 4.5s.
-- **Convex Deployment:** All schema mutations and queries deployed to `wandering-ox-399.eu-west-1.convex.cloud`.
-- **Git Synchronization:** All changes committed and pushed to `main` (`7cf824d`) on `master-developerr/praroha-26-sponsorship`. Working tree clean.
+- **Build & TypeScript Status:** `npx tsc --noEmit` passed with 0 errors. `npm run build` compiled all 30 routes (static, dynamic, API) cleanly in 1.38s.
+- **Deterministic Detector Status:** `impeccable detect` returns 0 warnings/findings.
+- **Git Synchronization:** All changes committed to `main` (`d533633`). Working tree clean.
 
 ## Next session starts with
 
-1. **Verify End-to-End Outreach Flow as Admin:**
-   - Log into `/admin/assignments`, select an unassigned lead, and allocate it to the active Admin account (`Adil M`).
-   - Navigate to `/workspace`, verify the lead appears in "My Leads" and "Today's Work" command bar.
-   - Launch Call Mode, test logging a call outcome and speech-to-text debrief.
-   - Confirm status update propagates to the Admin Executive Overview (`/admin`).
-2. **Review Dark Mode Across Edge Modals:**
-   - Spot-check any custom third-party dialogs or charts (Recharts) in dark mode to ensure high-contrast readability.
+1. **Test Live Calling & Voice Debrief Flow on `/workspace`:**
+   - Launch dev server, open `/workspace`, and verify the compact header layout and lead queue rendering.
+   - Click "Start Call" to open Call Mode, verify talking points and the 9 outcome buttons.
+   - Record an in-browser audio debrief and verify Whisper transcription + structured extraction.
+2. **Review Admin Surfaces with Impeccable:**
+   - Run `/impeccable critique app/admin/assignments/page.tsx` on the Lead Assignment Matrix.
 
 ## Open questions
 
-- None. Both Admin assignment eligibility and global theme toggle are completely functional, verified, and pushed to remote.
+- None. Workstation polish and design health score optimization (31 → 39/40) are complete and verified.
