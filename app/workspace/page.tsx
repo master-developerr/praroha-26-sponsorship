@@ -19,6 +19,8 @@ import {
   ArrowRight,
   Sparkles,
   Users,
+  Flame,
+  Target,
 } from "lucide-react";
 
 export default function VolunteerDashboardPage() {
@@ -90,82 +92,75 @@ export default function VolunteerDashboardPage() {
   };
 
   return (
-    <div className="space-y-6">
-      {/* 1. Large, Premium Integrated Dashboard Hero (approx 310–340px height) */}
+    <div className="space-y-5">
+      {/* 1. Compact, Focused Command Header (~200px height) */}
       <SectionErrorBoundary sectionTitle="Command Header">
-        <div className="relative overflow-hidden rounded-[24px] border border-border bg-surface shadow-xs min-h-[300px] md:min-h-[320px] lg:h-[330px] flex flex-col md:flex-row justify-between">
-          {/* LEFT ~55% Operational Content Layer */}
-          <div className="relative z-10 w-full md:w-[54%] lg:w-[52%] xl:w-[50%] p-6 sm:p-8 lg:p-9 flex flex-col justify-center space-y-4">
-            <div className="space-y-1.5">
-              <div className="inline-flex items-center gap-1.5 rounded-full bg-accent-mint px-3 py-1 text-xs font-bold text-accent-mint-text">
-                <Sparkles className="h-3.5 w-3.5 text-primary" />
-                PRAROHA&apos;26 Outreach Active
+        <div className="relative overflow-hidden rounded-2xl border border-border bg-surface shadow-xs min-h-[160px] md:h-[195px] lg:h-[205px] flex flex-col md:flex-row justify-between">
+          {/* LEFT Operational Content Layer */}
+          <div className="relative z-10 w-full md:w-[56%] lg:w-[54%] p-5 sm:p-6 flex flex-col justify-between space-y-3">
+            <div className="space-y-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-text-primary leading-tight">
+                  {greeting}, {firstName}
+                </h1>
+                <span className="inline-flex items-center gap-1 rounded-full bg-accent-mint px-2.5 py-0.5 text-[11px] font-semibold text-accent-mint-text border border-primary/20">
+                  <Sparkles className="h-3 w-3 text-primary" />
+                  PRAROHA&apos;26 Active
+                </span>
               </div>
-              <h1 className="text-2xl sm:text-3xl lg:text-[32px] font-black tracking-tight text-text-primary leading-tight">
-                {greeting}, {firstName}
-              </h1>
-              <p className="text-xs sm:text-sm text-text-secondary leading-relaxed max-w-lg">
+              <p className="text-xs text-text-secondary leading-relaxed max-w-md line-clamp-2">
                 Connect with corporate sponsors, confirm corporate deliverables, and advance deals through your pipeline.
               </p>
             </div>
 
-            {/* 4 Compact Operational Statistics */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-2">
-              <div className="rounded-xl border border-border-subtle bg-surface-subtle/80 p-3 backdrop-blur-xs">
+            {/* 4 Distinct Operational Stats (Non-redundant with TodayWorkBar) */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1">
+              <div className="rounded-lg border border-border-subtle bg-surface-subtle/70 px-2.5 py-2">
                 <span className="text-[10px] font-bold uppercase tracking-wider text-text-muted flex items-center gap-1">
                   <Users className="h-3 w-3 text-primary" />
                   Assigned
                 </span>
-                <p className="mt-1 text-xl font-black text-text-primary">
+                <p className="mt-0.5 text-lg font-black text-text-primary">
                   {metrics ? metrics.totalAssigned : leads.length}
                 </p>
               </div>
 
-              <div className="rounded-xl border border-border-subtle bg-surface-subtle/80 p-3 backdrop-blur-xs">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-800 flex items-center gap-1">
-                  <PhoneCall className="h-3 w-3 text-emerald-600" />
-                  Today&apos;s Calls
+              <div className="rounded-lg border border-border-subtle bg-surface-subtle/70 px-2.5 py-2">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-rose-700 dark:text-rose-400 flex items-center gap-1">
+                  <Flame className="h-3 w-3 text-rose-600 dark:text-rose-400" />
+                  High Priority
                 </span>
-                <p className="mt-1 text-xl font-black text-emerald-700">
-                  {displayMetrics.callsCompleted}{" "}
-                  <span className="text-xs font-semibold text-text-muted">
-                    / {displayMetrics.dailyTarget}
-                  </span>
+                <p className="mt-0.5 text-lg font-black text-rose-700 dark:text-rose-400">
+                  {displayMetrics.highPriority}
                 </p>
               </div>
 
-              <div className="rounded-xl border border-border-subtle bg-surface-subtle/80 p-3 backdrop-blur-xs">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-amber-800 flex items-center gap-1">
-                  <Calendar className="h-3 w-3 text-amber-600" />
-                  Follow-ups Due
+              <div className="rounded-lg border border-border-subtle bg-surface-subtle/70 px-2.5 py-2">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400 flex items-center gap-1">
+                  <Target className="h-3 w-3 text-emerald-600 dark:text-emerald-400" />
+                  In Progress
                 </span>
-                <p className="mt-1 text-xl font-black text-amber-700">
-                  {displayMetrics.todayFollowUps}
+                <p className="mt-0.5 text-lg font-black text-emerald-700 dark:text-emerald-400">
+                  {displayMetrics.inProgressCount}
                 </p>
               </div>
 
-              <div className="rounded-xl border border-border-subtle bg-surface-subtle/80 p-3 backdrop-blur-xs">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-teal-800 flex items-center gap-1">
+              <div className="rounded-lg border border-border-subtle bg-surface-subtle/70 px-2.5 py-2">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-amber-700 dark:text-amber-400 flex items-center gap-1">
                   <Trophy className="h-3 w-3 text-amber-500" />
                   Total Points
                 </span>
-                <p className="mt-1 text-xl font-black text-text-primary">
+                <p className="mt-0.5 text-lg font-black text-text-primary">
                   {pointsSummary?.totalPoints ?? 0}
                 </p>
               </div>
             </div>
           </div>
 
-          {/* RIGHT ~45% Integrated Editorial Artwork (Desktop / Tablet) */}
+          {/* RIGHT Integrated Editorial Artwork (Desktop / Tablet) */}
           <PrarohaHeroVisual
             variant="dashboard-hero"
-            className="w-[46%] lg:w-[48%] xl:w-[50%]"
-            priority
-          />
-
-          {/* Mobile Bottom Visual (< 768px: 160–190px tall) */}
-          <PrarohaHeroVisual
-            variant="dashboard-mobile"
+            className="w-[44%] lg:w-[46%]"
             priority
           />
         </div>

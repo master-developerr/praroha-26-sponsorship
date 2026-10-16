@@ -105,14 +105,8 @@ export function PrarohaHeroVisual({
             style={{ objectPosition: objectPosition || "right center" }}
           />
 
-          {/* Soft natural fade from artwork into dashboard white surface */}
-          <div
-            className="absolute inset-0 pointer-events-none"
-            style={{
-              background:
-                "linear-gradient(90deg, #FFFFFF 0%, rgba(255, 255, 255, 0.95) 10%, rgba(255, 255, 255, 0.4) 25%, rgba(255, 255, 255, 0) 45%)",
-            }}
-          />
+          {/* Soft natural fade from artwork into dashboard surface (theme-aware) */}
+          <div className="absolute inset-0 pointer-events-none bg-gradient-to-r from-surface via-surface/45 to-transparent" />
           <div className="absolute inset-x-0 top-0 h-6 bg-gradient-to-b from-surface/60 to-transparent pointer-events-none" />
           <div className="absolute inset-x-0 bottom-0 h-6 bg-gradient-to-t from-surface/60 to-transparent pointer-events-none" />
         </div>

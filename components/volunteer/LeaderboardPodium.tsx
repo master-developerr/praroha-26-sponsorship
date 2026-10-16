@@ -106,7 +106,7 @@ export function LeaderboardPodium({ compact = false }: LeaderboardPodiumProps) {
                 <span className="text-[10px] text-text-muted">
                   {second.dealsWonCount} deals ({second.callsCount} calls)
                 </span>
-                <div className="w-full h-20 sm:h-24 bg-slate-100 dark:bg-slate-800/40 border-t-4 border-slate-300 rounded-t-lg mt-3 flex items-center justify-center font-bold text-slate-500 text-sm">
+                <div className="w-full h-20 sm:h-24 bg-surface-subtle border border-border border-b-0 rounded-t-lg mt-3 flex items-center justify-center font-bold text-text-secondary text-sm shadow-xs">
                   SILVER
                 </div>
               </div>
@@ -117,9 +117,9 @@ export function LeaderboardPodium({ compact = false }: LeaderboardPodiumProps) {
             {/* 1st Place (Gold - Elevated Center) */}
             {first ? (
               <div className="flex flex-col items-center">
-                <Crown className="h-6 w-6 text-amber-500 mb-1 animate-bounce" />
+                <Crown className="h-6 w-6 text-amber-500 mb-1 transition-transform duration-300 hover:scale-110 drop-shadow-xs" />
                 <div className="relative mb-2">
-                  <div className="h-16 w-16 sm:h-20 sm:w-20 rounded-full border-3 border-amber-400 bg-amber-50 flex items-center justify-center font-black text-amber-800 shadow-md text-lg sm:text-xl">
+                  <div className="h-16 w-16 sm:h-20 sm:w-20 rounded-full border-2 border-amber-400 bg-amber-50 dark:bg-amber-950/40 flex items-center justify-center font-black text-amber-800 dark:text-amber-300 shadow-sm text-lg sm:text-xl">
                     {first.name.slice(0, 2).toUpperCase()}
                   </div>
                   <div className="absolute -top-2 -right-1 h-7 w-7 rounded-full bg-amber-400 border border-amber-600 flex items-center justify-center text-xs font-black text-amber-950 shadow-xs">
@@ -135,7 +135,7 @@ export function LeaderboardPodium({ compact = false }: LeaderboardPodiumProps) {
                 <span className="text-[10px] text-text-muted">
                   {first.dealsWonCount} deals ({first.callsCount} calls)
                 </span>
-                <div className="w-full h-28 sm:h-32 bg-amber-500/10 dark:bg-amber-500/20 border-t-4 border-amber-400 rounded-t-lg mt-3 flex flex-col items-center justify-center font-extrabold text-amber-700 text-sm">
+                <div className="w-full h-28 sm:h-32 bg-amber-500/10 dark:bg-amber-500/15 border border-amber-400/30 border-b-0 rounded-t-lg mt-3 flex flex-col items-center justify-center font-extrabold text-amber-700 dark:text-amber-400 text-sm shadow-xs">
                   <span>GOLD</span>
                   <Trophy className="h-4 w-4 mt-1 text-amber-500" />
                 </div>
@@ -148,10 +148,10 @@ export function LeaderboardPodium({ compact = false }: LeaderboardPodiumProps) {
             {third ? (
               <div className="flex flex-col items-center">
                 <div className="relative mb-2">
-                  <div className="h-14 w-14 sm:h-16 sm:w-16 rounded-full border-2 border-amber-700/40 bg-amber-700/10 flex items-center justify-center font-black text-amber-900 shadow-sm text-base sm:text-lg">
+                  <div className="h-14 w-14 sm:h-16 sm:w-16 rounded-full border-2 border-amber-700/40 bg-amber-700/10 dark:bg-amber-950/30 flex items-center justify-center font-black text-amber-900 dark:text-amber-400 shadow-sm text-base sm:text-lg">
                     {third.name.slice(0, 2).toUpperCase()}
                   </div>
-                  <div className="absolute -top-2 -right-1 h-6 w-6 rounded-full bg-amber-700/20 border border-amber-700/50 flex items-center justify-center text-[10px] font-bold text-amber-900">
+                  <div className="absolute -top-2 -right-1 h-6 w-6 rounded-full bg-amber-700/20 border border-amber-700/50 flex items-center justify-center text-[10px] font-bold text-amber-900 dark:text-amber-300">
                     3rd
                   </div>
                 </div>
@@ -164,7 +164,7 @@ export function LeaderboardPodium({ compact = false }: LeaderboardPodiumProps) {
                 <span className="text-[10px] text-text-muted">
                   {third.dealsWonCount} deals ({third.callsCount} calls)
                 </span>
-                <div className="w-full h-16 sm:h-18 bg-amber-800/5 dark:bg-amber-800/20 border-t-4 border-amber-700/50 rounded-t-lg mt-3 flex items-center justify-center font-bold text-amber-800 text-xs sm:text-sm">
+                <div className="w-full h-16 sm:h-18 bg-surface-subtle border border-border border-b-0 rounded-t-lg mt-3 flex items-center justify-center font-bold text-text-secondary text-xs sm:text-sm shadow-xs">
                   BRONZE
                 </div>
               </div>

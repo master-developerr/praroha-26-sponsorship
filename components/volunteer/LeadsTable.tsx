@@ -13,6 +13,7 @@ import {
   ExternalLink,
   MapPin,
   Calendar,
+  X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -258,8 +259,18 @@ export function LeadsTable({
             placeholder="Search company, contact, or niche..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="h-8 w-full rounded-lg border border-border bg-surface-subtle/50 pl-8 pr-3 text-xs text-text-primary placeholder:text-text-muted focus:border-primary focus:outline-none"
+            className="h-8 w-full rounded-lg border border-border bg-surface-subtle/50 pl-8 pr-8 text-xs text-text-primary placeholder:text-text-muted focus:border-primary focus:outline-none"
           />
+          {searchQuery && (
+            <button
+              type="button"
+              onClick={() => setSearchQuery("")}
+              aria-label="Clear search"
+              className="absolute right-2.5 top-2 text-text-muted hover:text-text-primary transition-colors cursor-pointer"
+            >
+              <X className="h-3.5 w-3.5" />
+            </button>
+          )}
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
