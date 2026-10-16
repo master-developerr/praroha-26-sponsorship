@@ -7,6 +7,7 @@ import {
   LayoutDashboard,
   Users,
   Calendar,
+  CalendarClock,
   PhoneCall,
   BarChart3,
   Trophy,
@@ -55,6 +56,12 @@ export function Sidebar() {
       icon: Calendar,
       href: "/workspace/follow-ups",
       isActive: pathname === "/workspace/follow-ups",
+    },
+    {
+      label: "Meetings & Dispatch",
+      icon: CalendarClock,
+      href: "/workspace/meetings",
+      isActive: pathname === "/workspace/meetings",
     },
     {
       label: "Call Reports",

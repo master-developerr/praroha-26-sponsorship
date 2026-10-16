@@ -62,12 +62,14 @@ export function CompanyDossierDrawer({
   isOpen,
   onClose,
   onStartCall,
+  onOpenNotionDoc,
 }: {
   company?: any | null;
   companyId?: Id<"companies"> | null;
   isOpen: boolean;
   onClose: () => void;
   onStartCall?: (lead: any) => void;
+  onOpenNotionDoc?: (companyId: Id<"companies">) => void;
 }) {
   const [activeTab, setActiveTab] = useState<"overview" | "ai" | "prep" | "proposals" | "timeline">(
     "overview"
@@ -551,6 +553,20 @@ export function CompanyDossierDrawer({
           {/* Sticky Drawer Footer */}
           <div className="flex items-center justify-between pt-3 border-t border-border-subtle">
             <div className="flex items-center gap-2">
+              {onOpenNotionDoc && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    onClose();
+                    onOpenNotionDoc(company._id);
+                  }}
+                  className="text-xs border-amber-500/30 text-amber-800 dark:text-amber-300 hover:bg-amber-50 dark:hover:bg-amber-950/30 font-semibold"
+                >
+                  <FileText className="h-3.5 w-3.5 mr-1.5 text-amber-600 dark:text-amber-400" />
+                  Notion Doc
+                </Button>
+              )}
               <Button
                 variant="outline"
                 size="sm"

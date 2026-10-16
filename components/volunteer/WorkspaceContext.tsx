@@ -9,10 +9,16 @@ import { CallReportModal } from "@/components/volunteer/CallReportModal";
 import { CompanyDossierDrawer } from "@/components/admin/CompanyDossierDrawer";
 import { EventInfoModal } from "@/components/volunteer/EventInfoModal";
 import { LeaderboardPodium } from "@/components/volunteer/LeaderboardPodium";
+import { NotionCompanyDossierModal } from "@/components/volunteer/NotionCompanyDossierModal";
+import { CalTeamScheduler } from "@/components/volunteer/CalTeamScheduler";
 
 interface WorkspaceContextType {
   openCompanyDossier: (companyId: Id<"companies">) => void;
   closeCompanyDossier: () => void;
+  openNotionDossier: (companyId: Id<"companies">) => void;
+  closeNotionDossier: () => void;
+  openCalScheduler: (lead?: any) => void;
+  closeCalScheduler: () => void;
   startCallMode: (lead: any) => void;
   openDebriefModal: (lead: any, callData?: any) => void;
   openEventInfo: () => void;
@@ -23,6 +29,9 @@ const WorkspaceContext = createContext<WorkspaceContextType | undefined>(undefin
 
 export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
   const [selectedCompanyId, setSelectedCompanyId] = useState<Id<"companies"> | null>(null);
+  const [selectedNotionCompanyId, setSelectedNotionCompanyId] = useState<Id<"companies"> | null>(null);
+  const [isCalSchedulerOpen, setIsCalSchedulerOpen] = useState(false);
+  const [calSchedulerLead, setCalSchedulerLead] = useState<any | null>(null);
   const [isEventInfoOpen, setIsEventInfoOpen] = useState(false);
   const [isLeaderboardOpen, setIsLeaderboardOpen] = useState(false);
 
@@ -48,6 +57,14 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
 
   const closeCompanyDossier = () => {
     setSelectedCompanyId(null);
+  };
+
+  const openNotionDossier = (companyId: Id<"companies">) => {
+    setSelectedNotionCompanyId(companyId);
+  };
+
+  const closeNotionDossier = () => {
+    setSelectedNotionCompanyId(null);
   };
 
   const normalizeLead = (lead: any) => {
@@ -107,11 +124,29 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
     setIsDebriefModalOpen(true);
   };
 
+  const openCalScheduler = (lead?: any) => {
+    if (lead) {
+      setCalSchedulerLead(normalizeLead(lead));
+    } else {
+      setCalSchedulerLead(null);
+    }
+    setIsCalSchedulerOpen(true);
+  };
+
+  const closeCalScheduler = () => {
+    setIsCalSchedulerOpen(false);
+    setCalSchedulerLead(null);
+  };
+
   return (
     <WorkspaceContext.Provider
       value={{
         openCompanyDossier,
         closeCompanyDossier,
+        openNotionDossier,
+        closeNotionDossier,
+        openCalScheduler,
+        closeCalScheduler,
         startCallMode,
         openDebriefModal,
         openEventInfo: () => setIsEventInfoOpen(true),
@@ -120,12 +155,42 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
     >
       {children}
 
+      {/* Notion-styled Clean Company Research Dossier Canvas */}
+      {selectedNotionCompanyId && (
+        <NotionCompanyDossierModal
+          companyId={selectedNotionCompanyId}
+          isOpen={Boolean(selectedNotionCompanyId)}
+          onClose={closeNotionDossier}
+          onStartCall={startCallMode}
+          onOpenScheduler={(lead) => {
+            closeNotionDossier();
+            openCalScheduler(lead);
+          }}
+        />
+      )}
+
+      {/* Cal.com Team Outreach & Meeting Scheduler Modal */}
+      {isCalSchedulerOpen && (
+        <CalTeamScheduler
+          isModal
+          initialLead={calSchedulerLead}
+          onClose={closeCalScheduler}
+          onBookingComplete={() => {
+            closeCalScheduler();
+          }}
+        />
+      )}
+
       {/* Slide-over Company & Contact Dossier Drawer */}
       <CompanyDossierDrawer
         companyId={selectedCompanyId}
         isOpen={Boolean(selectedCompanyId)}
         onClose={closeCompanyDossier}
         onStartCall={startCallMode}
+        onOpenNotionDoc={(cId) => {
+          closeCompanyDossier();
+          openNotionDossier(cId);
+        }}
       />
 
       {/* Live Minimal In-Call Stopwatch & Quick Outcome Overlay */}

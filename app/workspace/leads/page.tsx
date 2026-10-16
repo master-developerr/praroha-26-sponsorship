@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 
 export default function MyLeadsPage() {
   const { user } = useAuthUser();
-  const { openCompanyDossier, startCallMode } = useWorkspace();
+  const { openCompanyDossier, openNotionDossier, openCalScheduler, startCallMode } = useWorkspace();
   const [activeTab, setActiveTab] = useState("all");
 
   const clerkId = user?.id || "";
@@ -62,6 +62,8 @@ export default function MyLeadsPage() {
         activeTab={activeTab}
         onTabChange={setActiveTab}
         onSelectLead={(companyId) => openCompanyDossier(companyId)}
+        onOpenNotionDoc={(companyId) => openNotionDossier(companyId)}
+        onScheduleMeeting={(lead) => openCalScheduler(lead)}
         onStartCall={(lead) => startCallMode(lead)}
       />
     </div>

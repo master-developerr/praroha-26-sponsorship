@@ -13,6 +13,7 @@ import {
   ExternalLink,
   MapPin,
   Calendar,
+  CalendarClock,
   X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -54,6 +55,8 @@ interface LeadsTableProps {
   onTabChange: (tab: string) => void;
   onSelectLead: (companyId: Id<"companies">) => void;
   onStartCall?: (lead: AssignedLeadItem) => void;
+  onOpenNotionDoc?: (companyId: Id<"companies">) => void;
+  onScheduleMeeting?: (lead: AssignedLeadItem) => void;
   isLoading?: boolean;
 }
 
@@ -63,6 +66,8 @@ export function LeadsTable({
   onTabChange,
   onSelectLead,
   onStartCall,
+  onOpenNotionDoc,
+  onScheduleMeeting,
   isLoading = false,
 }: LeadsTableProps) {
   const [searchQuery, setSearchQuery] = useState("");
@@ -495,13 +500,39 @@ export function LeadsTable({
                       className="flex items-center justify-end gap-1.5"
                       onClick={(e) => e.stopPropagation()}
                     >
+                      {onOpenNotionDoc && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => onOpenNotionDoc(lead._id)}
+                          title="Open Notion Research Canvas"
+                          className="h-7 px-2 text-xs text-amber-800 dark:text-amber-300 hover:bg-amber-50 dark:hover:bg-amber-950/30 border-amber-500/25"
+                        >
+                          <FileText className="h-3 w-3 mr-1 text-amber-600 dark:text-amber-400" />
+                          Notion
+                        </Button>
+                      )}
+
+                      {onScheduleMeeting && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => onScheduleMeeting(lead)}
+                          title="Cal.com Team Meeting Dispatch"
+                          className="h-7 px-2 text-xs text-teal-800 dark:text-teal-300 hover:bg-teal-50 dark:hover:bg-teal-950/30 border-teal-500/25"
+                        >
+                          <CalendarClock className="h-3 w-3 mr-1 text-teal-600 dark:text-teal-400" />
+                          Meet
+                        </Button>
+                      )}
+
                       <Button
                         variant="outline"
                         size="sm"
                         onClick={() => onSelectLead(lead._id)}
                         className="h-7 px-2.5 text-xs text-text-secondary hover:text-text-primary border-border"
                       >
-                        <FileText className="h-3 w-3 mr-1 text-primary" />
+                        <Building2 className="h-3 w-3 mr-1 text-primary" />
                         Dossier
                       </Button>
 

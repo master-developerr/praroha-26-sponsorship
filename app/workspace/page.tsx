@@ -25,7 +25,7 @@ import {
 
 export default function VolunteerDashboardPage() {
   const { user, profile } = useAuthUser();
-  const { openCompanyDossier, startCallMode, openEventInfo } = useWorkspace();
+  const { openCompanyDossier, openNotionDossier, openCalScheduler, startCallMode, openEventInfo } = useWorkspace();
   const [activeTab, setActiveTab] = useState("all");
 
   const clerkId = user?.id || "";
@@ -214,6 +214,8 @@ export default function VolunteerDashboardPage() {
             activeTab={activeTab}
             onTabChange={setActiveTab}
             onSelectLead={(companyId) => openCompanyDossier(companyId)}
+            onOpenNotionDoc={(companyId) => openNotionDossier(companyId)}
+            onScheduleMeeting={(lead) => openCalScheduler(lead)}
             onStartCall={(lead) => startCallMode(lead)}
           />
         </div>
