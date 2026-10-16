@@ -1,57 +1,69 @@
-# Memory — PRAROHA'26 Complete Application Implementation & Production Readiness
+# Memory — PRAROHA'26 Admin Lead Allocation & Global Theme System
 
-Last updated: October 15, 2026 (19:22 IST)
+Last updated: October 16, 2026 (14:20 IST)
 
 ## What was built
 
-- **Production Authentication & Dev Tooling Isolation:**
-  - `app/layout.tsx`: Gated `<DevPersonaSwitcher />` strictly behind `process.env.NEXT_PUBLIC_ENABLE_DEV_SWITCHER === "true"`, removing all test persona controls from production user flows.
-  - `components/providers/AuthProvider.tsx`: Defaulted `activePersona` to `"clerk"` ensuring live Clerk sessions and Convex profiles strictly govern authentication, role verification, and access gates.
-- **Admin Volunteer & Team Governance (`/admin/verifications`):**
-  - `components/admin/AdminVerificationView.tsx`: Added 5th filter tab (`Suspended`), wired `restoreVolunteer` mutation, interactive role toggle (`Promote to Admin` / `Demote to Volunteer`), and detailed volunteer inspection modal displaying live workload velocity metrics (active leads, calls logged, deals won, total points).
-  - `convex/users.ts`: Implemented `restoreVolunteer`, `getVolunteerDetailedProfile`, and `setUserRole` mutations/queries with audit logging.
-- **Admin Lead Management & CRUD (`/admin/leads` & `/admin/assignments`):**
-  - `convex/companies.ts`: Added `updateLead` and `deleteLead` mutations with cascade cleanup for contacts, assignments, and audit logging.
-  - `components/forms/EditLeadModal.tsx`: Full company dossier and primary contact edit modal.
-  - `components/admin/MasterLeadDirectoryView.tsx`: Wired in-place Edit, Delete (with confirmation), and RFC-4180 CSV filtered export.
-  - `components/admin/LeadAssignmentMatrixView.tsx` & `app/admin/assignments/page.tsx`: Extracted interactive allocation cockpit to client component with quick quantity selectors (`5`, `10`, `20`, `All`, `Clear`) and workload bars, keeping `page.tsx` as a clean Server Component with Suspense.
-- **Volunteer Workstation & Audio Voice Debrief (`/workspace`):**
-  - `components/volunteer/CallReportModal.tsx`: Integrated native in-browser `MediaRecorder` + Web Speech API (`SpeechRecognition` / `webkitSpeechRecognition`). Volunteer speech streams into editable textarea in real time, displays audio playback, and triggers automated Gemini post-call analysis (`DebriefAnalysisCard`).
-  - `app/workspace/event-info/page.tsx`: Built dedicated PRAROHA'26 Event Intelligence section featuring the festival banner illustration, tiers, competitions, non-cash in-kind requirements, and committee contacts.
-  - `components/layout/Sidebar.tsx`: Linked Event Info navigation directly to `/workspace/event-info`.
-- **Real-Time Notifications Backend:**
-  - `convex/schema.ts` & `convex/notifications.ts`: Added `notifications` table indexed by `userId`, `by_user_and_read`, and `by_created_at`, with mutations for reading and sending alerts.
-- **GitHub Repository Synchronization:**
-  - Configured git remote `origin` to `https://github.com/master-developerr/praroha-26-sponsorship.git`.
-  - Pushed all commits to `main` branch (`c042fbf` and `0d8f0d5`).
+- **Lead Allocation Matrix — Admin Assignee Participation (`/admin/assignments`):**
+  - `convex/assignments.ts`:
+    - Updated `getVolunteerRosterWithWorkload` to include active Admins alongside approved student SDRs using role-aware filter `!suspended && !rejected && (role === "admin" || (role === "volunteer" && verificationStatus === "approved"))`.
+    - Updated `assignLeadsBatch` and `reassignLead` to authorize and validate assignments to active Admins.
+    - Updated `getMyAssignedLeads` and `getMyWorkstationMetrics` so Admins can access `/workspace`, see their assigned leads, and track daily quota metrics identically to SDRs while retaining their Admin privileges and signing authority.
+  - `convex/calls.ts`: Updated `logCallAndDebrief` to permit active Admins to log calls and voice debriefs.
+  - `convex/followUps.ts`: Updated `getVolunteerFollowUps` and `completeFollowUp` to allow active Admins to manage and complete callbacks.
+  - `convex/proposals.ts`: Updated `createProposal` to allow active Admins to create and dispatch sponsorship proposals.
+  - `components/admin/LeadAssignmentMatrixView.tsx`:
+    - Renamed KPI badge to `Active Assignees` (previously `Active SDRs`).
+    - Renamed right roster header to `Target Assignee Roster`.
+    - Added subtle Admin role badge (`Admin` in sky blue) on assignee cards.
+    - Rendered Admin name, department/role (`Admin • Sponsorship Committee Head`), phone number, active lead count, dynamic capacity badge (`Available` / `Optimal` / `Active` / `Heavy`), and workload progress bar.
+    - Updated search placeholder to *"Search assignee by name, role or department..."*.
+    - Updated empty state to *"No active assignees available."*.
+  - `components/admin/ReassignLeadModal.tsx`: Updated target assignee dropdown to display Admins with `[Admin • Department]`.
+
+- **Global Dark / Light Theme System:**
+  - `components/providers/ThemeProvider.tsx`: Centralized theme context supporting `"light" | "dark" | "system"`, `resolvedTheme`, and `localStorage` persistence under key `"praroha-theme"`.
+  - `components/ui/ThemeToggle.tsx`: Compact 36×36px Sun/Moon toggle button with smooth rotation and scale micro-animations, tooltips, visible focus rings, and `aria-label`.
+  - `components/layout/Navbar.tsx`: Integrated `ThemeToggle` into desktop/tablet top navbar right actions and mobile navigation drawer header without header overflow.
+  - `app/layout.tsx`: Wrapped application tree in `ThemeProvider` within `body`, and added inline anti-flash script in `<head>` to prevent flash of unstyled content (zero FOUC) and hydration mismatches.
+  - `app/globals.css`: Migrated color system to Tailwind CSS v4 CSS variables with `:root` (light) and `.dark` (deep charcoal/navy: background `#0B131E`, surfaces `#121D2C` / `#172436`, borders `#22344B`, typography `#F1F5F9`, PRAROHA teal `#14B89A`). Custom dark scrollbars and dark form controls included.
+  - `components/layout/Sidebar.tsx` & `components/layout/AdminSidebar.tsx`: Added dark mode styling to promo card, navigation items, and user popovers.
+
+- **Admin Data Management & Danger Zone (`/admin/data-management`):**
+  - Dedicated production Data Management cockpit with type-to-confirm modal dialogs for cascading data deletion (`deleteAllLeads`, `deleteAllVolunteers`, `resetEntireOutreachData`).
+
+- **Authoritative Event Data Replacement:**
+  - Reconciled all event data, dates (December 04–05, SOE CUSAT), tier deliverables, and audience demographics to match the authoritative PRAROHA'26 festival brochure.
 
 ## Decisions made
 
-- **Server Component Architecture for Admin Pages:** Refactored `app/admin/assignments/page.tsx` to remain a pure Server Component importing the client interactive view (`LeadAssignmentMatrixView.tsx`), aligning with Next.js 16 Partial Prerendering and eliminating client-side route segment config conflicts.
-- **Native Browser Speech Recognition over Heavy Third-Party APIs:** Adopted browser-native Web Speech API (`webkitSpeechRecognition`) for zero-cost, instant client-side speech-to-text during voice debriefs, with audio playback and editable text fallback.
-- **Zero-Trust Role & Verification Enforcement:** Kept `RouteGuard` and Convex server-side security checks as the single source of truth for authorization; URL tampering by volunteers to access `/admin/*` routes is intercepted and redirected.
-- **Strict Isolation of Dev Test UI:** Test personas are isolated behind an explicit environment variable so production builds contain only real Clerk auth and live database states.
+- **Role-Aware Allocation without Account Downgrade:** Admins are made eligible allocation targets by recognizing `user.role === "admin"` in assignment queries and validation logic. Admins retain full executive permissions and signing authority across the entire application without converting them into volunteers.
+- **Tailwind CSS v4 Semantic Variable Mapping:** Used `@theme` variables (`--color-background`, `--color-surface`, `--color-text-primary`, `--color-border`) mapped to `--bg-canvas`, `--bg-surface`, etc., allowing `:root` and `.dark` classes on `<html>` to seamlessly swap theme colors globally without touching individual utility classes across 30+ pages.
+- **Zero-FOUC Inline Head Script:** An inline IIFE executes before DOM render to read `localStorage` and OS color preference (`prefers-color-scheme`), applying the `.dark` class to `document.documentElement` before first paint to eliminate theme flickering.
+- **Real Database Users Only:** Lead allocation matrix queries live Convex user accounts; no mock or dummy admin accounts are created.
 
 ## Problems solved
 
-- **Next.js 16 Route Segment Config in Client Component:** Solved `Next.js can't recognize the exported instant field in route. "instant" is a route segment config and can only be used when the segment is a Server Component module` by extracting `LeadAssignmentMatrixView.tsx` with `"use client"` and keeping `app/admin/assignments/page.tsx` as a pure Server Component.
-- **Convex Dev Deployment Sync:** Deployed updated Convex schema and functions (`users:getVolunteerDetailedProfile`, `restoreVolunteer`, `notifications`) using `npx convex dev --once`, resolving missing function errors in the volunteer inspection modal.
-- **Next.js Prerender Build Validation:** Verified all 28 static and dynamic routes compile and prerender cleanly via `npm run build` and strict TypeScript checks (`npx tsc --noEmit` exited with code 0).
+- **Next.js Root Layout Provider Structure:** Restructured `app/layout.tsx` so `<html>` and `<body>` remain the top-level returned tags in the Server Component RootLayout, placing client providers (`ConvexClientProvider`, `AuthProvider`, `ThemeProvider`) inside `<body>`, eliminating Next.js App Router tree errors.
+- **PowerShell Command Separator:** Used `;` instead of `&&` in Windows PowerShell terminal execution for chaining git commands.
+- **Admin Lead Execution Gaps:** Resolved authorization checks in `convex/calls.ts`, `convex/followUps.ts`, and `convex/proposals.ts` so that when an Admin owns a lead, they can log calls, record debriefs, and manage follow-ups from `/workspace` without being blocked by SDR-only guard clauses.
 
 ## Current state
 
-- **Application Completeness:** 100% of core operational flows (Admin verification, lead CRUD, CSV import, batch allocation, volunteer workstation, call mode, voice debrief speech-to-text, AI pre-call & post-call analysis, follow-ups, points ledger, leaderboard, event info) are fully built and live-tested.
-- **Build & Quality Assurance:** `npx tsc --noEmit` passes with 0 errors; `next build` compiles all 28 routes with 0 errors.
-- **Remote Git Status:** Branch `main` is up to date with `origin/main` at `https://github.com/master-developerr/praroha-26-sponsorship.git`. Working tree clean.
+- **Build & TypeScript Status:** `npx tsc --noEmit` passed with 0 errors. `npm run build` compiled all 30 routes (static, dynamic, API) cleanly in 4.5s.
+- **Convex Deployment:** All schema mutations and queries deployed to `wandering-ox-399.eu-west-1.convex.cloud`.
+- **Git Synchronization:** All changes committed and pushed to `main` (`7cf824d`) on `master-developerr/praroha-26-sponsorship`. Working tree clean.
 
 ## Next session starts with
 
-- **Live Festival Outreach Kickoff:**
-  1. Test end-to-end volunteer onboarding with new student accounts.
-  2. Ingest initial company spreadsheet batches using the CSV import wizard at `/admin/leads`.
-  3. Bulk-allocate companies to verified SDRs via `/admin/assignments`.
-  4. Monitor live outreach velocity and commitments won on the Executive Dashboard (`/admin`).
+1. **Verify End-to-End Outreach Flow as Admin:**
+   - Log into `/admin/assignments`, select an unassigned lead, and allocate it to the active Admin account (`Adil M`).
+   - Navigate to `/workspace`, verify the lead appears in "My Leads" and "Today's Work" command bar.
+   - Launch Call Mode, test logging a call outcome and speech-to-text debrief.
+   - Confirm status update propagates to the Admin Executive Overview (`/admin`).
+2. **Review Dark Mode Across Edge Modals:**
+   - Spot-check any custom third-party dialogs or charts (Recharts) in dark mode to ensure high-contrast readability.
 
 ## Open questions
 
-- None. System architecture, data schemas, design tokens, and operational workflows are fully implemented and pushed.
+- None. Both Admin assignment eligibility and global theme toggle are completely functional, verified, and pushed to remote.
