@@ -29,6 +29,12 @@ Last updated: October 16, 2026 (16:32 IST)
   - Post-polish critique: **39/40 (Excellent)**.
   - Trend recorded: `31 → 39 (out of 40)`.
 
+- **Typography System Elevation (`/impeccable typeset`):**
+  - **Tabular Numerics (`tabular-nums`):** Added `tabular-nums` to stat cards in `TodayWorkBar.tsx` (quota ticker `4 / 15`, callbacks, overdue alerts), `app/workspace/page.tsx` header numbers, and `LeadsTable.tsx` (lead score badges, tab counts, and timeline dates) to ensure digits never jitter during live updates.
+  - **Badge Typography & Dark Mode Contrast ([badge.tsx](file:///d:/everything%20for%20coding/sponsorship%20management%20system/components/ui/badge.tsx)):** Added explicit dark mode color tokens (`dark:bg-... dark:text-... dark:border-...`) to all 10 `LeadStatusBadge` states, 4 `ContactVerificationBadge` tiers, and 4 `PriorityBadge` levels, ensuring WCAG AA contrast across both Light and Dark themes.
+  - **Monospace Costume Removal:** Replaced `font-mono text-text-muted` on `PhoneTypeBadge` with clean `font-medium text-text-secondary`, adhering to the craft-floor rule against costume monospace on plain category labels.
+  - **Type Scan Integrity:** Re-ran `impeccable detect --json --scope type`, confirming **0 findings**.
+
 ## Decisions made
 
 - **Non-Redundant Metric Hierarchy:** The Command Header displays cumulative account portfolio metrics (`Assigned`, `High Priority`, `In Progress`, `Total Points`), while `TodayWorkBar` strictly focuses on daily shift execution (`Daily Quota`, `Overdue`, `Due Today`, `To Contact`).
