@@ -1,66 +1,65 @@
-# Memory — PRAROHA'26 Impeccable Design Critique & Workstation Polish Pass
+# Memory — PRAROHA'26 Dual-Theme Hardening, Reference Evaluation & Clean State Restoration
 
-Last updated: October 16, 2026 (16:32 IST)
+Last updated: October 16, 2026 (19:02 IST)
 
 ## What was built
 
-- **Impeccable Context Setup (`PRODUCT.md` & `.impeccable/`):**
-  - Captured authoritative, durable product truth in `PRODUCT.md` (schema 1) for PRAROHA'26: Users (Admin / Sponsorship Head, Volunteer / Student SDR), Purpose, Positioning ("Operations First, AI Second"), Operating Context (Dec 04–05, 2026, SOE CUSAT), Capabilities & Constraints, Brand Commitments, and Evidence on Hand.
-  - Configured `.impeccable/config.json` with `"buildPath": "code"`, and activated project design hooks (`impeccable hooks on`).
+- **Full Dual-Theme Colorization & Contrast Hardening Pass:**
+  - Audited and updated 28 files across the volunteer workstation (`/workspace`), navigation shell, and executive cockpit to guarantee WCAG AA contrast compliance (>= 4.5:1 text, >= 3:1 UI) in both Light (`#F6F7F5` / `#FFFFFF`) and Dark (`#0B131E` / `#121D2C`) modes.
+  - **Sponsorship Tier Definitions ([lib/eventConfig.ts](file:///d:/everything%20for%20coding/sponsorship%20management%20system/lib/eventConfig.ts)):** Added dark-mode companion tokens to all 6 package tiers (`Title`, `Co-Sponsor`, `Associate`, `Supporting`, `Community`, `Event Sponsor`), eliminating glaring white container washouts in dark mode.
+  - **Volunteer Workstation & Call Preparation:**
+    - [components/volunteer/EventInfoModal.tsx](file:///d:/everything%20for%20coding/sponsorship%20management%20system/components/volunteer/EventInfoModal.tsx): Hardened Green Protocol sustainability card dark styling.
+    - [components/volunteer/CallReportModal.tsx](file:///d:/everything%20for%20coding/sponsorship%20management%20system/components/volunteer/CallReportModal.tsx): Replaced un-themed error messages and callback queued badges with dark mode tokens.
+    - [components/volunteer/FollowUpList.tsx](file:///d:/everything%20for%20coding/sponsorship%20management%20system/components/volunteer/FollowUpList.tsx): Added dark mode borders, backgrounds, and badges to Due Today callbacks.
+    - [components/volunteer/ConciseTalkingPoints.tsx](file:///d:/everything%20for%20coding/sponsorship%20management%20system/components/volunteer/ConciseTalkingPoints.tsx): Tuned Natural Opening Hook badge, Collegiate Objection Battlecard, and Non-Cash alternatives with dark tokens.
+    - [components/volunteer/VerificationPendingScreen.tsx](file:///d:/everything%20for%20coding/sponsorship%20management%20system/components/volunteer/VerificationPendingScreen.tsx) & [components/volunteer/VerificationRejectedScreen.tsx](file:///d:/everything%20for%20coding/sponsorship%20management%20system/components/volunteer/VerificationRejectedScreen.tsx): Dual-theme status badges, feedback boxes, and suspended account cards.
+    - [components/volunteer/VolunteerDashboardView.tsx](file:///d:/everything%20for%20coding/sponsorship%20management%20system/components/volunteer/VolunteerDashboardView.tsx) & [components/ui/stat-card.tsx](file:///d:/everything%20for%20coding/sponsorship%20management%20system/components/ui/stat-card.tsx): StatCard icon containers and percentage/delta badges updated with explicit dark backgrounds and borders.
+  - **App Shell & Real-Time Alerts:**
+    - [components/layout/Navbar.tsx](file:///d:/everything%20for%20coding/sponsorship%20management%20system/components/layout/Navbar.tsx), [components/layout/Sidebar.tsx](file:///d:/everything%20for%20coding/sponsorship%20management%20system/components/layout/Sidebar.tsx), [components/layout/AdminSidebar.tsx](file:///d:/everything%20for%20coding/sponsorship%20management%20system/components/layout/AdminSidebar.tsx): Role pills, "Sponsorship Head" label, and sign out hover actions given high-contrast dark classes.
+    - [components/layout/NotificationPopover.tsx](file:///d:/everything%20for%20coding/sponsorship%20management%20system/components/layout/NotificationPopover.tsx): Removed artificial `border-l-2` colored side tabs (AI UI slop tell); modernized alert items (overdue, due today, verification queue, point awards) with dual-theme backgrounds and badges.
+  - **Admin Operations & Cockpit:**
+    - [components/admin/CompanyDossierDrawer.tsx](file:///d:/everything%20for%20coding/sponsorship%20management%20system/components/admin/CompanyDossierDrawer.tsx): Added dark styling for "Why This Lead Matters", "Value for the Sponsor", internal notes, proposal status badges, and non-cash in-kind cards.
+    - [components/admin/ExecutiveDashboardView.tsx](file:///d:/everything%20for%20coding/sponsorship%20management%20system/components/admin/ExecutiveDashboardView.tsx): Dual-theme styling for all volunteer status cards (Approved, Pending, Rejected, Suspended) and lead lifecycle cards (Unassigned, In Outreach, Won, Lost).
+    - [components/admin/MasterLeadDirectoryView.tsx](file:///d:/everything%20for%20coding/sponsorship%20management%20system/components/admin/MasterLeadDirectoryView.tsx) & [components/admin/AdminVerificationView.tsx](file:///d:/everything%20for%20coding/sponsorship%20management%20system/components/admin/AdminVerificationView.tsx): Clear filters, archive, restore, suspend, and delete action buttons given dark mode styles.
+    - [components/admin/DataManagementView.tsx](file:///d:/everything%20for%20coding/sponsorship%20management%20system/components/admin/DataManagementView.tsx): Feedback toast, purge cards, and Danger Zone reset panels tuned for dark mode.
+    - [components/admin/OpportunityApprovalModal.tsx](file:///d:/everything%20for%20coding/sponsorship%20management%20system/components/admin/OpportunityApprovalModal.tsx): Administrative signing authority banner, total commitment value ticker, revenue recognition badge, and in-kind valuation text given dark contrast tokens.
+    - Form alert containers, error banners, and status buttons updated across `PointConfigDrawer.tsx`, `ReassignLeadModal.tsx`, `AdjustPointsModal.tsx`, `DestructiveConfirmationModal.tsx`, `AuditLogConsole.tsx`, `CreateProposalModal.tsx`, `CreateCommitmentModal.tsx`, `EditCommitmentModal.tsx`, and `LeadImportModal.tsx`.
+- **System-Wide Impeccable Design Enhancements:**
+  - Typography (`/impeccable typeset`): `tabular-nums` throughout live tickers, badge dark contrast in `badge.tsx`, removal of costume monospace on phone types.
+  - Layout (`/impeccable layout`): Balanced 3x3 grid for 9 call outcomes with >= 44px touch targets; responsive `grid-cols-2 lg:grid-cols-5` eliminating orphan cards in `TodayWorkBar.tsx`.
+  - Motion (`/impeccable animate`): System-wide `@media (prefers-reduced-motion: reduce)` in `app/globals.css`, tactile `active:scale-[0.98]` feedback on outcome buttons.
+  - Delight (`/impeccable delight`): Earned quota completion state (`Target Crushed!`), empty states in `LeadsTable.tsx`, podium/deal closer badges in `PersonalPerformanceCard.tsx`.
+- **Reference Flow Recovery (`/recover`):**
+  - Evaluated and tested Cal.com team scheduler and Notion doc reference adaptations.
+  - Following review, executed a clean git revert (`git revert 0f4935d`, `commit bfd37c9`) to eliminate the unwanted Cal.com scheduler and restore the clean, high-density single-page workstation.
 
-- **Workstation Dark Mode Polish ([PrarohaHeroVisual.tsx](file:///d:/everything%20for%20coding/sponsorship%20management%20system/components/ui/PrarohaHeroVisual.tsx)):**
-  - Replaced hardcoded `#FFFFFF` gradient fade with theme-aware `bg-gradient-to-r from-surface via-surface/45 to-transparent`, eliminating the white rectangular glare wash against dark surfaces in Dark Mode (`#0B131E`).
+## Decisions made
 
-- **Vertical Hierarchy & Layout Compaction ([app/workspace/page.tsx](file:///d:/everything%20for%20coding/sponsorship%20management%20system/app/workspace/page.tsx)):**
-  - Streamlined the Command Header from ~330px down to ~200px (`min-h-[160px] md:h-[195px] lg:h-[205px]`).
-  - Replaced redundant metrics (Today's Calls, Follow-ups Due) with distinct pipeline indicators (`Assigned`, `High Priority`, `In Progress`, `Total Points`), cleanly separating long-term account ownership from the daily shift dial quotas in `TodayWorkBar`.
-  - Brings the primary `My Assigned Leads` queue directly into view above the fold on standard 1366×768 and 1440×900 laptop displays.
+- **Preserved Single-Page Volunteer Cockpit:** Rejected complex multi-step external schedulers in `/workspace` to maintain the core operational ethos in `AGENTS.md`: high-velocity calling, fast outcome logging, and zero-distraction lead handling without unnecessary sub-tabs.
+- **No Mechanical Inversion:** Dark mode is explicitly calibrated with deep tinted backgrounds (`dark:bg-*-950/*`), translucent borders (`dark:border-*-800/*` or `dark:border-*-900/*`), and elevated foregrounds (`dark:text-*-300` / `dark:text-*-200`), rather than relying on generic CSS invert filters.
+- **Eliminated AI Slop Side-Tabs:** Replaced colored vertical border accents on notification and card elements with contextual icon containers, badge chips, and subtle surface highlights.
+- **Brand Fidelity:** Retained PRAROHA'26 brand colors (`#0D7A68` / `#14B89A`, Ivory `#F6F7F5`, Charcoal `#0B131E`, Surfaces `#FFFFFF` / `#121D2C`).
 
-- **Search UX Enhancement ([LeadsTable.tsx](file:///d:/everything%20for%20coding/sponsorship%20management%20system/components/volunteer/LeadsTable.tsx)):**
-  - Added an instant-clear (`×`) button in the search bar when query text is active, improving query control and keyboard navigability.
+## Problems solved
 
-- **Detector Slop Elimination ([LeaderboardPodium.tsx](file:///d:/everything%20for%20coding/sponsorship%20management%20system/components/volunteer/LeaderboardPodium.tsx)):**
-  - Resolved 3× `border-accent-on-rounded` findings: replaced clashing `border-t-4` stripes on `rounded-t-lg` / `rounded-2xl` podium cards with cohesive subtle borders (`border border-border border-b-0` and `border border-amber-400/30`).
-  - Resolved 1× `bounce-easing`: replaced tacky continuous `animate-bounce` on the first-place crown/trophy with smooth deceleration hover micro-interactions (`transition-transform duration-300 hover:scale-110 drop-shadow-xs`).
-  - Re-ran `impeccable detect` across the workspace target tree: returned **0 findings** (exit code 0).
-
-- **Design Critique Snapshots ([.impeccable/critique/](file:///d:/everything%20for%20coding/sponsorship%20management%20system/.impeccable/critique/)):**
-  - Baseline critique: 31/40 (Good).
-  - Post-polish critique: **39/40 (Excellent)**.
-  - Trend recorded: `31 → 39 (out of 40)`.
-
-- **Typography System Elevation (`/impeccable typeset`):**
-  - **Tabular Numerics (`tabular-nums`):** Added `tabular-nums` to stat cards in `TodayWorkBar.tsx` (quota ticker `4 / 15`, callbacks, overdue alerts), `app/workspace/page.tsx` header numbers, and `LeadsTable.tsx` (lead score badges, tab counts, and timeline dates) to ensure digits never jitter during live updates.
-  - **Badge Typography & Dark Mode Contrast ([badge.tsx](file:///d:/everything%20for%20coding/sponsorship%20management%20system/components/ui/badge.tsx)):** Added explicit dark mode color tokens (`dark:bg-... dark:text-... dark:border-...`) to all 10 `LeadStatusBadge` states, 4 `ContactVerificationBadge` tiers, and 4 `PriorityBadge` levels, ensuring WCAG AA contrast across both Light and Dark themes.
-  - **Monospace Costume Removal:** Replaced `font-mono text-text-muted` on `PhoneTypeBadge` with clean `font-medium text-text-secondary`, adhering to the craft-floor rule against costume monospace on plain category labels.
-- **Layout Polish & Viewport Continuity (`/impeccable layout`):**
-  - **Balanced 3×3 Call Outcomes ([CallModeOverlay.tsx](file:///d:/everything%20for%20coding/sponsorship%20management%20system/components/volunteer/CallModeOverlay.tsx)):** Refactored 9 call outcome buttons from an uneven 5-col split to an exact 3×3 grid (`grid-cols-2 sm:grid-cols-3 gap-2.5` with `col-span-2 sm:col-span-1` on button 9 for mobile), and guaranteed touch targets $\ge 44$px (`min-h-[44px]`).
-  - **Orphan Card Wrapping Elimination ([TodayWorkBar.tsx](file:///d:/everything%20for%20coding/sponsorship%20management%20system/components/volunteer/TodayWorkBar.tsx)):** Standardized metric cards to `grid-cols-2 lg:grid-cols-5`. Mobile and tablets receive a full-width Daily Quota progress bar followed by a balanced 2×2 metric grid; desktop renders an unbroken 5-column single row.
-
-- **Color Architecture & Contrast Hardening (`/impeccable colorize`):**
-  - **WCAG AA Overdue Alert Fix ([TodayWorkBar.tsx](file:///d:/everything%20for%20coding/sponsorship%20management%20system/components/volunteer/TodayWorkBar.tsx) & [FollowUpList.tsx](file:///d:/everything%20for%20coding/sponsorship%20management%20system/components/volunteer/FollowUpList.tsx)):** Replaced hardcoded `#F18A70` (which had a failing 2.45:1 contrast on light canvas) with WCAG AA compliant rose tokens (`text-rose-700` at 5.8:1 contrast in light mode; `text-rose-400` at 8.2:1 in dark mode; `bg-rose-600` action buttons at 5.0:1 contrast).
-  - **Gamification Rank Contrast ([PersonalPerformanceCard.tsx](file:///d:/everything%20for%20coding/sponsorship%20management%20system/components/volunteer/PersonalPerformanceCard.tsx)):** Replaced low-contrast `text-amber-500` (1.9:1) with `text-amber-700 dark:text-amber-400` (4.6:1 light / 8.4:1 dark) and hardened silver/bronze ranks across light and dark modes.
-  - **Dark Mode Silver Podium ([LeaderboardPodium.tsx](file:///d:/everything%20for%20coding/sponsorship%20management%20system/components/volunteer/LeaderboardPodium.tsx)):** Added dark-mode variants to Silver podium avatar and table ranks.
-
-- **Motion & Accessibility System (`/impeccable animate`):**
-  - **Accessible Reduced Motion ([app/globals.css](file:///d:/everything%20for%20coding/sponsorship%20management%20system/app/globals.css)):** Declared `@media (prefers-reduced-motion: reduce)` system-wide, safely subduing animations for users with vestibular sensitivities or OS motion reduction settings.
-  - **Focused Call Mode ([CallModeOverlay.tsx](file:///d:/everything%20for%20coding/sponsorship%20management%20system/components/volunteer/CallModeOverlay.tsx)):** Removed continuous `animate-pulse` from the phone header box to prevent peripheral distraction, and added tactile `active:scale-[0.98]` micro-feedback across all outcome buttons.
+- **Fast Reversion of Unwanted Exploration:** Used the `recover` skill to diagnose the failure mode and cleanly revert all changes (`commit bfd37c9`) without breaking any existing component connections or leaving orphaned imports.
+- **Dark Mode Blinding Washouts:** Hardcoded light pastel styles (`bg-emerald-50`, `bg-rose-50`, `bg-amber-50`) were causing glaring white boxes with dark text in dark mode across tier packages, modals, and status breakdowns. Resolved by pairing every light color utility with explicit `dark:` classes.
+- **Low Contrast Danger & Overdue Elements:** Replaced low-contrast `#F18A70` with WCAG AA compliant rose tokens (`text-rose-700` light / `text-rose-400` dark / `bg-rose-600` buttons).
 
 ## Current state
 
-- **Build & TypeScript Status:** `npx tsc --noEmit` passed with 0 errors.
-- **Deterministic Detector Status:** `impeccable detect` returns 0 warnings/findings.
-- **Git Synchronization:** All 8 commits pushed to GitHub (`origin/main` at `c6decff`). Working tree clean.
+- **TypeScript Compilation:** Passed with 0 errors (`npx tsc --noEmit`).
+- **Working Tree:** Completely clean on branch `main`.
+- **Git Synchronization:** Origin is up to date (`commit bfd37c9`).
+- **Development Server:** Active at `http://localhost:3000`.
 
 ## Next session starts with
 
-1. **Test Live Calling & Voice Debrief Flow on `/workspace`:**
-   - Launch dev server, open `/workspace`, and verify the compact header layout and lead queue rendering.
-   - Click "Start Call" to open Call Mode, verify talking points and the 9 outcome buttons with tactile press feedback.
-   - Record an in-browser audio debrief and verify Whisper transcription + structured extraction.
-2. **Review Admin Surfaces with Impeccable:**
-   - Run `/impeccable critique app/admin/assignments/page.tsx` on the Lead Assignment Matrix.
+1. **Verify Current Workstation:**
+   - Open `http://localhost:3000/workspace` to confirm the restored, contrast-hardened workstation.
+2. **Next Feature / Design Task:**
+   - Determine whether to integrate inspiration from `inspo-mcp` or proceed with targeted enhancements (e.g., CSV duplicate engine, voice debrief transcription audio player polish, or proposal generation workflow).
 
 ## Open questions
 
-- None. All layout, typography, color, motion, and accessibility passes are complete, verified, and pushed to GitHub.
+- Does the user want an isolated, minimalist Notion-styled document viewer inside `CompanyDossierDrawer.tsx`, or keep the drawer in its current multi-tab layout?
