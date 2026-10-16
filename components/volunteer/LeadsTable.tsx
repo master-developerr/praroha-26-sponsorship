@@ -161,8 +161,8 @@ export function LeadsTable({
         >
           All Assigned
           <span
-            className={`rounded px-1.5 py-0.2 text-[10px] ${
-              activeTab === "all" ? "bg-white/20 text-white" : "bg-black/5 text-text-muted"
+            className={`rounded px-1.5 py-0.2 text-[10px] font-semibold tabular-nums ${
+              activeTab === "all" ? "bg-white/20 text-white" : "bg-black/5 dark:bg-white/10 text-text-muted"
             }`}
           >
             {countAll}
@@ -179,7 +179,7 @@ export function LeadsTable({
         >
           To Contact
           <span
-            className={`rounded px-1.5 py-0.2 text-[10px] ${
+            className={`rounded px-1.5 py-0.2 text-[10px] font-semibold tabular-nums ${
               activeTab === "to_contact"
                 ? "bg-white/20 text-white"
                 : "bg-surface-subtle text-text-muted"
@@ -199,7 +199,7 @@ export function LeadsTable({
         >
           In Progress
           <span
-            className={`rounded px-1.5 py-0.2 text-[10px] ${
+            className={`rounded px-1.5 py-0.2 text-[10px] font-semibold tabular-nums ${
               activeTab === "in_progress"
                 ? "bg-white/20 text-white"
                 : "bg-surface-subtle text-text-muted"
@@ -219,7 +219,7 @@ export function LeadsTable({
         >
           Follow-up
           <span
-            className={`rounded px-1.5 py-0.2 text-[10px] ${
+            className={`rounded px-1.5 py-0.2 text-[10px] font-semibold tabular-nums ${
               activeTab === "follow_up"
                 ? "bg-white/20 text-white"
                 : "bg-surface-subtle text-text-muted"
@@ -239,7 +239,7 @@ export function LeadsTable({
         >
           Interested
           <span
-            className={`rounded px-1.5 py-0.2 text-[10px] ${
+            className={`rounded px-1.5 py-0.2 text-[10px] font-semibold tabular-nums ${
               activeTab === "interested"
                 ? "bg-white/20 text-white"
                 : "bg-surface-subtle text-text-muted"
@@ -387,7 +387,7 @@ export function LeadsTable({
                           {lead.companyName}
                         </span>
                         {lead.leadScore !== undefined && (
-                          <span className="rounded bg-accent-mint/30 px-1.5 py-0.2 text-[10px] font-bold text-primary">
+                          <span className="rounded bg-accent-mint/30 px-1.5 py-0.2 text-[10px] font-bold text-primary tabular-nums">
                             {lead.leadScore} pts
                           </span>
                         )}
@@ -452,7 +452,7 @@ export function LeadsTable({
                       {lead.assignedAt && (
                         <div className="flex items-center gap-1">
                           <Calendar className="h-3 w-3 text-text-muted" />
-                          <span>
+                          <span className="tabular-nums">
                             Assigned{" "}
                             {new Date(lead.assignedAt).toLocaleDateString("en-US", {
                               month: "short",
@@ -462,7 +462,7 @@ export function LeadsTable({
                         </div>
                       )}
                       {lead.lastContactedAt && !isCompactDensity && (
-                        <p className="text-[10px] text-primary">
+                        <p className="text-[10px] text-primary tabular-nums">
                           Called{" "}
                           {new Date(lead.lastContactedAt).toLocaleDateString("en-US", {
                             month: "short",

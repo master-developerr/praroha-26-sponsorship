@@ -36,11 +36,11 @@ export function Badge({
     default: "bg-surface-subtle text-text-secondary border-border",
     secondary: "bg-surface text-text-primary border-border",
     outline: "border-border text-text-secondary bg-transparent",
-    success: "bg-emerald-50 text-emerald-700 border-emerald-200",
-    warning: "bg-amber-50 text-amber-700 border-amber-200",
-    danger: "bg-rose-50 text-rose-700 border-rose-200",
-    info: "bg-sky-50 text-sky-700 border-sky-200",
-    mint: "bg-accent-mint text-accent-mint-text border-[#BEE3D3]",
+    success: "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800/50",
+    warning: "bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 border-amber-200 dark:border-amber-800/50",
+    danger: "bg-rose-50 dark:bg-rose-950/40 text-rose-800 dark:text-rose-300 border-rose-200 dark:border-rose-800/50",
+    info: "bg-sky-50 dark:bg-sky-950/40 text-sky-800 dark:text-sky-300 border-sky-200 dark:border-sky-800/50",
+    mint: "bg-accent-mint text-accent-mint-text border-primary/20",
   };
 
   return (
@@ -88,63 +88,63 @@ export function LeadStatusBadge({ status }: { status: LeadStage }) {
   > = {
     UNASSIGNED: {
       label: "Unassigned",
-      bg: "bg-zinc-100",
-      text: "text-zinc-600",
-      border: "border-zinc-200",
+      bg: "bg-zinc-100 dark:bg-zinc-800/60",
+      text: "text-zinc-700 dark:text-zinc-300",
+      border: "border-zinc-200 dark:border-zinc-700",
     },
     ASSIGNED: {
       label: "Assigned",
-      bg: "bg-blue-50",
-      text: "text-blue-700",
-      border: "border-blue-200",
+      bg: "bg-blue-50 dark:bg-blue-950/40",
+      text: "text-blue-800 dark:text-blue-300",
+      border: "border-blue-200 dark:border-blue-800/50",
     },
     CONTACTED: {
       label: "Contacted",
-      bg: "bg-cyan-50",
-      text: "text-cyan-700",
-      border: "border-cyan-200",
+      bg: "bg-cyan-50 dark:bg-cyan-950/40",
+      text: "text-cyan-800 dark:text-cyan-300",
+      border: "border-cyan-200 dark:border-cyan-800/50",
     },
     INTERESTED: {
       label: "Interested",
-      bg: "bg-teal-50",
-      text: "text-teal-700",
-      border: "border-teal-200",
+      bg: "bg-teal-50 dark:bg-teal-950/40",
+      text: "text-teal-800 dark:text-teal-300",
+      border: "border-teal-200 dark:border-teal-800/50",
     },
     FOLLOW_UP: {
       label: "Follow-up",
-      bg: "bg-amber-50",
-      text: "text-amber-700",
-      border: "border-amber-200",
+      bg: "bg-amber-50 dark:bg-amber-950/40",
+      text: "text-amber-800 dark:text-amber-300",
+      border: "border-amber-200 dark:border-amber-800/50",
     },
     PROPOSAL_REQUESTED: {
       label: "Proposal Req.",
-      bg: "bg-indigo-50",
-      text: "text-indigo-700",
-      border: "border-indigo-200",
+      bg: "bg-indigo-50 dark:bg-indigo-950/40",
+      text: "text-indigo-800 dark:text-indigo-300",
+      border: "border-indigo-200 dark:border-indigo-800/50",
     },
     PROPOSAL_SENT: {
       label: "Proposal Sent",
-      bg: "bg-sky-50",
-      text: "text-sky-700",
-      border: "border-sky-200",
+      bg: "bg-sky-50 dark:bg-sky-950/40",
+      text: "text-sky-800 dark:text-sky-300",
+      border: "border-sky-200 dark:border-sky-800/50",
     },
     NEGOTIATION: {
       label: "Negotiation",
-      bg: "bg-purple-50",
-      text: "text-purple-700",
-      border: "border-purple-200",
+      bg: "bg-purple-50 dark:bg-purple-950/40",
+      text: "text-purple-800 dark:text-purple-300",
+      border: "border-purple-200 dark:border-purple-800/50",
     },
     WON: {
       label: "Confirmed / WON",
-      bg: "bg-emerald-50",
-      text: "text-emerald-700",
-      border: "border-emerald-200",
+      bg: "bg-emerald-50 dark:bg-emerald-950/40",
+      text: "text-emerald-800 dark:text-emerald-300",
+      border: "border-emerald-200 dark:border-emerald-800/50",
     },
     LOST: {
       label: "Lost",
-      bg: "bg-rose-50",
-      text: "text-rose-700",
-      border: "border-rose-200",
+      bg: "bg-rose-50 dark:bg-rose-950/40",
+      text: "text-rose-800 dark:text-rose-300",
+      border: "border-rose-200 dark:border-rose-800/50",
     },
   };
 
@@ -152,7 +152,7 @@ export function LeadStatusBadge({ status }: { status: LeadStage }) {
   return (
     <span
       className={cn(
-        "inline-flex items-center rounded-full border px-2.5 py-0.5 text-[11px] font-semibold",
+        "inline-flex items-center rounded-full border px-2.5 py-0.5 text-[11px] font-semibold tracking-normal",
         current.bg,
         current.text,
         current.border
@@ -171,30 +171,30 @@ export function ContactVerificationBadge({
   switch (level) {
     case "VERIFIED_DECISION_MAKER":
       return (
-        <span className="inline-flex items-center gap-1 rounded-md border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold text-emerald-800">
-          <CheckCheck className="h-3 w-3 text-emerald-600" />
+        <span className="inline-flex items-center gap-1 rounded-md border border-emerald-200 dark:border-emerald-800/50 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 text-[10px] font-semibold text-emerald-800 dark:text-emerald-300">
+          <CheckCheck className="h-3 w-3 text-emerald-600 dark:text-emerald-400" />
           Verified Decision-Maker
         </span>
       );
     case "VERIFIED_COMPANY_REPRESENTATIVE":
       return (
-        <span className="inline-flex items-center gap-1 rounded-md border border-teal-200 bg-teal-50 px-2 py-0.5 text-[10px] font-semibold text-teal-800">
-          <Check className="h-3 w-3 text-teal-600" />
+        <span className="inline-flex items-center gap-1 rounded-md border border-teal-200 dark:border-teal-800/50 bg-teal-50 dark:bg-teal-950/40 px-2 py-0.5 text-[10px] font-semibold text-teal-800 dark:text-teal-300">
+          <Check className="h-3 w-3 text-teal-600 dark:text-teal-400" />
           Company Representative
         </span>
       );
     case "OFFICIAL_COMPANY_CONTACT":
       return (
-        <span className="inline-flex items-center gap-1 rounded-md border border-sky-200 bg-sky-50 px-2 py-0.5 text-[10px] font-semibold text-sky-800">
-          <Building2 className="h-3 w-3 text-sky-600" />
+        <span className="inline-flex items-center gap-1 rounded-md border border-sky-200 dark:border-sky-800/50 bg-sky-50 dark:bg-sky-950/40 px-2 py-0.5 text-[10px] font-semibold text-sky-800 dark:text-sky-300">
+          <Building2 className="h-3 w-3 text-sky-600 dark:text-sky-400" />
           Official Desk Line
         </span>
       );
     case "UNVERIFIED":
     default:
       return (
-        <span className="inline-flex items-center gap-1 rounded-md border border-amber-200 bg-amber-50 px-2 py-0.5 text-[10px] font-semibold text-amber-800">
-          <AlertCircle className="h-3 w-3 text-amber-600" />
+        <span className="inline-flex items-center gap-1 rounded-md border border-amber-200 dark:border-amber-800/50 bg-amber-50 dark:bg-amber-950/40 px-2 py-0.5 text-[10px] font-semibold text-amber-800 dark:text-amber-300">
+          <AlertCircle className="h-3 w-3 text-amber-600 dark:text-amber-400" />
           Unverified Contact
         </span>
       );
@@ -205,26 +205,26 @@ export function PriorityBadge({ priority }: { priority: PriorityLevel }) {
   switch (priority) {
     case "High":
       return (
-        <span className="inline-flex items-center rounded-md border border-rose-200 bg-rose-50 px-2 py-0.5 text-[10px] font-bold text-rose-700">
+        <span className="inline-flex items-center rounded-md border border-rose-200 dark:border-rose-800/50 bg-rose-50 dark:bg-rose-950/40 px-2 py-0.5 text-[10px] font-bold text-rose-800 dark:text-rose-300">
           High
         </span>
       );
     case "Medium":
       return (
-        <span className="inline-flex items-center rounded-md border border-amber-200 bg-amber-50 px-2 py-0.5 text-[10px] font-semibold text-amber-700">
+        <span className="inline-flex items-center rounded-md border border-amber-200 dark:border-amber-800/50 bg-amber-50 dark:bg-amber-950/40 px-2 py-0.5 text-[10px] font-semibold text-amber-800 dark:text-amber-300">
           Medium
         </span>
       );
     case "Normal":
       return (
-        <span className="inline-flex items-center rounded-md border border-blue-200 bg-blue-50 px-2 py-0.5 text-[10px] font-semibold text-blue-700">
+        <span className="inline-flex items-center rounded-md border border-blue-200 dark:border-blue-800/50 bg-blue-50 dark:bg-blue-950/40 px-2 py-0.5 text-[10px] font-semibold text-blue-800 dark:text-blue-300">
           Normal
         </span>
       );
     case "Low":
     default:
       return (
-        <span className="inline-flex items-center rounded-md border border-zinc-200 bg-zinc-100 px-2 py-0.5 text-[10px] font-medium text-zinc-600">
+        <span className="inline-flex items-center rounded-md border border-zinc-200 dark:border-zinc-700 bg-zinc-100 dark:bg-zinc-800/40 px-2 py-0.5 text-[10px] font-medium text-zinc-700 dark:text-zinc-300">
           Low
         </span>
       );
@@ -242,7 +242,7 @@ export function PhoneTypeBadge({ type }: { type: PhoneType }) {
   };
 
   return (
-    <span className="inline-flex items-center gap-1 rounded border border-border bg-surface-subtle px-1.5 py-0.2 text-[10px] font-mono text-text-muted">
+    <span className="inline-flex items-center gap-1 rounded border border-border bg-surface-subtle px-1.5 py-0.2 text-[10px] font-medium text-text-secondary">
       <Phone className="h-2.5 w-2.5 text-text-muted" />
       {labels[type] || type}
     </span>

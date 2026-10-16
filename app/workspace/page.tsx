@@ -120,7 +120,7 @@ export default function VolunteerDashboardPage() {
                   <Users className="h-3 w-3 text-primary" />
                   Assigned
                 </span>
-                <p className="mt-0.5 text-lg font-black text-text-primary">
+                <p className="mt-0.5 text-lg font-black text-text-primary tabular-nums">
                   {metrics ? metrics.totalAssigned : leads.length}
                 </p>
               </div>
@@ -130,7 +130,7 @@ export default function VolunteerDashboardPage() {
                   <Flame className="h-3 w-3 text-rose-600 dark:text-rose-400" />
                   High Priority
                 </span>
-                <p className="mt-0.5 text-lg font-black text-rose-700 dark:text-rose-400">
+                <p className="mt-0.5 text-lg font-black text-rose-700 dark:text-rose-400 tabular-nums">
                   {displayMetrics.highPriority}
                 </p>
               </div>
@@ -140,7 +140,7 @@ export default function VolunteerDashboardPage() {
                   <Target className="h-3 w-3 text-emerald-600 dark:text-emerald-400" />
                   In Progress
                 </span>
-                <p className="mt-0.5 text-lg font-black text-emerald-700 dark:text-emerald-400">
+                <p className="mt-0.5 text-lg font-black text-emerald-700 dark:text-emerald-400 tabular-nums">
                   {displayMetrics.inProgressCount}
                 </p>
               </div>
@@ -150,7 +150,7 @@ export default function VolunteerDashboardPage() {
                   <Trophy className="h-3 w-3 text-amber-500" />
                   Total Points
                 </span>
-                <p className="mt-0.5 text-lg font-black text-text-primary">
+                <p className="mt-0.5 text-lg font-black text-text-primary tabular-nums">
                   {pointsSummary?.totalPoints ?? 0}
                 </p>
               </div>

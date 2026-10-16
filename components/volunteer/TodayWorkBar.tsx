@@ -86,7 +86,7 @@ export function TodayWorkBar({
               <PhoneCall className="h-3.5 w-3.5 text-primary" />
               Daily Quota
             </span>
-            <span className="text-[11px] font-bold text-primary">
+            <span className="text-[11px] font-bold text-primary tabular-nums">
               {metrics.callsCompleted} / {metrics.dailyTarget}
             </span>
           </div>
@@ -99,8 +99,8 @@ export function TodayWorkBar({
               />
             </div>
             <div className="flex justify-between items-center text-[10px] text-text-muted">
-              <span>{percentComplete}% of daily goal</span>
-              <span className="font-semibold text-text-secondary">
+              <span className="tabular-nums">{percentComplete}% of daily goal</span>
+              <span className="font-semibold text-text-secondary tabular-nums">
                 {metrics.callsRemaining} remaining
               </span>
             </div>
@@ -115,9 +115,9 @@ export function TodayWorkBar({
               High Priority
             </span>
             <span
-              className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
+              className={`rounded-full px-2 py-0.5 text-[10px] font-bold tabular-nums ${
                 metrics.highPriority > 0
-                  ? "bg-rose-100 text-rose-700 border border-rose-200"
+                  ? "bg-rose-100 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800/50"
                   : "bg-surface text-text-muted border border-border"
               }`}
             >
@@ -125,7 +125,7 @@ export function TodayWorkBar({
             </span>
           </div>
           <div className="mt-2">
-            <p className="text-xl font-bold text-text-primary">
+            <p className="text-xl font-bold text-text-primary tabular-nums">
               {metrics.highPriority}
             </p>
             <p className="text-[10px] text-text-muted">
@@ -152,7 +152,7 @@ export function TodayWorkBar({
               Overdue
             </span>
             <span
-              className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
+              className={`rounded-full px-2 py-0.5 text-[10px] font-bold tabular-nums ${
                 metrics.overdueFollowUps > 0
                   ? "bg-[#F18A70] text-white"
                   : "bg-surface text-text-muted border border-border"
@@ -163,7 +163,7 @@ export function TodayWorkBar({
           </div>
           <div className="mt-2">
             <p
-              className={`text-xl font-bold ${
+              className={`text-xl font-bold tabular-nums ${
                 metrics.overdueFollowUps > 0 ? "text-[#F18A70]" : "text-text-primary"
               }`}
             >
@@ -181,9 +181,9 @@ export function TodayWorkBar({
               Due Today
             </span>
             <span
-              className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
+              className={`rounded-full px-2 py-0.5 text-[10px] font-bold tabular-nums ${
                 metrics.todayFollowUps > 0
-                  ? "bg-amber-100 text-amber-800 border border-amber-300"
+                  ? "bg-amber-100 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-800/50"
                   : "bg-surface text-text-muted border border-border"
               }`}
             >
@@ -191,7 +191,7 @@ export function TodayWorkBar({
             </span>
           </div>
           <div className="mt-2">
-            <p className="text-xl font-bold text-text-primary">
+            <p className="text-xl font-bold text-text-primary tabular-nums">
               {metrics.todayFollowUps}
             </p>
             <p className="text-[10px] text-text-muted">Scheduled for this shift</p>
@@ -205,12 +205,12 @@ export function TodayWorkBar({
               <Clock className="h-3.5 w-3.5 text-blue-600" />
               To Contact
             </span>
-            <span className="rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-bold text-blue-800 border border-blue-200">
+            <span className="rounded-full bg-blue-100 dark:bg-blue-950/40 px-2 py-0.5 text-[10px] font-bold text-blue-800 dark:text-blue-300 border border-blue-200 dark:border-blue-800/50 tabular-nums">
               {metrics.toContact}
             </span>
           </div>
           <div className="mt-2">
-            <p className="text-xl font-bold text-text-primary">
+            <p className="text-xl font-bold text-text-primary tabular-nums">
               {metrics.toContact}
             </p>
             <p className="text-[10px] text-text-muted">Assigned, not yet called</p>
