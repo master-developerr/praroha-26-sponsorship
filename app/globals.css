@@ -1,43 +1,121 @@
 @import "tailwindcss";
 
+:root {
+  color-scheme: light;
+
+  /* Canvas & Base Surfaces */
+  --bg-canvas: #F6F7F5;
+  --bg-surface: #FFFFFF;
+  --bg-surface-subtle: #FAF9F5;
+
+  /* Dividers & Borders */
+  --border-default: #E2E5DE;
+  --border-subtle: #ECEFE8;
+
+  /* Text & Labels */
+  --text-primary: #1E293B;
+  --text-secondary: #64748B;
+  --text-muted: #94A3B8;
+
+  /* Brand Interactive Tokens */
+  --brand-primary: #0D7A68;
+  --brand-primary-hover: #0A6354;
+  --brand-secondary: #203B35;
+
+  /* Supporting Accents & Highlights */
+  --accent-mint: #D9EEE4;
+  --accent-mint-text: #0D7A68;
+  --accent-yellow: #FEF3C7;
+  --accent-yellow-text: #B45309;
+  --accent-coral: #FEE2E2;
+  --accent-coral-text: #DC2626;
+  --accent-blue: #E0F2FE;
+  --accent-blue-text: #0284C7;
+
+  /* Semantic Status Tokens */
+  --status-success: #16845B;
+  --status-warning: #B45309;
+  --status-error: #DC2626;
+  --status-info: #0284C7;
+}
+
+.dark {
+  color-scheme: dark;
+
+  /* Deep charcoal/navy page background & surfaces */
+  --bg-canvas: #0B131E;
+  --bg-surface: #121D2C;
+  --bg-surface-subtle: #172436;
+
+  /* Dividers & Borders */
+  --border-default: #22344B;
+  --border-subtle: #19273A;
+
+  /* Text & Labels */
+  --text-primary: #F1F5F9;
+  --text-secondary: #94A3B8;
+  --text-muted: #64748B;
+
+  /* Brand Interactive Tokens */
+  --brand-primary: #14B89A;
+  --brand-primary-hover: #0D7A68;
+  --brand-secondary: #A7F3D0;
+
+  /* Supporting Accents & Highlights */
+  --accent-mint: rgba(20, 184, 154, 0.15);
+  --accent-mint-text: #2DD4BF;
+  --accent-yellow: rgba(245, 158, 11, 0.15);
+  --accent-yellow-text: #FBBF24;
+  --accent-coral: rgba(239, 68, 68, 0.15);
+  --accent-coral-text: #F87171;
+  --accent-blue: rgba(14, 165, 233, 0.15);
+  --accent-blue-text: #38BDF8;
+
+  /* Semantic Status Tokens */
+  --status-success: #10B981;
+  --status-warning: #F59E0B;
+  --status-error: #EF4444;
+  --status-info: #38BDF8;
+}
+
 @theme {
   /* Typography */
   --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 
   /* Canvas & Base Surfaces */
-  --color-background: #F6F7F5;
-  --color-surface: #FFFFFF;
-  --color-surface-subtle: #FAF9F5;
+  --color-background: var(--bg-canvas);
+  --color-surface: var(--bg-surface);
+  --color-surface-subtle: var(--bg-surface-subtle);
 
   /* Dividers & Borders */
-  --color-border: #E2E5DE;
-  --color-border-subtle: #ECEFE8;
+  --color-border: var(--border-default);
+  --color-border-subtle: var(--border-subtle);
 
   /* Text & Labels */
-  --color-text-primary: #1E293B;
-  --color-text-secondary: #64748B;
-  --color-text-muted: #94A3B8;
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
 
   /* Brand Interactive Tokens */
-  --color-primary: #0D7A68;
-  --color-primary-hover: #0A6354;
-  --color-secondary: #203B35;
+  --color-primary: var(--brand-primary);
+  --color-primary-hover: var(--brand-primary-hover);
+  --color-secondary: var(--brand-secondary);
 
   /* Supporting Accents & Highlights */
-  --color-accent-mint: #D9EEE4;
-  --color-accent-mint-text: #0D7A68;
-  --color-accent-yellow: #FEF3C7;
-  --color-accent-yellow-text: #B45309;
-  --color-accent-coral: #FEE2E2;
-  --color-accent-coral-text: #DC2626;
-  --color-accent-blue: #E0F2FE;
-  --color-accent-blue-text: #0284C7;
+  --color-accent-mint: var(--accent-mint);
+  --color-accent-mint-text: var(--accent-mint-text);
+  --color-accent-yellow: var(--accent-yellow);
+  --color-accent-yellow-text: var(--accent-yellow-text);
+  --color-accent-coral: var(--accent-coral);
+  --color-accent-coral-text: var(--accent-coral-text);
+  --color-accent-blue: var(--accent-blue);
+  --color-accent-blue-text: var(--accent-blue-text);
 
   /* Semantic Status Tokens */
-  --color-success: #16845B;
-  --color-warning: #B45309;
-  --color-error: #DC2626;
-  --color-info: #0284C7;
+  --color-success: var(--status-success);
+  --color-warning: var(--status-warning);
+  --color-error: var(--status-error);
+  --color-info: var(--status-info);
 
   /* Radii */
   --radius-xs: 2px;
@@ -49,14 +127,14 @@
   --radius-full: 9999px;
 
   /* Shadows */
-  --shadow-xs: 0 1px 2px rgba(30, 41, 59, 0.04);
-  --shadow-sm: 0 1px 3px rgba(30, 41, 59, 0.06), 0 1px 2px rgba(30, 41, 59, 0.04);
-  --shadow-md: 0 4px 6px -1px rgba(30, 41, 59, 0.08), 0 2px 4px -2px rgba(30, 41, 59, 0.04);
-  --shadow-lg: 0 10px 15px -3px rgba(30, 41, 59, 0.10), 0 4px 6px -4px rgba(30, 41, 59, 0.05);
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.05);
 }
 
-:root {
-  color-scheme: light;
+html {
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
 }
 
 body {
@@ -64,6 +142,12 @@ body {
   color: var(--color-text-primary);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
+}
+
+.dark input,
+.dark select,
+.dark textarea {
+  color-scheme: dark;
 }
 
 /* Custom scrollbars */
@@ -80,4 +164,11 @@ body {
 }
 ::-webkit-scrollbar-thumb:hover {
   background: #94A3B8;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #26364D;
+}
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #354B6A;
 }

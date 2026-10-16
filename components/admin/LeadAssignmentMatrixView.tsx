@@ -172,7 +172,7 @@ export function LeadAssignmentMatrixView() {
           </div>
           <div className="rounded-xl border border-border bg-surface px-3 py-2 shadow-xs text-center">
             <span className="text-[10px] uppercase font-bold text-text-muted">
-              Active SDRs
+              Active Assignees
             </span>
             <p className="text-lg font-bold text-primary leading-tight">
               {volunteerRoster?.length ?? "—"}
@@ -367,13 +367,14 @@ export function LeadAssignmentMatrixView() {
         </div>
 
         {/* Right Column: Approved SDRs Roster & Workload (5 cols) */}
+        {/* Right Column: Approved Assignees Roster & Workload (5 cols) */}
         <div className="lg:col-span-5 space-y-4">
           <div className="rounded-xl border border-border bg-surface p-5 shadow-xs space-y-4">
             <div className="flex items-center justify-between border-b border-border-subtle pb-3">
               <div className="flex items-center gap-2">
                 <UserCheck className="h-4 w-4 text-primary" />
                 <h2 className="text-sm font-bold text-text-primary">
-                  Target SDR Roster
+                  Target Assignee Roster
                 </h2>
                 <span className="rounded-full bg-accent-mint/30 px-2 py-0.5 text-xs font-bold text-primary border border-primary/20">
                   {volunteerRoster?.length ?? 0}
@@ -389,14 +390,14 @@ export function LeadAssignmentMatrixView() {
               <Search className="pointer-events-none absolute left-3 top-2.5 h-3.5 w-3.5 text-text-muted" />
               <input
                 type="text"
-                placeholder="Search volunteer by name or department..."
+                placeholder="Search assignee by name, role or department..."
                 value={volunteerSearch}
                 onChange={(e) => setVolunteerSearch(e.target.value)}
                 className="h-8 w-full rounded-lg border border-border bg-surface-subtle/50 pl-8 pr-3 text-xs text-text-primary placeholder:text-text-muted focus:border-primary focus:outline-none"
               />
             </div>
 
-            {/* SDR Cards List */}
+            {/* SDR & Admin Cards List */}
             {volunteerRoster === undefined ? (
               <div className="py-8 text-center">
                 <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent mx-auto" />
@@ -405,30 +406,31 @@ export function LeadAssignmentMatrixView() {
               <div className="py-6">
                 <EmptyState
                   icon={Users2}
-                  title="No Approved Volunteers"
-                  description="Approved student SDRs will show here. Check the Volunteer Verification queue if new signups are pending."
+                  title="No active assignees available."
+                  description="Approved student SDRs and active Admins will appear here. Check the Volunteer Verification queue or add users."
                 />
               </div>
             ) : (
               <div className="space-y-2.5 max-h-[600px] overflow-y-auto pr-1">
                 {(volunteerRoster as any[]).map((v: any) => {
                   const isSelected = targetVolunteerId === v._id;
+                  const isAdmin = v.role === "admin";
 
                   // Capacity badge styling
                   let capacityBadge = (
-                    <span className="rounded-md border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold text-emerald-800">
-                      Optimal ({v.activeLeadsCount} active)
+                    <span className="rounded-md border border-emerald-200 bg-emerald-50 dark:bg-emerald-950/40 dark:border-emerald-800 px-2 py-0.5 text-[10px] font-semibold text-emerald-800 dark:text-emerald-300">
+                      {v.activeLeadsCount === 0 ? "Available" : "Optimal"} ({v.activeLeadsCount} active)
                     </span>
                   );
                   if (v.capacityStatus === "Moderate") {
                     capacityBadge = (
-                      <span className="rounded-md border border-amber-200 bg-amber-50 px-2 py-0.5 text-[10px] font-semibold text-amber-800">
+                      <span className="rounded-md border border-amber-200 bg-amber-50 dark:bg-amber-950/40 dark:border-amber-800 px-2 py-0.5 text-[10px] font-semibold text-amber-800 dark:text-amber-300">
                         Active ({v.activeLeadsCount} active)
                       </span>
                     );
                   } else if (v.capacityStatus === "Near Capacity") {
                     capacityBadge = (
-                      <span className="rounded-md border border-rose-200 bg-rose-50 px-2 py-0.5 text-[10px] font-semibold text-rose-800">
+                      <span className="rounded-md border border-rose-200 bg-rose-50 dark:bg-rose-950/40 dark:border-rose-800 px-2 py-0.5 text-[10px] font-semibold text-rose-800 dark:text-rose-300">
                         Heavy ({v.activeLeadsCount} active)
                       </span>
                     );
@@ -440,16 +442,21 @@ export function LeadAssignmentMatrixView() {
                       onClick={() => setTargetVolunteerId(v._id)}
                       className={`p-3.5 rounded-xl border transition-all cursor-pointer ${
                         isSelected
-                          ? "border-primary bg-accent-mint/15 shadow-xs"
+                          ? "border-primary bg-accent-mint/15 shadow-xs ring-1 ring-primary/30"
                           : "border-border-subtle bg-surface-subtle/50 hover:bg-surface-subtle"
                       }`}
                     >
-                      <div className="flex items-center justify-between">
-                        <div className="space-y-0.5">
-                          <div className="flex items-center gap-2">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-1.5 flex-wrap">
                             <span className="text-xs font-bold text-text-primary">
                               {v.name}
                             </span>
+                            {isAdmin && (
+                              <span className="rounded-md border border-sky-300 bg-sky-50 dark:bg-sky-950/50 dark:border-sky-700 px-1.5 py-0.2 text-[9px] font-black uppercase tracking-wider text-sky-800 dark:text-sky-300">
+                                Admin
+                              </span>
+                            )}
                             {isSelected && (
                               <span className="rounded-full bg-primary text-white p-0.5">
                                 <CheckCircle2 className="h-3 w-3" />
@@ -457,8 +464,15 @@ export function LeadAssignmentMatrixView() {
                             )}
                           </div>
                           <p className="text-[11px] text-text-secondary">
-                            {v.department} • {v.semester}
+                            {isAdmin
+                              ? `Admin • ${v.department || "Sponsorship Committee Head"}`
+                              : `Volunteer • ${v.department || "Civil Engineering"} • ${v.semester || "SDR"}`}
                           </p>
+                          {v.phone && (
+                            <p className="text-[10px] text-text-muted font-mono">
+                              📞 {v.phone}
+                            </p>
+                          )}
                         </div>
                         {capacityBadge}
                       </div>
@@ -481,18 +495,6 @@ export function LeadAssignmentMatrixView() {
                               )}%`,
                             }}
                           />
-                        </div>
-                        <div className="flex items-center justify-between text-[10px] text-text-muted">
-                          <span>{v.phone}</span>
-                          <span>
-                            {isSelected ? (
-                              <strong className="text-primary font-bold">
-                                Selected Target
-                              </strong>
-                            ) : (
-                              "Click to select"
-                            )}
-                          </span>
                         </div>
                       </div>
                     </div>
@@ -522,11 +524,11 @@ export function LeadAssignmentMatrixView() {
                     <strong className="text-primary font-bold">
                       {targetVolunteer.name}
                     </strong>{" "}
-                    ({targetVolunteer.department} • {targetVolunteer.activeLeadsCount} current leads)
+                    ({targetVolunteer.role === "admin" ? "Admin" : targetVolunteer.department} • {targetVolunteer.activeLeadsCount} current leads)
                   </>
                 ) : (
-                  <span className="text-amber-700 font-semibold">
-                    ← Select a target student SDR from the roster on the right
+                  <span className="text-amber-700 dark:text-amber-400 font-semibold">
+                    ← Select a target SDR or Admin from the roster on the right
                   </span>
                 )}
               </p>

@@ -87,14 +87,14 @@ export function AdminSidebar() {
     <aside className="flex h-screen w-64 flex-col justify-between border-r border-border bg-surface select-none">
       <div>
         <div className="flex items-center gap-3 px-6 py-5 border-b border-border-subtle">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-sky-50 text-sky-700">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-sky-50 dark:bg-sky-950/60 text-sky-700 dark:text-sky-300">
             <ShieldAlert className="h-6 w-6" />
           </div>
           <div>
             <h1 className="text-base font-bold tracking-tight text-text-primary leading-tight">
               PRAROHA'26
             </h1>
-            <p className="text-[11px] font-semibold text-sky-700 leading-none mt-0.5">
+            <p className="text-[11px] font-semibold text-sky-700 dark:text-sky-400 leading-none mt-0.5">
               Admin Leadership Cockpit
             </p>
           </div>
@@ -109,14 +109,14 @@ export function AdminSidebar() {
                 href={item.href}
                 className={`flex items-center justify-between rounded-xl px-3.5 py-2.5 text-xs font-semibold transition-all ${
                   item.isActive
-                    ? "bg-sky-50 text-sky-900 shadow-xs font-bold"
+                    ? "bg-sky-50 dark:bg-sky-950/60 text-sky-900 dark:text-sky-200 shadow-xs font-bold"
                     : "text-text-secondary hover:text-text-primary hover:bg-surface-subtle"
                 }`}
               >
                 <div className="flex items-center gap-3">
                   <Icon
                     className={`h-4 w-4 transition-colors ${
-                      item.isActive ? "text-sky-700" : "text-text-muted"
+                      item.isActive ? "text-sky-700 dark:text-sky-400" : "text-text-muted"
                     }`}
                   />
                   <span>{item.label}</span>
@@ -125,7 +125,7 @@ export function AdminSidebar() {
                   <span
                     className={`text-[10px] rounded px-1.5 py-0.2 font-mono font-medium ${
                       item.isActive
-                        ? "bg-sky-100 text-sky-800"
+                        ? "bg-sky-100 dark:bg-sky-900/60 text-sky-800 dark:text-sky-300"
                         : "bg-surface-subtle text-text-muted border border-border-subtle"
                     }`}
                   >

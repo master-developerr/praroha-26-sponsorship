@@ -16,7 +16,10 @@ export const getVolunteerFollowUps = query({
       .withIndex("by_clerk_id", (q) => q.eq("clerkId", args.volunteerClerkId))
       .unique();
 
-    if (!user || user.verificationStatus !== "approved") {
+    if (!user || user.verificationStatus === "suspended" || user.verificationStatus === "rejected") {
+      return { overdue: [], dueToday: [], upcoming: [], totalPending: 0 };
+    }
+    if (user.role === "volunteer" && user.verificationStatus !== "approved") {
       return { overdue: [], dueToday: [], upcoming: [], totalPending: 0 };
     }
 
@@ -85,8 +88,11 @@ export const completeFollowUp = mutation({
       .withIndex("by_clerk_id", (q) => q.eq("clerkId", args.volunteerClerkId))
       .unique();
 
-    if (!user || user.verificationStatus !== "approved") {
-      throw new Error("Unauthorized");
+    if (!user || user.verificationStatus === "suspended" || user.verificationStatus === "rejected") {
+      throw new Error("Unauthorized: Account is suspended or rejected");
+    }
+    if (user.role === "volunteer" && user.verificationStatus !== "approved") {
+      throw new Error("Unauthorized: Only approved volunteers and active admins can manage follow-ups");
     }
 
     const followUp = await ctx.db.get(args.followUpId);

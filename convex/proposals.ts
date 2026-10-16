@@ -54,8 +54,11 @@ export const createProposal = mutation({
       .withIndex("by_clerk_id", (q) => q.eq("clerkId", args.clerkId))
       .first();
 
-    if (!user || user.verificationStatus !== "approved") {
-      throw new Error("Unauthorized: Only approved volunteers and admins can create proposals.");
+    if (!user || user.verificationStatus === "suspended" || user.verificationStatus === "rejected") {
+      throw new Error("Unauthorized: Account is suspended or rejected");
+    }
+    if (user.role === "volunteer" && user.verificationStatus !== "approved") {
+      throw new Error("Unauthorized: Only approved volunteers and active admins can create proposals.");
     }
 
     const company = await ctx.db.get(args.companyId);

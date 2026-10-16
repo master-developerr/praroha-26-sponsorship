@@ -67,13 +67,24 @@ export const getVolunteerRosterWithWorkload = query({
     department: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    let volunteers = await ctx.db
-      .query("users")
-      .withIndex("by_role", (q) => q.eq("role", "volunteer"))
-      .collect();
+    // Fetch all users and filter to active assignees (approved volunteers + active admins)
+    const allUsers = await ctx.db.query("users").collect();
 
-    // Filter to approved volunteers only
-    volunteers = volunteers.filter((u) => u.verificationStatus === "approved");
+    let volunteers = allUsers.filter((u) => {
+      // Exclude suspended or rejected users
+      if (u.verificationStatus === "suspended" || u.verificationStatus === "rejected") {
+        return false;
+      }
+      // Active admins are eligible
+      if (u.role === "admin") {
+        return true;
+      }
+      // Student SDRs must be approved
+      if (u.role === "volunteer") {
+        return u.verificationStatus === "approved";
+      }
+      return false;
+    });
 
     if (args.department && args.department !== "all") {
       volunteers = volunteers.filter((u) => u.department === args.department);
@@ -85,8 +96,9 @@ export const getVolunteerRosterWithWorkload = query({
         (u) =>
           u.name.toLowerCase().includes(q) ||
           u.email.toLowerCase().includes(q) ||
-          u.department.toLowerCase().includes(q) ||
-          u.semester.toLowerCase().includes(q)
+          (u.department && u.department.toLowerCase().includes(q)) ||
+          (u.semester && u.semester.toLowerCase().includes(q)) ||
+          (u.role && u.role.toLowerCase().includes(q))
       );
     }
 
@@ -153,7 +165,13 @@ export const assignLeadsBatch = mutation({
     }
 
     const volunteer = await ctx.db.get(args.volunteerId);
-    if (!volunteer || volunteer.verificationStatus !== "approved") {
+    if (!volunteer) {
+      throw new Error("Target assignee user not found");
+    }
+    if (volunteer.verificationStatus === "suspended" || volunteer.verificationStatus === "rejected") {
+      throw new Error("Target assignee is suspended or rejected");
+    }
+    if (volunteer.role === "volunteer" && volunteer.verificationStatus !== "approved") {
       throw new Error("Target volunteer is not verified or approved");
     }
 
@@ -232,7 +250,13 @@ export const reassignLead = mutation({
     }
 
     const newVolunteer = await ctx.db.get(args.newVolunteerId);
-    if (!newVolunteer || newVolunteer.verificationStatus !== "approved") {
+    if (!newVolunteer) {
+      throw new Error("Target assignee user not found");
+    }
+    if (newVolunteer.verificationStatus === "suspended" || newVolunteer.verificationStatus === "rejected") {
+      throw new Error("Target assignee is suspended or rejected");
+    }
+    if (newVolunteer.role === "volunteer" && newVolunteer.verificationStatus !== "approved") {
       throw new Error("Target volunteer is not verified or approved");
     }
 
@@ -384,8 +408,11 @@ export const getMyAssignedLeads = query({
       .withIndex("by_clerk_id", (q) => q.eq("clerkId", args.volunteerClerkId))
       .unique();
 
-    // Strict boundary: Only approved volunteers can query assigned leads
-    if (!user || user.verificationStatus !== "approved") {
+    // Boundary: Approved volunteers or active admins can query their assigned leads
+    if (!user || user.verificationStatus === "suspended" || user.verificationStatus === "rejected") {
+      return [];
+    }
+    if (user.role === "volunteer" && user.verificationStatus !== "approved") {
       return [];
     }
 
@@ -499,7 +526,21 @@ export const getMyWorkstationMetrics = query({
       .withIndex("by_clerk_id", (q) => q.eq("clerkId", args.volunteerClerkId))
       .unique();
 
-    if (!user || user.verificationStatus !== "approved") {
+    if (!user || user.verificationStatus === "suspended" || user.verificationStatus === "rejected") {
+      return {
+        totalAssigned: 0,
+        toContact: 0,
+        highPriority: 0,
+        callsCompleted: 0,
+        dailyTarget: 15,
+        callsRemaining: 15,
+        overdueFollowUps: 0,
+        todayFollowUps: 0,
+        interestedCount: 0,
+        inProgressCount: 0,
+      };
+    }
+    if (user.role === "volunteer" && user.verificationStatus !== "approved") {
       return {
         totalAssigned: 0,
         toContact: 0,

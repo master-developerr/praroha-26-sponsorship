@@ -28,6 +28,7 @@ import { GlobalCommandPalette } from "@/components/search/GlobalCommandPalette";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { eventConfig } from "@/lib/eventConfig";
+import { ThemeToggle } from "@/components/ui/ThemeToggle";
 
 export function Navbar({
   onLogCallClick,
@@ -110,6 +111,9 @@ export function Navbar({
 
         {/* Right Actions */}
         <div className="flex items-center gap-2 sm:gap-3">
+          {/* Theme Toggle Button */}
+          <ThemeToggle />
+
           {/* Reactive Notification Popover */}
           <NotificationPopover />
 
@@ -167,7 +171,7 @@ export function Navbar({
               {/* Header */}
               <div className="flex items-center justify-between pb-4 border-b border-border">
                 <div className="flex items-center gap-2.5">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-teal-50 text-teal-700 font-black text-xs">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-teal-50 dark:bg-teal-950/60 text-teal-700 dark:text-teal-300 font-black text-xs">
                     P26
                   </div>
                   <div>
@@ -177,13 +181,16 @@ export function Navbar({
                     <p className="text-[10px] text-text-muted">Outreach Cockpit</p>
                   </div>
                 </div>
-                <button
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  aria-label="Close navigation"
-                  className="rounded-md p-1.5 text-text-muted hover:bg-surface-subtle hover:text-text-primary transition-colors cursor-pointer"
-                >
-                  <X className="h-4 w-4" />
-                </button>
+                <div className="flex items-center gap-1.5">
+                  <ThemeToggle />
+                  <button
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    aria-label="Close navigation"
+                    className="rounded-md p-1.5 text-text-muted hover:bg-surface-subtle hover:text-text-primary transition-colors cursor-pointer"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
               </div>
 
               {/* User Profile Summary */}

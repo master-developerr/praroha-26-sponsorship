@@ -164,7 +164,7 @@ export function Sidebar() {
       {/* Bottom Section: Promo Card, Secondary Links & User Profile */}
       <div className="space-y-3 px-3 pb-4">
         {/* Editorial Promo Card */}
-        <div className="relative overflow-hidden rounded-xl border border-[#BEE3D3] bg-gradient-to-br from-[#E6F4EA] via-[#D9EEE4] to-[#C7E9DA] p-3.5 text-text-primary shadow-xs">
+        <div className="relative overflow-hidden rounded-xl border border-[#BEE3D3] dark:border-teal-900/50 bg-gradient-to-br from-[#E6F4EA] via-[#D9EEE4] to-[#C7E9DA] dark:from-teal-950/40 dark:via-surface-subtle dark:to-teal-950/20 p-3.5 text-text-primary shadow-xs">
           <div className="relative z-10 space-y-1.5">
             <h3 className="text-xs font-bold leading-snug text-primary">
               More Sponsors.

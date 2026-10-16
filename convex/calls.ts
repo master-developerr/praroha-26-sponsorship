@@ -65,8 +65,11 @@ export const logCallAndDebrief = mutation({
       .withIndex("by_clerk_id", (q) => q.eq("clerkId", args.volunteerClerkId))
       .unique();
 
-    if (!user || user.verificationStatus !== "approved") {
-      throw new Error("Unauthorized: Only approved volunteers can log calls and debriefs");
+    if (!user || user.verificationStatus === "suspended" || user.verificationStatus === "rejected") {
+      throw new Error("Unauthorized: Account is suspended or rejected");
+    }
+    if (user.role === "volunteer" && user.verificationStatus !== "approved") {
+      throw new Error("Unauthorized: Only approved volunteers and active admins can log calls and debriefs");
     }
 
     const company = await ctx.db.get(args.companyId);

@@ -18,8 +18,9 @@ interface ReassignLeadModalProps {
   volunteers: Array<{
     _id: Id<"users">;
     name: string;
-    department: string;
-    semester: string;
+    role?: string;
+    department?: string;
+    semester?: string;
     activeLeadsCount: number;
     capacityStatus: string;
   }>;
@@ -96,10 +97,10 @@ export function ReassignLeadModal({
           </span>
         </div>
 
-        {/* Target New Volunteer Selector */}
+        {/* Target New Assignee Selector */}
         <div className="space-y-1.5">
           <label className="text-xs font-semibold text-text-primary">
-            New Assignee (Approved SDR) <span className="text-rose-500">*</span>
+            New Assignee (Approved SDR or Admin) <span className="text-rose-500">*</span>
           </label>
           <select
             value={selectedVolunteerId}
@@ -107,12 +108,18 @@ export function ReassignLeadModal({
             required
             className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-xs text-text-primary focus:border-primary focus:outline-none"
           >
-            <option value="">Select an approved volunteer...</option>
-            {volunteers.map((v) => (
-              <option key={v._id} value={v._id}>
-                {v.name} ({v.department} • {v.semester}) — {v.activeLeadsCount} active leads [{v.capacityStatus}]
-              </option>
-            ))}
+            <option value="">Select an active assignee (SDR or Admin)...</option>
+            {volunteers.map((v) => {
+              const isAdmin = v.role === "admin";
+              const title = isAdmin
+                ? `${v.name} [Admin • ${v.department || "Core Committee"}]`
+                : `${v.name} (${v.department} • ${v.semester})`;
+              return (
+                <option key={v._id} value={v._id}>
+                  {title} — {v.activeLeadsCount} active leads [{v.capacityStatus}]
+                </option>
+              );
+            })}
           </select>
         </div>
 
