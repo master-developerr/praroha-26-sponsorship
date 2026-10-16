@@ -29,7 +29,7 @@ export function AdminSidebar() {
       icon: BarChart3,
       href: "/admin",
       isActive: pathname === "/admin",
-      badge: "Live",
+      badge: "Active",
     },
     {
       label: "Volunteer Verification",
@@ -71,7 +71,7 @@ export function AdminSidebar() {
       icon: Award,
       href: "/admin/leaderboard",
       isActive: pathname.startsWith("/admin/leaderboard"),
-      badge: "Live",
+      badge: "Active",
     },
   ];
 
@@ -96,34 +96,35 @@ export function AdminSidebar() {
           {adminNavItems.map((item) => {
             const Icon = item.icon;
             return (
-              <div key={item.label}>
-                {item.isActive ? (
-                  <Link
-                    href={item.href}
-                    className="flex items-center justify-between rounded-xl bg-sky-50 px-3.5 py-2.5 text-xs font-semibold text-sky-900 shadow-xs"
+              <Link
+                key={item.label}
+                href={item.href}
+                className={`flex items-center justify-between rounded-xl px-3.5 py-2.5 text-xs font-semibold transition-all ${
+                  item.isActive
+                    ? "bg-sky-50 text-sky-900 shadow-xs font-bold"
+                    : "text-text-secondary hover:text-text-primary hover:bg-surface-subtle"
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <Icon
+                    className={`h-4 w-4 transition-colors ${
+                      item.isActive ? "text-sky-700" : "text-text-muted"
+                    }`}
+                  />
+                  <span>{item.label}</span>
+                </div>
+                {item.badge && (
+                  <span
+                    className={`text-[10px] rounded px-1.5 py-0.2 font-mono font-medium ${
+                      item.isActive
+                        ? "bg-sky-100 text-sky-800"
+                        : "bg-surface-subtle text-text-muted border border-border-subtle"
+                    }`}
                   >
-                    <div className="flex items-center gap-3">
-                      <Icon className="h-4 w-4 text-sky-700" />
-                      <span>{item.label}</span>
-                    </div>
-                  </Link>
-                ) : (
-                  <div
-                    title={`${item.label} is scheduled in upcoming feature phases.`}
-                    className="flex items-center justify-between rounded-xl px-3.5 py-2 text-xs font-medium text-text-muted hover:text-text-secondary hover:bg-surface-subtle transition-colors cursor-not-allowed"
-                  >
-                    <div className="flex items-center gap-3">
-                      <Icon className="h-4 w-4" />
-                      <span>{item.label}</span>
-                    </div>
-                    {item.badge && (
-                      <span className="text-[10px] rounded px-1.5 py-0.2 bg-zinc-100 text-zinc-500 font-mono">
-                        {item.badge}
-                      </span>
-                    )}
-                  </div>
+                    {item.badge}
+                  </span>
                 )}
-              </div>
+              </Link>
             );
           })}
         </nav>

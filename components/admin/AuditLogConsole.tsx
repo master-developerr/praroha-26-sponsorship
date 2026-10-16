@@ -88,12 +88,12 @@ export function AuditLogConsole() {
             className="h-9 rounded-lg border border-border bg-surface px-3 text-xs text-text-secondary focus:border-primary focus:outline-none cursor-pointer"
           >
             <option value="all">All Actions</option>
-            <option value="commitments:authorize">Sponsorship Authorizations</option>
-            <option value="leads:reassign">Lead Reassignments</option>
-            <option value="users:verify">Volunteer Verifications</option>
-            <option value="points:adjust">Points Adjustments</option>
-            <option value="proposals:create">Proposals Created</option>
-            <option value="calls:log">Outreach Calls</option>
+            <option value="commitments:">Commitments & Ratifications</option>
+            <option value="leads:">Leads & Stage Allocations</option>
+            <option value="users:">Volunteer SDR Governance</option>
+            <option value="points:">Gamification Points</option>
+            <option value="proposals:">Proposals</option>
+            <option value="calls:">Outreach Calls</option>
           </select>
 
           {/* Entity Type Filter */}

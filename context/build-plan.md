@@ -1,4 +1,7 @@
 # Build Plan
+ 
+> [!NOTE]
+> The single source of truth for the project roadmap and architectural phases is located at root [BUILD_PLAN.md](file:///d:/everything%20for%20coding/sponsorship%20management%20system/BUILD_PLAN.md) and progress matrix at [IMPLEMENTATION_PROGRESS.md](file:///d:/everything%20for%20coding/sponsorship%20management%20system/IMPLEMENTATION_PROGRESS.md).
 
 ## Core Principle
 

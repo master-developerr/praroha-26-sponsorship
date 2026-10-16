@@ -50,7 +50,7 @@ export function ExecutiveDashboardView() {
     );
   }
 
-  const { kpis, velocityTimeSeries, topObjections, sectorBreakdown } = dashboard;
+  const { kpis, volunteersBreakdown, leadsBreakdown, velocityTimeSeries, topObjections, sectorBreakdown, recentActivity } = dashboard;
 
   return (
     <div className="space-y-6">
@@ -95,7 +95,7 @@ export function ExecutiveDashboardView() {
 
       {activeTab === "overview" && (
         <div className="space-y-6">
-          {/* 1. Macro KPI Bento Grid */}
+          {/* 1. Macro Financial KPI Bento Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Confirmed Revenue Card */}
             <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/5 p-4 space-y-2 shadow-2xs">
@@ -180,7 +180,72 @@ export function ExecutiveDashboardView() {
             </div>
           </div>
 
-          {/* 2. Daily Outreach Velocity Chart (Recharts) */}
+          {/* 2. Operational Health Bento: Volunteers Governance & Lead Pipeline */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Volunteer Governance */}
+            <div className="rounded-xl border border-border bg-surface p-4 space-y-3 shadow-2xs">
+              <div className="flex items-center justify-between border-b border-border-subtle pb-2">
+                <span className="text-xs font-bold text-text-primary flex items-center gap-1.5 uppercase tracking-wider">
+                  <Users className="h-4 w-4 text-primary" />
+                  Volunteer SDR Governance
+                </span>
+                <span className="text-xs font-bold text-text-primary">
+                  {volunteersBreakdown?.total ?? 0} Total Registered
+                </span>
+              </div>
+              <div className="grid grid-cols-4 gap-2 text-center">
+                <div className="p-2.5 rounded-lg bg-emerald-50 border border-emerald-100">
+                  <span className="text-[10px] font-bold text-emerald-800 uppercase block">Approved</span>
+                  <span className="text-lg font-black text-emerald-700">{volunteersBreakdown?.approved ?? 0}</span>
+                </div>
+                <div className="p-2.5 rounded-lg bg-amber-50 border border-amber-100">
+                  <span className="text-[10px] font-bold text-amber-800 uppercase block">Pending</span>
+                  <span className="text-lg font-black text-amber-700">{volunteersBreakdown?.pending ?? 0}</span>
+                </div>
+                <div className="p-2.5 rounded-lg bg-rose-50 border border-rose-100">
+                  <span className="text-[10px] font-bold text-rose-800 uppercase block">Rejected</span>
+                  <span className="text-lg font-black text-rose-700">{volunteersBreakdown?.rejected ?? 0}</span>
+                </div>
+                <div className="p-2.5 rounded-lg bg-zinc-100 border border-zinc-200">
+                  <span className="text-[10px] font-bold text-zinc-700 uppercase block">Suspended</span>
+                  <span className="text-lg font-black text-zinc-800">{volunteersBreakdown?.suspended ?? 0}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Lead Lifecycle Distribution */}
+            <div className="rounded-xl border border-border bg-surface p-4 space-y-3 shadow-2xs">
+              <div className="flex items-center justify-between border-b border-border-subtle pb-2">
+                <span className="text-xs font-bold text-text-primary flex items-center gap-1.5 uppercase tracking-wider">
+                  <Building2 className="h-4 w-4 text-primary" />
+                  Lead Lifecycle Distribution
+                </span>
+                <span className="text-xs font-bold text-text-primary">
+                  {leadsBreakdown?.total ?? 0} Total Leads
+                </span>
+              </div>
+              <div className="grid grid-cols-4 gap-2 text-center">
+                <div className="p-2.5 rounded-lg bg-amber-50 border border-amber-100">
+                  <span className="text-[10px] font-bold text-amber-800 uppercase block">Unassigned</span>
+                  <span className="text-lg font-black text-amber-700">{leadsBreakdown?.unassigned ?? 0}</span>
+                </div>
+                <div className="p-2.5 rounded-lg bg-sky-50 border border-sky-100">
+                  <span className="text-[10px] font-bold text-sky-800 uppercase block">In Outreach</span>
+                  <span className="text-lg font-black text-sky-700">{leadsBreakdown?.inPipeline ?? 0}</span>
+                </div>
+                <div className="p-2.5 rounded-lg bg-emerald-50 border border-emerald-100">
+                  <span className="text-[10px] font-bold text-emerald-800 uppercase block">Won</span>
+                  <span className="text-lg font-black text-emerald-700">{leadsBreakdown?.won ?? 0}</span>
+                </div>
+                <div className="p-2.5 rounded-lg bg-zinc-100 border border-zinc-200">
+                  <span className="text-[10px] font-bold text-zinc-700 uppercase block">Lost</span>
+                  <span className="text-lg font-black text-zinc-800">{leadsBreakdown?.lost ?? 0}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* 3. Daily Outreach Velocity Chart (Recharts) */}
           <div className="rounded-xl border border-border bg-surface p-5 shadow-2xs space-y-4">
             <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border-subtle pb-3">
               <div>
@@ -279,7 +344,7 @@ export function ExecutiveDashboardView() {
             </div>
           </div>
 
-          {/* 3. Team Intelligence: Objections Roadblocks & Sector Responsiveness */}
+          {/* 4. Team Intelligence & Sector Responsiveness */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Primary Corporate Objections */}
             <div className="rounded-xl border border-border bg-surface p-5 shadow-2xs space-y-4">
@@ -293,28 +358,34 @@ export function ExecutiveDashboardView() {
                 </p>
               </div>
 
-              <div className="space-y-3">
-                {topObjections.map((item, idx) => {
-                  const maxCount = Math.max(...topObjections.map((o) => o.count), 1);
-                  const pct = Math.round((item.count / maxCount) * 100);
-                  return (
-                    <div key={idx} className="space-y-1 text-xs">
-                      <div className="flex items-center justify-between text-text-primary font-medium">
-                        <span className="truncate pr-2">{item.objection}</span>
-                        <span className="font-bold text-text-muted shrink-0">
-                          {item.count} calls
-                        </span>
+              {topObjections.length === 0 ? (
+                <div className="py-8 text-center text-xs text-text-muted">
+                  No corporate objections recorded yet. Objections will populate as SDRs log call reports.
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {topObjections.map((item, idx) => {
+                    const maxCount = Math.max(...topObjections.map((o) => o.count), 1);
+                    const pct = Math.round((item.count / maxCount) * 100);
+                    return (
+                      <div key={idx} className="space-y-1 text-xs">
+                        <div className="flex items-center justify-between text-text-primary font-medium">
+                          <span className="truncate pr-2">{item.objection}</span>
+                          <span className="font-bold text-text-muted shrink-0">
+                            {item.count} calls
+                          </span>
+                        </div>
+                        <div className="h-2 w-full rounded-full bg-surface-subtle border border-border overflow-hidden">
+                          <div
+                            className="h-full bg-amber-500 rounded-full transition-all duration-500"
+                            style={{ width: `${item.count > 0 ? Math.max(pct, 8) : 2}%` }}
+                          ></div>
+                        </div>
                       </div>
-                      <div className="h-2 w-full rounded-full bg-surface-subtle border border-border overflow-hidden">
-                        <div
-                          className="h-full bg-amber-500 rounded-full transition-all duration-500"
-                          style={{ width: `${item.count > 0 ? Math.max(pct, 8) : 2}%` }}
-                        ></div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
 
             {/* Sector Responsiveness */}
@@ -329,43 +400,94 @@ export function ExecutiveDashboardView() {
                 </p>
               </div>
 
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs">
-                  <thead>
-                    <tr className="border-b border-border text-[10px] uppercase font-bold text-text-muted">
-                      <th className="py-2 px-2">Industry</th>
-                      <th className="py-2 px-2 text-right">Leads</th>
-                      <th className="py-2 px-2 text-right">Contacted</th>
-                      <th className="py-2 px-2 text-right">Won</th>
-                      <th className="py-2 px-2 text-right">Valuation</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-border-subtle">
-                    {sectorBreakdown.map((s, idx) => (
-                      <tr key={idx} className="hover:bg-surface-subtle transition-colors">
-                        <td className="py-2 px-2 font-semibold text-text-primary">
-                          {s.industry}
-                        </td>
-                        <td className="py-2 px-2 text-right text-text-muted">
-                          {s.totalLeads}
-                        </td>
-                        <td className="py-2 px-2 text-right text-text-secondary font-medium">
-                          {s.contacted} ({s.responsivenessRate}%)
-                        </td>
-                        <td className="py-2 px-2 text-right font-bold text-emerald-600">
-                          {s.won}
-                        </td>
-                        <td className="py-2 px-2 text-right font-bold text-primary">
-                          {s.totalValuation > 0
-                            ? formatCurrencyINR(s.totalValuation)
-                            : "—"}
-                        </td>
+              {sectorBreakdown.length === 0 ? (
+                <div className="py-8 text-center text-xs text-text-muted">
+                  No sector outreach data recorded yet.
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs">
+                    <thead>
+                      <tr className="border-b border-border text-[10px] uppercase font-bold text-text-muted">
+                        <th className="py-2 px-2">Industry</th>
+                        <th className="py-2 px-2 text-right">Leads</th>
+                        <th className="py-2 px-2 text-right">Contacted</th>
+                        <th className="py-2 px-2 text-right">Won</th>
+                        <th className="py-2 px-2 text-right">Valuation</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody className="divide-y divide-border-subtle">
+                      {sectorBreakdown.map((s, idx) => (
+                        <tr key={idx} className="hover:bg-surface-subtle transition-colors">
+                          <td className="py-2 px-2 font-semibold text-text-primary">
+                            {s.industry}
+                          </td>
+                          <td className="py-2 px-2 text-right text-text-muted">
+                            {s.totalLeads}
+                          </td>
+                          <td className="py-2 px-2 text-right text-text-secondary font-medium">
+                            {s.contacted} ({s.responsivenessRate}%)
+                          </td>
+                          <td className="py-2 px-2 text-right font-bold text-emerald-600">
+                            {s.won}
+                          </td>
+                          <td className="py-2 px-2 text-right font-bold text-primary">
+                            {s.totalValuation > 0
+                              ? formatCurrencyINR(s.totalValuation)
+                              : "—"}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* 5. Live Recent Activity Stream from Audit Logs */}
+          <div className="rounded-xl border border-border bg-surface p-5 shadow-2xs space-y-4">
+            <div className="flex items-center justify-between border-b border-border-subtle pb-3">
+              <div>
+                <h4 className="text-xs font-bold text-text-primary uppercase tracking-wider flex items-center gap-1.5">
+                  <BarChart3 className="h-4 w-4 text-sky-600" />
+                  Live Operational Activity Feed
+                </h4>
+                <p className="text-[11px] text-text-secondary">
+                  Real-time immutable audit records from volunteer registrations, lead allocations, and commitments.
+                </p>
               </div>
             </div>
+
+            {!recentActivity || recentActivity.length === 0 ? (
+              <div className="py-8 text-center text-xs text-text-muted">
+                No recent activity recorded in the audit trail yet.
+              </div>
+            ) : (
+              <div className="divide-y divide-border-subtle">
+                {recentActivity.map((log: any) => (
+                  <div key={log._id} className="py-2.5 flex items-center justify-between text-xs">
+                    <div className="flex items-center gap-3">
+                      <span className="rounded-full bg-surface-subtle border border-border px-2 py-0.5 text-[10px] font-mono font-bold text-text-muted">
+                        {log.action}
+                      </span>
+                      <span className="text-text-primary font-medium">
+                        {log.actorName} ({log.actorRole})
+                      </span>
+                      <span className="text-text-muted text-[11px]">
+                        on {log.entityType} ({log.entityId.slice(-6)})
+                      </span>
+                    </div>
+                    <span className="text-text-muted text-[11px] font-mono whitespace-nowrap">
+                      {new Date(log.timestamp).toLocaleTimeString("en-IN", {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       )}

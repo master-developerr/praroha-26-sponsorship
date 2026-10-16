@@ -274,6 +274,18 @@ export default defineSchema({
     volunteerId: v.id("users"),
     authorizedBy: v.id("users"),
     packageTier: v.string(),
+    status: v.optional(
+      v.union(
+        v.literal("PROSPECT"),
+        v.literal("NEGOTIATING"),
+        v.literal("PROPOSED"),
+        v.literal("VERBAL_COMMITMENT"),
+        v.literal("CONFIRMED"),
+        v.literal("DELIVERABLES_PENDING"),
+        v.literal("COMPLETED"),
+        v.literal("CANCELLED")
+      )
+    ),
     cashAmount: v.number(),
     inKindEstimatedValue: v.number(),
     totalValuation: v.number(),
@@ -284,10 +296,12 @@ export default defineSchema({
     notes: v.optional(v.string()),
     authorizedAt: v.number(),
     createdAt: v.number(),
+    updatedAt: v.optional(v.number()),
   })
     .index("by_company_id", ["companyId"])
     .index("by_authorized_by", ["authorizedBy"])
-    .index("by_volunteer_id", ["volunteerId"]),
+    .index("by_volunteer_id", ["volunteerId"])
+    .index("by_status", ["status"]),
 
   aiAnalyses: defineTable({
     companyId: v.id("companies"),

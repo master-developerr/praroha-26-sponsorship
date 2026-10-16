@@ -12,6 +12,7 @@ import type * as ai from "../ai.js";
 import type * as analytics from "../analytics.js";
 import type * as assignments from "../assignments.js";
 import type * as calls from "../calls.js";
+import type * as commitments from "../commitments.js";
 import type * as companies from "../companies.js";
 import type * as followUps from "../followUps.js";
 import type * as gamification from "../gamification.js";
@@ -31,6 +32,7 @@ declare const fullApi: ApiFromModules<{
   analytics: typeof analytics;
   assignments: typeof assignments;
   calls: typeof calls;
+  commitments: typeof commitments;
   companies: typeof companies;
   followUps: typeof followUps;
   gamification: typeof gamification;

@@ -23,6 +23,7 @@ export function DataExportHub() {
   const companiesData = useQuery(api.analytics.getExportData, { type: "companies" });
   const callsData = useQuery(api.analytics.getExportData, { type: "calls" });
   const commitmentsData = useQuery(api.analytics.getExportData, { type: "commitments" });
+  const auditLogsData = useQuery(api.analytics.getExportData, { type: "audit_logs" });
 
   const handleExportCompanies = async () => {
     if (!companiesData) return;
@@ -54,6 +55,16 @@ export function DataExportHub() {
     }
   };
 
+  const handleExportAuditLogs = async () => {
+    if (!auditLogsData) return;
+    setDownloadingType("audit_logs");
+    try {
+      downloadCSV(auditLogsData, "praroha26_admin_audit_trail");
+    } finally {
+      setTimeout(() => setDownloadingType(null), 500);
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Notice Banner */}
@@ -67,8 +78,8 @@ export function DataExportHub() {
         </div>
       </div>
 
-      {/* 3 Export Bento Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+      {/* 4 Export Bento Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Card 1: Master Companies */}
         <div className="flex flex-col justify-between p-5 rounded-2xl border border-border bg-surface shadow-xs hover:border-primary/40 transition-colors">
           <div>
@@ -182,6 +193,45 @@ export function DataExportHub() {
             >
               <ArrowDownToLine className="h-4 w-4" />
               {downloadingType === "commitments" ? "Generating CSV..." : "Export Commitments CSV"}
+            </button>
+          </div>
+        </div>
+
+        {/* Card 4: Administrative Audit Trail */}
+        <div className="flex flex-col justify-between p-5 rounded-2xl border border-border bg-surface shadow-xs hover:border-purple-400 transition-colors">
+          <div>
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-purple-50 text-purple-700">
+                <ShieldCheck className="h-5 w-5" />
+              </div>
+              <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-purple-50 text-purple-800 border border-purple-200">
+                System Audit
+              </span>
+            </div>
+
+            <h3 className="text-sm font-bold text-text-primary">
+              Administrative Audit Trail
+            </h3>
+            <p className="text-xs text-text-muted mt-1 leading-relaxed">
+              Complete chronological audit trail recording volunteer verifications, lead allocations, stage transitions, and contract approvals.
+            </p>
+
+            <div className="mt-4 pt-4 border-t border-border-subtle flex items-center justify-between text-xs">
+              <span className="text-text-muted">Logged Actions</span>
+              <span className="font-bold text-text-primary">
+                {auditLogsData ? `${auditLogsData.length} entries` : "Loading..."}
+              </span>
+            </div>
+          </div>
+
+          <div className="mt-5">
+            <button
+              onClick={handleExportAuditLogs}
+              disabled={!auditLogsData || auditLogsData.length === 0}
+              className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl font-bold text-xs bg-purple-700 hover:bg-purple-800 text-white shadow-xs transition-colors cursor-pointer disabled:opacity-50"
+            >
+              <ArrowDownToLine className="h-4 w-4" />
+              {downloadingType === "audit_logs" ? "Generating CSV..." : "Export Audit Trail CSV"}
             </button>
           </div>
         </div>

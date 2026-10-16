@@ -95,16 +95,6 @@ export const getExecutiveDashboard = query({
       .sort((a, b) => b.count - a.count)
       .slice(0, 6);
 
-    // If no objections logged yet, provide structured categories
-    if (topObjections.length === 0) {
-      topObjections.push(
-        { objection: "Annual sponsorship budget locked/exhausted", count: 0 },
-        { objection: "Does not sponsor collegiate/student festivals", count: 0 },
-        { objection: "Decision strictly delegated to Mumbai/Delhi HQ", count: 0 },
-        { objection: "Prefers non-cash product/merchandise support only", count: 0 }
-      );
-    }
-
     // 5. Sector Responsiveness Analysis
     const sectorStats: Record<string, { industry: string; totalLeads: number; contacted: number; won: number; totalValuation: number }> = {};
 
@@ -164,6 +154,54 @@ export const getExecutiveDashboard = query({
       }
     });
 
+    // 7. Real Volunteer & Lead Breakdowns
+    const volunteersBreakdown = {
+      total: users.length,
+      approved: users.filter((u) => u.verificationStatus === "approved").length,
+      pending: users.filter((u) => u.verificationStatus === "pending").length,
+      rejected: users.filter((u) => u.verificationStatus === "rejected").length,
+      suspended: users.filter((u) => u.verificationStatus === "suspended").length,
+    };
+
+    const leadsBreakdown = {
+      total: companies.length,
+      unassigned: stageCounts.UNASSIGNED,
+      assigned: stageCounts.ASSIGNED,
+      inPipeline: companies.filter(
+        (c) =>
+          c.leadStatus !== "UNASSIGNED" &&
+          c.leadStatus !== "ASSIGNED" &&
+          c.leadStatus !== "WON" &&
+          c.leadStatus !== "LOST"
+      ).length,
+      won: stageCounts.WON,
+      lost: stageCounts.LOST,
+      byStatus: stageCounts,
+    };
+
+    // 8. Recent Audit Activity Stream
+    const rawAuditLogs = await ctx.db
+      .query("auditLogs")
+      .withIndex("by_timestamp")
+      .order("desc")
+      .take(8);
+
+    const userMap = new Map();
+    users.forEach((u) => {
+      userMap.set(u._id, u);
+      userMap.set(u.clerkId, u);
+    });
+
+    const recentActivity = rawAuditLogs.map((log) => {
+      const actor = userMap.get(log.actorId);
+      return {
+        ...log,
+        actorName: actor?.name || "System Admin",
+        actorEmail: actor?.email || "internal@praroha.in",
+        actorRole: actor?.role || "admin",
+      };
+    });
+
     return {
       kpis: {
         totalPipelinePotential,
@@ -175,11 +213,24 @@ export const getExecutiveDashboard = query({
         activeVolunteersCount: approvedVolunteers.length,
         totalSourcedLeads: companies.length,
         overdueFollowUpsCount: overdueFollowUps.length,
+        totalVolunteers: volunteersBreakdown.total,
+        approvedVolunteers: volunteersBreakdown.approved,
+        pendingVolunteers: volunteersBreakdown.pending,
+        rejectedVolunteers: volunteersBreakdown.rejected,
+        suspendedVolunteers: volunteersBreakdown.suspended,
+        unassignedLeads: leadsBreakdown.unassigned,
+        assignedLeads: leadsBreakdown.assigned,
+        inPipelineLeads: leadsBreakdown.inPipeline,
+        wonLeads: leadsBreakdown.won,
+        lostLeads: leadsBreakdown.lost,
       },
+      volunteersBreakdown,
+      leadsBreakdown,
       velocityTimeSeries,
       topObjections,
       sectorBreakdown,
       stageCounts,
+      recentActivity,
     };
   },
 });
@@ -308,9 +359,9 @@ export const getAuditLogsFiltered = query({
       .order("desc")
       .take(args.limit || 100);
 
-    // Optional filters
     if (args.action && args.action !== "all") {
-      logs = logs.filter((l) => l.action === args.action);
+      const act = args.action;
+      logs = logs.filter((l) => l.action === act || l.action.startsWith(act));
     }
     if (args.entityType && args.entityType !== "all") {
       logs = logs.filter((l) => l.entityType === args.entityType);
@@ -359,7 +410,8 @@ export const getExportData = query({
     type: v.union(
       v.literal("companies"),
       v.literal("calls"),
-      v.literal("commitments")
+      v.literal("commitments"),
+      v.literal("audit_logs")
     ),
   },
   handler: async (ctx, args) => {
@@ -469,6 +521,7 @@ export const getExportData = query({
           commitment_id: cm._id,
           company_name: comp?.companyName || "Unknown",
           package_tier: cm.packageTier,
+          status: cm.status || "CONFIRMED",
           cash_amount_inr: cm.cashAmount,
           in_kind_valuation_inr: cm.inKindEstimatedValue,
           total_commercial_valuation_inr: cm.totalValuation,
@@ -478,7 +531,32 @@ export const getExportData = query({
           assigned_sdr: sdr?.name || "Student SDR",
           authorized_by: authorizer?.name || "Sponsorship Head",
           mou_reference: cm.mouReference || "Standard MoU",
+          notes: cm.notes || "",
           authorized_date: new Date(cm.authorizedAt).toISOString(),
+        };
+      });
+    }
+
+    if (args.type === "audit_logs") {
+      const logs = await ctx.db.query("auditLogs").withIndex("by_timestamp").order("desc").collect();
+      const users = await ctx.db.query("users").collect();
+      const userMap = new Map();
+      users.forEach((u) => {
+        userMap.set(u._id, u);
+        userMap.set(u.clerkId, u);
+      });
+
+      return logs.map((l) => {
+        const actor = userMap.get(l.actorId);
+        return {
+          timestamp: new Date(l.timestamp).toISOString(),
+          actor_name: actor?.name || "System Admin",
+          actor_email: actor?.email || "internal@praroha.in",
+          actor_role: actor?.role || "admin",
+          action: l.action,
+          entity_type: l.entityType,
+          entity_id: l.entityId,
+          changes: l.changes,
         };
       });
     }

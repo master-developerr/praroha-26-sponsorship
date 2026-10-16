@@ -58,8 +58,20 @@ export function LeaderboardPodium({ compact = false }: LeaderboardPodiumProps) {
 
   return (
     <div className="space-y-6">
-      {/* 1. Visual Podium for Top 3 SDRs */}
-      {topThree.length > 0 && (
+      {/* 1. Visual Podium for Top 3 SDRs or Empty State */}
+      {leaderboard.length === 0 ? (
+        <div className="rounded-2xl border border-border bg-surface p-10 text-center shadow-xs">
+          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 mx-auto mb-3.5 border border-amber-200 dark:border-amber-500/20">
+            <Trophy className="h-7 w-7" />
+          </div>
+          <h3 className="text-base font-bold text-text-primary">
+            No outreach activity recorded yet
+          </h3>
+          <p className="text-xs text-text-secondary max-w-md mx-auto mt-1 leading-relaxed">
+            Volunteer rankings and the PRAROHA&apos;26 Honors Podium will automatically activate once student SDRs begin logging calls, debriefs, and secured sponsorship commitments.
+          </p>
+        </div>
+      ) : topThree.length > 0 ? (
         <div className="rounded-2xl border border-border bg-gradient-to-b from-surface to-surface-subtle p-6 shadow-xs">
           <div className="text-center mb-6">
             <span className="text-[10px] font-extrabold uppercase tracking-widest text-teal-700 dark:text-teal-300 bg-teal-500/10 px-3 py-1 rounded-full border border-teal-500/20">
@@ -161,7 +173,7 @@ export function LeaderboardPodium({ compact = false }: LeaderboardPodiumProps) {
             )}
           </div>
         </div>
-      )}
+      ) : null}
 
       {/* 2. Full Ranked Team Roster */}
       <div className="rounded-xl border border-border bg-surface p-4 shadow-2xs space-y-3">
