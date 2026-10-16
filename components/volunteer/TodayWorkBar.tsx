@@ -10,6 +10,7 @@ import {
   FileText,
   Clock,
   Sparkles,
+  CheckCircle2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -80,13 +81,35 @@ export function TodayWorkBar({
       {/* Metric Cards Grid: 2-col on mobile/tablet (with wide quota bar), 5-col on desktop */}
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 pt-4">
         {/* 1. Daily Quota Progress */}
-        <div className="col-span-2 lg:col-span-1 rounded-xl border border-border-subtle bg-surface-subtle/60 p-3 flex flex-col justify-between">
+        <div
+          className={`col-span-2 lg:col-span-1 rounded-xl border p-3 flex flex-col justify-between transition-colors ${
+            percentComplete >= 100
+              ? "border-emerald-300 dark:border-emerald-800/60 bg-emerald-50/40 dark:bg-emerald-950/15"
+              : "border-border-subtle bg-surface-subtle/60"
+          }`}
+        >
           <div className="flex items-center justify-between text-xs text-text-secondary">
-            <span className="font-semibold text-text-primary flex items-center gap-1.5">
-              <PhoneCall className="h-3.5 w-3.5 text-primary" />
+            <span
+              className={`font-semibold flex items-center gap-1.5 ${
+                percentComplete >= 100
+                  ? "text-emerald-800 dark:text-emerald-300 font-bold"
+                  : "text-text-primary"
+              }`}
+            >
+              {percentComplete >= 100 ? (
+                <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
+              ) : (
+                <PhoneCall className="h-3.5 w-3.5 text-primary" />
+              )}
               Daily Quota
             </span>
-            <span className="text-[11px] font-bold text-primary tabular-nums">
+            <span
+              className={`text-[11px] font-bold tabular-nums ${
+                percentComplete >= 100
+                  ? "text-emerald-700 dark:text-emerald-400"
+                  : "text-primary"
+              }`}
+            >
               {metrics.callsCompleted} / {metrics.dailyTarget}
             </span>
           </div>
@@ -94,15 +117,36 @@ export function TodayWorkBar({
           <div className="mt-2.5 space-y-1.5">
             <div className="h-2 w-full rounded-full bg-border overflow-hidden">
               <div
-                className="h-full bg-primary rounded-full transition-all duration-500 ease-out"
+                className={`h-full rounded-full transition-all duration-500 ease-out ${
+                  percentComplete >= 100
+                    ? "bg-emerald-600 dark:bg-emerald-500"
+                    : "bg-primary"
+                }`}
                 style={{ width: `${percentComplete}%` }}
               />
             </div>
-            <div className="flex justify-between items-center text-[10px] text-text-muted">
-              <span className="tabular-nums">{percentComplete}% of daily goal</span>
-              <span className="font-semibold text-text-secondary tabular-nums">
-                {metrics.callsRemaining} remaining
-              </span>
+            <div className="flex justify-between items-center text-[10px]">
+              {percentComplete >= 100 ? (
+                <>
+                  <span className="font-bold text-emerald-700 dark:text-emerald-400">
+                    Target Crushed! 🎯
+                  </span>
+                  <span className="font-semibold text-emerald-800 dark:text-emerald-300 tabular-nums">
+                    {metrics.callsCompleted - metrics.dailyTarget > 0
+                      ? `+${metrics.callsCompleted - metrics.dailyTarget} bonus`
+                      : "Goal met"}
+                  </span>
+                </>
+              ) : (
+                <>
+                  <span className="text-text-muted tabular-nums">
+                    {percentComplete}% of daily goal
+                  </span>
+                  <span className="font-semibold text-text-secondary tabular-nums">
+                    {metrics.callsRemaining} remaining
+                  </span>
+                </>
+              )}
             </div>
           </div>
         </div>

@@ -41,13 +41,23 @@ export function PersonalPerformanceCard({
 
         {/* User points & stats */}
         <div>
-          <div className="flex items-center gap-2">
-            <span className="font-extrabold text-sm text-text-primary">
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="font-extrabold text-sm text-text-primary tabular-nums">
               {profile.totalPoints} pts
             </span>
             <span className="text-[11px] text-text-muted">
               ({profile.rank} of {profile.totalVolunteers} volunteers)
             </span>
+            {profile.rank === 1 && (
+              <span className="rounded-full bg-amber-100 dark:bg-amber-950/60 border border-amber-300 dark:border-amber-700/50 px-2 py-0.2 text-[10px] font-black text-amber-800 dark:text-amber-300">
+                Podium Leader 👑
+              </span>
+            )}
+            {profile.dealsWon > 0 && profile.rank > 1 && (
+              <span className="rounded-full bg-emerald-100 dark:bg-emerald-950/60 border border-emerald-300 dark:border-emerald-700/50 px-2 py-0.2 text-[10px] font-bold text-emerald-800 dark:text-emerald-300 tabular-nums">
+                {profile.dealsWon} Deals Won 🏆
+              </span>
+            )}
           </div>
           <div className="flex items-center gap-3 text-[11px] text-text-secondary mt-0.5">
             <span className="flex items-center gap-1">

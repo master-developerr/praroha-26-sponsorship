@@ -350,12 +350,28 @@ export function LeadsTable({
             title={
               leads.length === 0
                 ? "No leads assigned yet"
+                : searchQuery.trim().length > 0
+                ? "No matching accounts found"
+                : activeTab === "to_contact"
+                ? "All assigned accounts dialed! 👏"
+                : activeTab === "follow_up"
+                ? "No callbacks due right now"
+                : activeTab === "interested"
+                ? "No active interested deals yet"
                 : "No leads match current filters"
             }
             description={
               leads.length === 0
                 ? "Your allocated sponsorship leads will automatically populate here once assigned by the Sponsorship Head."
-                : "Try clearing your search query or adjusting priority filters."
+                : searchQuery.trim().length > 0
+                ? `No assigned leads match "${searchQuery}". Clear your search query to see all accounts.`
+                : activeTab === "to_contact"
+                ? "You've contacted every fresh account in your initial queue. Head to 'Follow-ups' for scheduled callbacks or review active deals."
+                : activeTab === "follow_up"
+                ? "Your follow-up pipeline is currently clear. Focus on high-priority accounts or review proposal statuses."
+                : activeTab === "interested"
+                ? "Direct conversations turn corporate interest into signed festival partnerships. Keep dialing!"
+                : "Try clearing your sector or priority filter dropdowns."
             }
           />
         </div>
