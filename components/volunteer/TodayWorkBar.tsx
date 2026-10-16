@@ -134,11 +134,11 @@ export function TodayWorkBar({
           </div>
         </div>
 
-        {/* 3. Overdue Follow-ups (Urgent Coral #F18A70 alert) */}
+        {/* 3. Overdue Follow-ups (Urgent Coral / Rose Alert) */}
         <div
           className={`rounded-xl border p-3 flex flex-col justify-between transition-colors ${
             metrics.overdueFollowUps > 0
-              ? "border-[#F18A70] bg-[#F18A70]/10 text-text-primary"
+              ? "border-rose-300 dark:border-rose-900/60 bg-rose-50/70 dark:bg-rose-950/20 text-text-primary"
               : "border-border-subtle bg-surface-subtle/60 text-text-secondary"
           }`}
         >
@@ -146,7 +146,9 @@ export function TodayWorkBar({
             <span className="text-xs font-semibold flex items-center gap-1.5">
               <AlertCircle
                 className={`h-3.5 w-3.5 ${
-                  metrics.overdueFollowUps > 0 ? "text-[#F18A70]" : "text-text-muted"
+                  metrics.overdueFollowUps > 0
+                    ? "text-rose-600 dark:text-rose-400"
+                    : "text-text-muted"
                 }`}
               />
               Overdue
@@ -154,7 +156,7 @@ export function TodayWorkBar({
             <span
               className={`rounded-full px-2 py-0.5 text-[10px] font-bold tabular-nums ${
                 metrics.overdueFollowUps > 0
-                  ? "bg-[#F18A70] text-white"
+                  ? "bg-rose-600 text-white shadow-xs"
                   : "bg-surface text-text-muted border border-border"
               }`}
             >
@@ -164,7 +166,9 @@ export function TodayWorkBar({
           <div className="mt-2">
             <p
               className={`text-xl font-bold tabular-nums ${
-                metrics.overdueFollowUps > 0 ? "text-[#F18A70]" : "text-text-primary"
+                metrics.overdueFollowUps > 0
+                  ? "text-rose-700 dark:text-rose-300"
+                  : "text-text-primary"
               }`}
             >
               {metrics.overdueFollowUps}

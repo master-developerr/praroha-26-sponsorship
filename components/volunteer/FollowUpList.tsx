@@ -83,23 +83,23 @@ export function FollowUpList({ onStartCall }: FollowUpListProps) {
         </div>
       ) : (
         <div className="space-y-3 max-h-[420px] overflow-y-auto pr-1">
-          {/* 1. Overdue Callbacks (Urgent Coral #F18A70 alert) */}
+          {/* 1. Overdue Callbacks (Urgent Coral / Rose Alert) */}
           {overdue.length > 0 && (
             <div className="space-y-2">
-              <div className="flex items-center gap-1.5 text-[11px] font-bold text-[#F18A70] uppercase tracking-wider">
+              <div className="flex items-center gap-1.5 text-[11px] font-bold text-rose-600 dark:text-rose-400 uppercase tracking-wider">
                 <AlertCircle className="h-3.5 w-3.5" />
                 <span>Overdue Callbacks ({overdue.length})</span>
               </div>
               {overdue.map((item) => (
                 <div
                   key={item._id}
-                  className="rounded-xl border border-[#F18A70]/40 bg-[#F18A70]/5 p-3 space-y-2 text-xs"
+                  className="rounded-xl border border-rose-300 dark:border-rose-900/60 bg-rose-50/60 dark:bg-rose-950/20 p-3 space-y-2 text-xs"
                 >
                   <div className="flex items-center justify-between">
                     <span className="font-bold text-text-primary">
                       {item.companyName}
                     </span>
-                    <span className="text-[10px] font-bold text-[#F18A70] bg-[#F18A70]/10 px-1.5 py-0.2 rounded">
+                    <span className="text-[10px] font-bold text-rose-700 dark:text-rose-300 bg-rose-100 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-800/50 px-1.5 py-0.2 rounded">
                       Overdue
                     </span>
                   </div>
@@ -141,7 +141,7 @@ export function FollowUpList({ onStartCall }: FollowUpListProps) {
                             primaryContact: item.primaryContact,
                           })
                         }
-                        className="h-6 px-2.5 bg-[#F18A70] hover:bg-[#F18A70]/90 text-white text-[11px] font-bold"
+                        className="h-6 px-2.5 bg-rose-600 hover:bg-rose-700 text-white text-[11px] font-bold shadow-xs"
                       >
                         <PhoneCall className="h-3 w-3 mr-1" />
                         Call Now

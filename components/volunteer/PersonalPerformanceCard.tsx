@@ -21,12 +21,12 @@ export function PersonalPerformanceCard({
   const isTopThree = profile.rank <= 3;
   const rankColor =
     profile.rank === 1
-      ? "text-amber-500 bg-amber-500/10 border-amber-500/30"
+      ? "text-amber-700 dark:text-amber-400 bg-amber-500/10 border-amber-500/30"
       : profile.rank === 2
-      ? "text-slate-400 bg-slate-500/10 border-slate-400/30"
+      ? "text-slate-700 dark:text-slate-300 bg-slate-500/10 border-slate-400/30"
       : profile.rank === 3
-      ? "text-amber-700 bg-amber-700/10 border-amber-700/30"
-      : "text-teal-600 bg-teal-500/10 border-teal-500/20";
+      ? "text-amber-900 dark:text-amber-400 bg-amber-700/10 border-amber-700/30"
+      : "text-teal-700 dark:text-teal-400 bg-teal-500/10 border-teal-500/20";
 
   return (
     <div className="rounded-xl border border-border bg-surface p-3 shadow-2xs flex flex-wrap items-center justify-between gap-3 text-xs">

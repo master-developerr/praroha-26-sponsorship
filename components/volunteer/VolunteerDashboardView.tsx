@@ -201,7 +201,7 @@ export function VolunteerDashboardView() {
           </div>
 
           {/* Festival Editorial Card */}
-          <div className="relative hidden lg:flex items-center justify-center w-72 h-40 rounded-xl border border-border bg-gradient-to-br from-surface to-[#F0F7F4] p-4 shadow-xs overflow-hidden">
+          <div className="relative hidden lg:flex items-center justify-center w-72 h-40 rounded-xl border border-border bg-gradient-to-br from-surface to-accent-mint/30 p-4 shadow-xs overflow-hidden">
             <div className="text-center space-y-1 z-10">
               <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-xl bg-accent-mint text-primary shadow-xs">
                 <Sparkles className="h-5 w-5" />
