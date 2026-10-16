@@ -77,10 +77,10 @@ export function TodayWorkBar({
         </div>
       </div>
 
-      {/* Metric Cards Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3 pt-4">
+      {/* Metric Cards Grid: 2-col on mobile/tablet (with wide quota bar), 5-col on desktop */}
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 pt-4">
         {/* 1. Daily Quota Progress */}
-        <div className="col-span-2 sm:col-span-1 rounded-xl border border-border-subtle bg-surface-subtle/60 p-3 flex flex-col justify-between">
+        <div className="col-span-2 lg:col-span-1 rounded-xl border border-border-subtle bg-surface-subtle/60 p-3 flex flex-col justify-between">
           <div className="flex items-center justify-between text-xs text-text-secondary">
             <span className="font-semibold text-text-primary flex items-center gap-1.5">
               <PhoneCall className="h-3.5 w-3.5 text-primary" />

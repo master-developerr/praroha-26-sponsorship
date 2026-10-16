@@ -212,11 +212,11 @@ export function CallModeOverlay({
             </span>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
             {/* 1. Interested */}
             <button
               onClick={() => handleOutcomeClick("Interested")}
-              className="flex items-center justify-center rounded-lg border border-emerald-300 bg-emerald-50 px-3 py-2 text-xs font-bold text-emerald-800 hover:bg-emerald-100 transition-colors shadow-xs cursor-pointer focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary"
+              className="flex min-h-[44px] items-center justify-center rounded-lg border border-emerald-300 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/40 px-3 py-2 text-xs font-bold text-emerald-800 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 transition-colors shadow-xs cursor-pointer focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary"
             >
               Interested
             </button>
@@ -224,7 +224,7 @@ export function CallModeOverlay({
             {/* 2. Asked for proposal */}
             <button
               onClick={() => handleOutcomeClick("Asked for proposal")}
-              className="flex items-center justify-center rounded-lg border border-sky-300 bg-sky-50 px-3 py-2 text-xs font-bold text-sky-800 hover:bg-sky-100 transition-colors shadow-xs cursor-pointer focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary"
+              className="flex min-h-[44px] items-center justify-center rounded-lg border border-sky-300 dark:border-sky-800 bg-sky-50 dark:bg-sky-950/40 px-3 py-2 text-xs font-bold text-sky-800 dark:text-sky-300 hover:bg-sky-100 dark:hover:bg-sky-900/50 transition-colors shadow-xs cursor-pointer focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary"
             >
               Proposal Req.
             </button>
@@ -232,7 +232,7 @@ export function CallModeOverlay({
             {/* 3. Asked for budget */}
             <button
               onClick={() => handleOutcomeClick("Asked for budget")}
-              className="flex items-center justify-center rounded-lg border border-indigo-300 bg-indigo-50 px-3 py-2 text-xs font-bold text-indigo-800 hover:bg-indigo-100 transition-colors shadow-xs cursor-pointer focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary"
+              className="flex min-h-[44px] items-center justify-center rounded-lg border border-indigo-300 dark:border-indigo-800 bg-indigo-50 dark:bg-indigo-950/40 px-3 py-2 text-xs font-bold text-indigo-800 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition-colors shadow-xs cursor-pointer focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary"
             >
               Budget Req.
             </button>
@@ -240,7 +240,7 @@ export function CallModeOverlay({
             {/* 4. Meeting requested */}
             <button
               onClick={() => handleOutcomeClick("Meeting requested")}
-              className="flex items-center justify-center rounded-lg border border-teal-300 bg-teal-50 px-3 py-2 text-xs font-bold text-teal-800 hover:bg-teal-100 transition-colors shadow-xs cursor-pointer focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary"
+              className="flex min-h-[44px] items-center justify-center rounded-lg border border-teal-300 dark:border-teal-800 bg-teal-50 dark:bg-teal-950/40 px-3 py-2 text-xs font-bold text-teal-800 dark:text-teal-300 hover:bg-teal-100 dark:hover:bg-teal-900/50 transition-colors shadow-xs cursor-pointer focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary"
             >
               Meeting Set
             </button>
@@ -248,7 +248,7 @@ export function CallModeOverlay({
             {/* 5. Non-cash opportunity */}
             <button
               onClick={() => handleOutcomeClick("Non-cash opportunity")}
-              className="flex items-center justify-center rounded-lg border border-purple-300 bg-purple-50 px-3 py-2 text-xs font-bold text-purple-800 hover:bg-purple-100 transition-colors shadow-xs cursor-pointer focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary"
+              className="flex min-h-[44px] items-center justify-center rounded-lg border border-purple-300 dark:border-purple-800 bg-purple-50 dark:bg-purple-950/40 px-3 py-2 text-xs font-bold text-purple-800 dark:text-purple-300 hover:bg-purple-100 dark:hover:bg-purple-900/50 transition-colors shadow-xs cursor-pointer focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary"
             >
               Non-Cash / In-Kind
             </button>
@@ -256,7 +256,7 @@ export function CallModeOverlay({
             {/* 6. Call back */}
             <button
               onClick={() => handleOutcomeClick("Call back")}
-              className="flex items-center justify-center rounded-lg border border-yellow-300 bg-yellow-50 px-3 py-2 text-xs font-bold text-yellow-800 hover:bg-yellow-100 transition-colors shadow-xs cursor-pointer focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary"
+              className="flex min-h-[44px] items-center justify-center rounded-lg border border-amber-300 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/40 px-3 py-2 text-xs font-bold text-amber-800 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/50 transition-colors shadow-xs cursor-pointer focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary"
             >
               Call Back Later
             </button>
@@ -264,7 +264,7 @@ export function CallModeOverlay({
             {/* 7. Wrong person */}
             <button
               onClick={() => handleOutcomeClick("Wrong person")}
-              className="flex items-center justify-center rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-xs font-semibold text-zinc-700 hover:bg-zinc-100 transition-colors shadow-xs cursor-pointer focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary"
+              className="flex min-h-[44px] items-center justify-center rounded-lg border border-border-subtle bg-surface-subtle px-3 py-2 text-xs font-semibold text-text-secondary hover:bg-surface-hover hover:text-text-primary transition-colors shadow-xs cursor-pointer focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary"
             >
               Wrong Contact
             </button>
@@ -272,7 +272,7 @@ export function CallModeOverlay({
             {/* 8. Rejected */}
             <button
               onClick={() => handleOutcomeClick("Rejected")}
-              className="flex items-center justify-center rounded-lg border border-rose-300 bg-rose-50 px-3 py-2 text-xs font-bold text-rose-800 hover:bg-rose-100 transition-colors shadow-xs cursor-pointer focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary"
+              className="flex min-h-[44px] items-center justify-center rounded-lg border border-rose-300 dark:border-rose-800 bg-rose-50 dark:bg-rose-950/40 px-3 py-2 text-xs font-bold text-rose-800 dark:text-rose-300 hover:bg-rose-100 dark:hover:bg-rose-900/50 transition-colors shadow-xs cursor-pointer focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary"
             >
               Rejected
             </button>
@@ -280,7 +280,7 @@ export function CallModeOverlay({
             {/* 9. Other */}
             <button
               onClick={() => handleOutcomeClick("Other")}
-              className="flex items-center justify-center rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-xs font-semibold text-zinc-700 hover:bg-zinc-100 transition-colors shadow-xs cursor-pointer col-span-2 sm:col-span-1 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary"
+              className="flex min-h-[44px] items-center justify-center rounded-lg border border-border-subtle bg-surface-subtle px-3 py-2 text-xs font-semibold text-text-secondary hover:bg-surface-hover hover:text-text-primary transition-colors shadow-xs cursor-pointer col-span-2 sm:col-span-1 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary"
             >
               Other Outcome
             </button>
