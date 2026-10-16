@@ -14,6 +14,7 @@ import type * as assignments from "../assignments.js";
 import type * as calls from "../calls.js";
 import type * as commitments from "../commitments.js";
 import type * as companies from "../companies.js";
+import type * as dataManagement from "../dataManagement.js";
 import type * as followUps from "../followUps.js";
 import type * as gamification from "../gamification.js";
 import type * as notifications from "../notifications.js";
@@ -34,6 +35,7 @@ declare const fullApi: ApiFromModules<{
   calls: typeof calls;
   commitments: typeof commitments;
   companies: typeof companies;
+  dataManagement: typeof dataManagement;
   followUps: typeof followUps;
   gamification: typeof gamification;
   notifications: typeof notifications;

@@ -130,12 +130,24 @@ graph TD
 - **4.4 Forensic Audit Log Console (`/admin/analytics`):**
   - Searchable, filterable audit event log (commitments, lead reassignments, volunteer verifications, points adjustments, call debriefs).
   - Expandable JSON payload diff inspection.
-- **4.5 Administrative Data Export Hub (`/admin/analytics`):**
-  - 4-card RFC-4180 CSV export suite:
+- **4.5 Administrative Data Export Hub (`/admin/analytics` & `/admin/data-management`):**
+  - Certified RFC-4180 CSV export suite:
     1. Master Lead Directory (29 canonical fields)
     2. Outreach Calls History & Discussion Summaries
-    3. Ratified Sponsorship Commitments & Deliverables
-    4. Administrative Audit Trail
+    3. Student SDR Volunteers & Performance Roster
+    4. Ratified Sponsorship Commitments & Deliverables
+    5. Administrative Audit Trail
+- **4.6 Admin Data Management & Danger Zone (`/admin/data-management`):**
+  - Full-cockpit administrative data lifecycle engine with live storage telemetry across all 13 Convex collections.
+  - Server-side zero-trust security gate (`assertAdminUser`) enforcing `role === "admin"` and `verificationStatus === "approved"` with non-admin rejection.
+  - Multi-tiered destructive operational suite with cascading cleanup:
+    1. **Delete All Leads:** Cascades across companies, contacts, assignments, follow-ups, calls, debriefs, proposals, commitments, and AI analyses. Confirmation phrase: `DELETE ALL LEADS`.
+    2. **Delete All Students / Volunteers:** Cascades across volunteer accounts, assignments, point transactions, calls, debriefs, notifications, and resets assigned companies to `UNASSIGNED`. Preserves admin accounts. Confirmation phrase: `DELETE ALL STUDENTS`.
+    3. **Delete All Outreach Data:** Clears calls, debriefs, follow-ups, proposals, lead assignments, and points while preserving company master leads and user accounts. Confirmation phrase: `DELETE ALL OUTREACH`.
+    4. **Reset Event Data:** Purges all operational sponsorship records while preserving all user accounts, festival configuration, and system settings. Confirmation phrase: `RESET EVENT DATA`.
+    5. **Factory Reset:** Two-step extreme emergency action wiping all operational collections and all other user accounts, preserving strictly the calling primary admin account. Confirmation phrase: `FACTORY RESET PRAROHA26`.
+  - Mandatory pre-deletion export recommendations and exact-phrase confirmation modal gates.
+  - Immutable audit stream recording actor, timestamp, affected record breakdown, and status in `auditLogs`.
 
 ---
 

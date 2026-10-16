@@ -411,7 +411,9 @@ export const getExportData = query({
       v.literal("companies"),
       v.literal("calls"),
       v.literal("commitments"),
-      v.literal("audit_logs")
+      v.literal("audit_logs"),
+      v.literal("students"),
+      v.literal("outreach")
     ),
   },
   handler: async (ctx, args) => {
@@ -557,6 +559,52 @@ export const getExportData = query({
           entity_type: l.entityType,
           entity_id: l.entityId,
           changes: l.changes,
+        };
+      });
+    }
+
+    if (args.type === "students") {
+      const users = await ctx.db.query("users").collect();
+      return users
+        .filter((u) => u.role !== "admin")
+        .map((u) => ({
+          student_id: u._id,
+          name: u.name,
+          email: u.email,
+          phone: u.phone,
+          department: u.department,
+          semester: u.semester,
+          verification_status: u.verificationStatus,
+          total_points: u.totalPoints || 0,
+          registered_date: new Date(u.createdAt).toISOString(),
+        }));
+    }
+
+    if (args.type === "outreach") {
+      const calls = await ctx.db.query("calls").order("desc").collect();
+      const debriefs = await ctx.db.query("callDebriefs").collect();
+      const companies = await ctx.db.query("companies").collect();
+      const users = await ctx.db.query("users").collect();
+
+      const debriefMap = new Map(debriefs.map((d) => [d.callId, d]));
+      const companyMap = new Map(companies.map((c) => [c._id, c]));
+      const userMap = new Map(users.map((u) => [u._id, u]));
+
+      return calls.map((c) => {
+        const debrief = debriefMap.get(c._id);
+        const comp = companyMap.get(c.companyId);
+        const volunteer = userMap.get(c.volunteerId);
+
+        return {
+          call_id: c._id,
+          company_name: comp?.companyName || "Unknown",
+          volunteer_name: volunteer?.name || "Student SDR",
+          duration_seconds: c.durationSeconds,
+          quick_outcome: c.quickOutcome,
+          discussion_summary: debrief?.discussionSummary || "",
+          primary_objection: debrief?.primaryObjection || "",
+          interest_level: debrief?.interestLevel || "None",
+          date_logged: new Date(c.createdAt).toISOString(),
         };
       });
     }

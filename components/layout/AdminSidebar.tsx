@@ -15,6 +15,7 @@ import {
   ChevronDown,
   LogOut,
   ShieldAlert,
+  Database,
 } from "lucide-react";
 import { useAuthUser } from "@/components/providers/AuthProvider";
 
@@ -71,6 +72,13 @@ export function AdminSidebar() {
       icon: Award,
       href: "/admin/leaderboard",
       isActive: pathname.startsWith("/admin/leaderboard"),
+      badge: "Active",
+    },
+    {
+      label: "Data Management",
+      icon: Database,
+      href: "/admin/data-management",
+      isActive: pathname.startsWith("/admin/data-management"),
       badge: "Active",
     },
   ];

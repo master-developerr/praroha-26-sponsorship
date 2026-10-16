@@ -14,9 +14,9 @@
 | **P0: Core Operations & Auth** | 6 | 6 | 0 | **100%** |
 | **P1: Sponsorship Operations** | 4 | 4 | 0 | **100%** |
 | **P2: AI Intelligence Layer** | 1 | 1 (With Fallback) | 0 | **100%** |
-| **P3: Team Management & Admin** | 2 | 2 | 0 | **100%** |
+| **P3: Team Management & Admin** | 3 | 3 | 0 | **100%** |
 | **P4: Supporting Systems & Audit**| 1 | 1 | 0 | **100%** |
-| **Total Operational Modules** | **14** | **14** | **0** | **100%** |
+| **Total Operational Modules** | **15** | **15** | **0** | **100%** |
 
 > [!NOTE]
 > **Operational Status Definition:**
@@ -26,10 +26,10 @@
 
 ---
 
-## 2. 14-Module Detailed Feature Matrix
+## 2. 15-Module Detailed Feature Matrix
 
 | # | Operational Module | Primary Route(s) & Components | Backend Convex Endpoints | Operational Reality & Features Tested | Verified Status |
-| :-: | :--- | :--- | :--- | :--- | :---: |
+| :-: | :--- | :--- | :--- | :--- | :--- | :---: |
 | **1** | **Executive Overview & Macro Cockpit** | `/admin`<br>`components/admin/ExecutiveDashboardView.tsx` | `api.analytics.getExecutiveDashboard` | Aggregates real pipeline valuation, liquid cash vs in-kind non-cash, active SDR count, volunteer verification breakdown (approved/pending/rejected/suspended), lead lifecycle distribution (unassigned/assigned/in pipeline/won/lost), and live audit feed. Displays clean empty states when database has no activity. | **Functional** (Active) |
 | **2** | **Volunteer Verification & Governance** | `/admin/verifications`<br>`components/admin/VolunteerVerificationQueue.tsx`<br>`components/forms/VolunteerRegistrationModal.tsx` | `api.users.getUsersByVerification`<br>`api.users.updateVolunteerStatus`<br>`api.users.toggleUserRole` | 4-field mandatory registration (Name, Phone, Semester, Department). Admin queue allows Approve, Reject (with mandatory reason), Suspend, and Role Toggle. Route guards actively block unapproved users (`/pending`, `/rejected`, `/suspended`). Emits `users:verify` audit logs. | **Functional** (Active) |
 | **3** | **Master Lead Directory** | `/admin/leads`<br>`components/admin/MasterLeadTable.tsx` | `api.companies.getAllCompanies`<br>`api.companies.getCompanyMetrics`<br>`api.companies.updateCompany` | High-density data grid displaying all 29 canonical fields. Multi-attribute filtering (industry, priority, lead status, Kerala presence). Column sorting, search, company edit drawer, and contact classification (`phoneType`, 4-tier `contactVerification`). | **Functional** (Active) |
@@ -44,6 +44,7 @@
 | **12** | **Sponsorship Commitments Portal** | `/admin/commitments` (Tab 1)<br>`components/forms/CreateCommitmentModal.tsx`<br>`components/forms/EditCommitmentModal.tsx` | `api.commitments.getAllCommitments`<br>`api.commitments.createCommitment`<br>`api.commitments.updateCommitment`<br>`api.commitments.updateCommitmentStatus`<br>`api.commitments.deleteCommitment` | Dedicated commercial contract management table. 8 lifecycle statuses (`PROSPECT` to `CANCELLED`). Contracted cash amount + 13 in-kind non-cash categories with estimated monetary INR valuation. MoU reference code, deliverables checklist (standard + custom), SDR attribution, and full CRUD. | **Functional** (Active) |
 | **13** | **Audit Trail & RFC-4180 Data Export** | `/admin/analytics`<br>`components/admin/AuditLogConsole.tsx`<br>`components/admin/DataExportHub.tsx` | `api.analytics.getAuditLogsFiltered`<br>`api.analytics.getExportData` | Searchable forensic audit console with expandable JSON payload diffs and multi-action filters. Data Export Hub provides 1-click RFC-4180 CSV downloads for: (1) Master Leads, (2) Call History, (3) Ratified Commitments, and (4) Administrative Audit Trail. | **Functional** (Active) |
 | **14** | **Gamification & Honors Leaderboard** | `/admin/leaderboard`<br>`/workspace/leaderboard`<br>`components/volunteer/LeaderboardPodium.tsx`<br>`components/admin/AdjustPointsModal.tsx` | `api.gamification.getLeaderboard`<br>`api.gamification.adjustPoints` | Real-time Gold, Silver, Bronze podium with ranked team roster. Tracks calls logged, deals won, total points, and conversion rates. Idempotent points ledger. Admin points adjustment modal with audit reason. Clean empty state when no activity has occurred yet. | **Functional** (Active) |
+| **15** | **Data Management & Danger Zone** | `/admin/data-management`<br>`components/admin/DataManagementView.tsx`<br>`components/admin/DestructiveConfirmationModal.tsx` | `api.dataManagement.getSystemDataCounts`<br>`api.dataManagement.getRecentDestructiveOperations`<br>`api.dataManagement.deleteAllLeads`<br>`api.dataManagement.deleteAllStudents`<br>`api.dataManagement.deleteAllOutreach`<br>`api.dataManagement.resetEventData`<br>`api.dataManagement.factoryReset` | High-security administrative data lifecycle cockpit. Live storage counts across all 13 collections. Certified pre-deletion exports. 5 atomic destructive operations with cascading dependency cleanups, exact phrase gates (`DELETE ALL LEADS`, `DELETE ALL STUDENTS`, `DELETE ALL OUTREACH`, `RESET EVENT DATA`, `FACTORY RESET PRAROHA26`), server-side admin role assertions, and immutable audit logs. | **Functional** (Active) |
 
 ---
 
@@ -65,6 +66,7 @@ Prior to this hardening cycle, the admin sidebar displayed inactive stubs with `
 | **Sponsorship Commitments** | `/admin/commitments` | `Active` | Fully Functional |
 | **Audit & Data Export** | `/admin/analytics` | `Active` | Fully Functional |
 | **Honors Leaderboard** | `/admin/leaderboard` | `Active` | Fully Functional |
+| **Data Management** | `/admin/data-management` | `Active` | Fully Functional |
 
 ---
 
@@ -78,8 +80,8 @@ Prior to this hardening cycle, the admin sidebar displayed inactive stubs with `
 - **Next.js Production Build:**
   ```powershell
   npm run build
-  # Result: Compiled successfully in 2.9s
-  # 29 routes generated (Static, Dynamic, and Partial Prerender)
+  # Result: Compiled successfully in 3.1s
+  # 30 routes generated (Static, Dynamic, and Partial Prerender)
   ```
 - **Convex Schema & Codegen:**
   ```powershell
