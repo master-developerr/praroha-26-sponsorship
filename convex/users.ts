@@ -431,7 +431,11 @@ export const promoteUserToAdminByEmail = mutation({
   handler: async (ctx, args) => {
     const cleanEmail = args.email.trim().toLowerCase();
     const users = await ctx.db.query("users").collect();
-    let targetUser = users.find((u) => u.email.trim().toLowerCase() === cleanEmail);
+    const matchingUsers = users.filter((u) => u.email.trim().toLowerCase() === cleanEmail);
+
+    let targetUser = args.clerkId
+      ? users.find((u) => u.clerkId === args.clerkId) || matchingUsers[0]
+      : matchingUsers[0];
 
     const now = Date.now();
     if (!targetUser) {
@@ -451,13 +455,16 @@ export const promoteUserToAdminByEmail = mutation({
       });
       targetUser = (await ctx.db.get(newUserId))!;
     } else {
-      await ctx.db.patch(targetUser._id, {
-        role: "admin",
-        verificationStatus: "approved",
-        ...(args.name ? { name: args.name } : {}),
-        ...(args.clerkId ? { clerkId: args.clerkId } : {}),
-        updatedAt: now,
-      });
+      for (const u of matchingUsers) {
+        await ctx.db.patch(u._id, {
+          role: "admin",
+          verificationStatus: "approved",
+          ...(args.name ? { name: args.name } : {}),
+          ...(args.clerkId && (u.clerkId === args.clerkId || !u.clerkId) ? { clerkId: args.clerkId } : {}),
+          updatedAt: now,
+        });
+      }
+      targetUser = (await ctx.db.get(targetUser._id))!;
     }
 
     await ctx.db.insert("auditLogs", {
