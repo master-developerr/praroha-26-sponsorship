@@ -200,21 +200,21 @@ export function ExecutiveDashboardView() {
                 </span>
               </div>
               <div className="grid grid-cols-4 gap-2 text-center">
-                <div className="p-2.5 rounded-lg bg-emerald-50 border border-emerald-100">
-                  <span className="text-[10px] font-bold text-emerald-800 uppercase block">Approved</span>
-                  <span className="text-lg font-black text-emerald-700">{volunteersBreakdown?.approved ?? 0}</span>
+                <div className="p-2.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-100 dark:border-emerald-800/50">
+                  <span className="text-[10px] font-bold text-emerald-800 dark:text-emerald-300 uppercase block">Approved</span>
+                  <span className="text-lg font-black text-emerald-700 dark:text-emerald-400">{volunteersBreakdown?.approved ?? 0}</span>
                 </div>
-                <div className="p-2.5 rounded-lg bg-amber-50 border border-amber-100">
-                  <span className="text-[10px] font-bold text-amber-800 uppercase block">Pending</span>
-                  <span className="text-lg font-black text-amber-700">{volunteersBreakdown?.pending ?? 0}</span>
+                <div className="p-2.5 rounded-lg bg-amber-50 dark:bg-amber-950/40 border border-amber-100 dark:border-amber-800/50">
+                  <span className="text-[10px] font-bold text-amber-800 dark:text-amber-300 uppercase block">Pending</span>
+                  <span className="text-lg font-black text-amber-700 dark:text-amber-400">{volunteersBreakdown?.pending ?? 0}</span>
                 </div>
-                <div className="p-2.5 rounded-lg bg-rose-50 border border-rose-100">
-                  <span className="text-[10px] font-bold text-rose-800 uppercase block">Rejected</span>
-                  <span className="text-lg font-black text-rose-700">{volunteersBreakdown?.rejected ?? 0}</span>
+                <div className="p-2.5 rounded-lg bg-rose-50 dark:bg-rose-950/40 border border-rose-100 dark:border-rose-900/50">
+                  <span className="text-[10px] font-bold text-rose-800 dark:text-rose-300 uppercase block">Rejected</span>
+                  <span className="text-lg font-black text-rose-700 dark:text-rose-400">{volunteersBreakdown?.rejected ?? 0}</span>
                 </div>
-                <div className="p-2.5 rounded-lg bg-zinc-100 border border-zinc-200">
-                  <span className="text-[10px] font-bold text-zinc-700 uppercase block">Suspended</span>
-                  <span className="text-lg font-black text-zinc-800">{volunteersBreakdown?.suspended ?? 0}</span>
+                <div className="p-2.5 rounded-lg bg-zinc-100 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800/60">
+                  <span className="text-[10px] font-bold text-zinc-700 dark:text-zinc-400 uppercase block">Suspended</span>
+                  <span className="text-lg font-black text-zinc-800 dark:text-zinc-200">{volunteersBreakdown?.suspended ?? 0}</span>
                 </div>
               </div>
             </div>
@@ -231,21 +231,21 @@ export function ExecutiveDashboardView() {
                 </span>
               </div>
               <div className="grid grid-cols-4 gap-2 text-center">
-                <div className="p-2.5 rounded-lg bg-amber-50 border border-amber-100">
-                  <span className="text-[10px] font-bold text-amber-800 uppercase block">Unassigned</span>
-                  <span className="text-lg font-black text-amber-700">{leadsBreakdown?.unassigned ?? 0}</span>
+                <div className="p-2.5 rounded-lg bg-amber-50 dark:bg-amber-950/40 border border-amber-100 dark:border-amber-800/50">
+                  <span className="text-[10px] font-bold text-amber-800 dark:text-amber-300 uppercase block">Unassigned</span>
+                  <span className="text-lg font-black text-amber-700 dark:text-amber-400">{leadsBreakdown?.unassigned ?? 0}</span>
                 </div>
-                <div className="p-2.5 rounded-lg bg-sky-50 border border-sky-100">
-                  <span className="text-[10px] font-bold text-sky-800 uppercase block">In Outreach</span>
-                  <span className="text-lg font-black text-sky-700">{leadsBreakdown?.inPipeline ?? 0}</span>
+                <div className="p-2.5 rounded-lg bg-sky-50 dark:bg-sky-950/40 border border-sky-100 dark:border-sky-800/50">
+                  <span className="text-[10px] font-bold text-sky-800 dark:text-sky-300 uppercase block">In Outreach</span>
+                  <span className="text-lg font-black text-sky-700 dark:text-sky-400">{leadsBreakdown?.inPipeline ?? 0}</span>
                 </div>
-                <div className="p-2.5 rounded-lg bg-emerald-50 border border-emerald-100">
-                  <span className="text-[10px] font-bold text-emerald-800 uppercase block">Won</span>
-                  <span className="text-lg font-black text-emerald-700">{leadsBreakdown?.won ?? 0}</span>
+                <div className="p-2.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-100 dark:border-emerald-800/50">
+                  <span className="text-[10px] font-bold text-emerald-800 dark:text-emerald-300 uppercase block">Won</span>
+                  <span className="text-lg font-black text-emerald-700 dark:text-emerald-400">{leadsBreakdown?.won ?? 0}</span>
                 </div>
-                <div className="p-2.5 rounded-lg bg-zinc-100 border border-zinc-200">
-                  <span className="text-[10px] font-bold text-zinc-700 uppercase block">Lost</span>
-                  <span className="text-lg font-black text-zinc-800">{leadsBreakdown?.lost ?? 0}</span>
+                <div className="p-2.5 rounded-lg bg-zinc-100 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800/60">
+                  <span className="text-[10px] font-bold text-zinc-700 dark:text-zinc-400 uppercase block">Lost</span>
+                  <span className="text-lg font-black text-zinc-800 dark:text-zinc-200">{leadsBreakdown?.lost ?? 0}</span>
                 </div>
               </div>
             </div>

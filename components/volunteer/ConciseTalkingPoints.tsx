@@ -185,7 +185,7 @@ export function ConciseTalkingPoints({
                 <Sparkles className="h-3.5 w-3.5 text-amber-500" />
                 Natural 15-Second Opening Hook
               </span>
-              <span className="text-[10px] text-amber-800 font-semibold bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
+              <span className="text-[10px] text-amber-800 dark:text-amber-300 font-semibold bg-amber-50 dark:bg-amber-950/60 px-2 py-0.5 rounded border border-amber-200 dark:border-amber-800/40">
                 Do not recite robotically
               </span>
             </div>
@@ -226,7 +226,7 @@ export function ConciseTalkingPoints({
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <span className="font-bold text-text-primary flex items-center gap-1.5">
-                <ShieldAlert className="h-3.5 w-3.5 text-rose-600" />
+                <ShieldAlert className="h-3.5 w-3.5 text-rose-600 dark:text-rose-400" />
                 Collegiate Objection Battlecard
               </span>
               <span className="text-[10px] text-text-muted">
@@ -239,8 +239,8 @@ export function ConciseTalkingPoints({
                   key={i}
                   className="rounded-lg border border-border-subtle bg-surface-subtle/50 p-3 space-y-1.5"
                 >
-                  <p className="font-semibold text-rose-700 flex items-center gap-1.5">
-                    <span className="text-[10px] font-bold bg-rose-100 text-rose-800 px-1.5 py-0.2 rounded">
+                  <p className="font-semibold text-rose-700 dark:text-rose-400 flex items-center gap-1.5">
+                    <span className="text-[10px] font-bold bg-rose-100 dark:bg-rose-950/60 text-rose-800 dark:text-rose-300 border border-rose-200 dark:border-rose-800/40 px-1.5 py-0.2 rounded">
                       Objection
                     </span>
                     "{item.objection}"
@@ -260,11 +260,11 @@ export function ConciseTalkingPoints({
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <span className="font-bold text-text-primary flex items-center gap-1.5">
-                <Gift className="h-3.5 w-3.5 text-purple-600" />
+                <Gift className="h-3.5 w-3.5 text-purple-600 dark:text-purple-400" />
                 Non-Cash / In-Kind Partnership Angles
               </span>
             </div>
-            <div className="rounded-lg border border-purple-200 bg-purple-50/50 p-3 text-purple-900 leading-relaxed">
+            <div className="rounded-lg border border-purple-200 dark:border-purple-900/50 bg-purple-50/50 dark:bg-purple-950/20 p-3 text-purple-900 dark:text-purple-200 leading-relaxed">
               <p className="font-semibold mb-1">Viable Non-Cash Alternatives:</p>
               <p>
                 {alternativeSupport ||

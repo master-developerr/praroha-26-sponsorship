@@ -272,24 +272,24 @@ export function CompanyDossierDrawer({
               {(company.whyGoodLead || company.whyCompanyBenefits) && (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
                   {company.whyGoodLead && (
-                    <div className="rounded-xl border border-border bg-emerald-50/40 p-3.5 space-y-1">
-                      <span className="font-semibold text-emerald-950 flex items-center gap-1.5">
-                        <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
+                    <div className="rounded-xl border border-border bg-emerald-50/40 dark:bg-emerald-950/20 p-3.5 space-y-1">
+                      <span className="font-semibold text-emerald-950 dark:text-emerald-200 flex items-center gap-1.5">
+                        <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
                         Why This Lead Matters
                       </span>
-                      <p className="text-emerald-900/80 leading-relaxed">
+                      <p className="text-emerald-900/80 dark:text-emerald-200/80 leading-relaxed">
                         {company.whyGoodLead}
                       </p>
                     </div>
                   )}
 
                   {company.whyCompanyBenefits && (
-                    <div className="rounded-xl border border-border bg-sky-50/40 p-3.5 space-y-1">
-                      <span className="font-semibold text-sky-950 flex items-center gap-1.5">
-                        <Lightbulb className="h-3.5 w-3.5 text-sky-600" />
+                    <div className="rounded-xl border border-border bg-sky-50/40 dark:bg-sky-950/20 p-3.5 space-y-1">
+                      <span className="font-semibold text-sky-950 dark:text-sky-200 flex items-center gap-1.5">
+                        <Lightbulb className="h-3.5 w-3.5 text-sky-600 dark:text-sky-400" />
                         Value for the Sponsor
                       </span>
-                      <p className="text-sky-900/80 leading-relaxed">
+                      <p className="text-sky-900/80 dark:text-sky-200/80 leading-relaxed">
                         {company.whyCompanyBenefits}
                       </p>
                     </div>
@@ -368,11 +368,11 @@ export function CompanyDossierDrawer({
               </div>
 
               {company.notes && (
-                <div className="rounded-xl border border-border bg-amber-50/40 p-3.5 text-xs">
-                  <span className="font-semibold text-amber-900 block mb-1">
+                <div className="rounded-xl border border-border bg-amber-50/40 dark:bg-amber-950/20 p-3.5 text-xs">
+                  <span className="font-semibold text-amber-900 dark:text-amber-200 block mb-1">
                     Internal Outreach Notes:
                   </span>
-                  <p className="text-amber-800 leading-relaxed">{company.notes}</p>
+                  <p className="text-amber-800 dark:text-amber-200/80 leading-relaxed">{company.notes}</p>
                 </div>
               )}
             </div>
@@ -476,10 +476,10 @@ export function CompanyDossierDrawer({
                           <span
                             className={`rounded-full border px-2 py-0.5 text-[10px] font-bold ${
                               p.status === "sent"
-                                ? "bg-sky-50 text-sky-800 border-sky-300"
+                                ? "bg-sky-50 dark:bg-sky-950/40 text-sky-800 dark:text-sky-300 border-sky-300 dark:border-sky-800/50"
                                 : p.status === "accepted"
-                                ? "bg-emerald-50 text-emerald-800 border-emerald-300"
-                                : "bg-amber-50 text-amber-800 border-amber-300"
+                                ? "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 border-emerald-300 dark:border-emerald-800/50"
+                                : "bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 border-amber-300 dark:border-amber-800/50"
                             }`}
                           >
                             {p.status.toUpperCase()}
@@ -499,13 +499,13 @@ export function CompanyDossierDrawer({
                       </div>
 
                       {p.inKindCategory && p.inKindEstimatedValue && (
-                        <div className="rounded-lg bg-purple-50/50 border border-purple-200 p-2 text-[11px] text-purple-950 flex items-center justify-between">
+                        <div className="rounded-lg bg-purple-50/50 dark:bg-purple-950/20 border border-purple-200 dark:border-purple-800/50 p-2 text-[11px] text-purple-950 dark:text-purple-200 flex items-center justify-between">
                           <span className="flex items-center gap-1 font-semibold">
-                            <Gift className="h-3.5 w-3.5 text-purple-700" />
+                            <Gift className="h-3.5 w-3.5 text-purple-700 dark:text-purple-400" />
                             Non-Cash: {p.inKindCategory} ({formatCurrencyINR(p.inKindEstimatedValue)})
                           </span>
                           {p.inKindDescription && (
-                            <span className="text-purple-900 truncate max-w-xs">
+                            <span className="text-purple-900 dark:text-purple-300 truncate max-w-xs">
                               {p.inKindDescription}
                             </span>
                           )}

@@ -152,22 +152,22 @@ export function OpportunityApprovalModal({
     >
       <form onSubmit={handleAuthorize} className="space-y-4 pt-2 max-h-[75vh] overflow-y-auto pr-1">
         {errorMsg && (
-          <div className="rounded-xl border border-rose-200 bg-rose-50 p-3 text-xs text-rose-800 flex items-center gap-2">
-            <AlertCircle className="h-4 w-4 shrink-0 text-rose-600" />
+          <div className="rounded-xl border border-rose-200 dark:border-rose-900/60 bg-rose-50 dark:bg-rose-950/40 p-3 text-xs text-rose-800 dark:text-rose-300 flex items-center gap-2">
+            <AlertCircle className="h-4 w-4 shrink-0 text-rose-600 dark:text-rose-400" />
             <span>{errorMsg}</span>
           </div>
         )}
 
         {/* Exclusive Authority Banner */}
-        <div className="rounded-xl bg-emerald-50 border border-emerald-200 p-3 flex items-center gap-3 text-xs text-emerald-950">
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-emerald-600 text-white shadow-xs">
+        <div className="rounded-xl bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-900/50 p-3 flex items-center gap-3 text-xs text-emerald-950 dark:text-emerald-100">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-emerald-600 dark:bg-emerald-500 text-white shadow-xs">
             <ShieldCheck className="h-5 w-5" />
           </div>
           <div>
             <span className="font-bold block">
               Core Committee Administrative Signing Authority
             </span>
-            <span className="text-[11px] text-emerald-800">
+            <span className="text-[11px] text-emerald-800 dark:text-emerald-300">
               This action creates an immutable binding sponsorship record and advances <strong>{company.companyName}</strong> to WON.
             </span>
           </div>
@@ -196,7 +196,7 @@ export function OpportunityApprovalModal({
 
             <div className="space-y-1 pt-1">
               <label className="text-[11px] font-semibold text-text-secondary flex items-center gap-1">
-                <Coins className="h-3.5 w-3.5 text-emerald-600" />
+                <Coins className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
                 Confirmed Cash Amount (₹)
               </label>
               <Input
@@ -216,7 +216,7 @@ export function OpportunityApprovalModal({
               Total Corporate Commitment Value
             </span>
             <div className="text-right">
-              <span className="text-2xl font-black text-emerald-700 block">
+              <span className="text-2xl font-black text-emerald-700 dark:text-emerald-400 block">
                 {formatCurrencyINR(totalCommittedValue)}
               </span>
               <span className="text-[11px] text-text-secondary font-medium">
@@ -224,7 +224,7 @@ export function OpportunityApprovalModal({
                 {hasInKind ? ` + In-Kind: ${formatCurrencyINR(inKindEstimatedValue || 0)}` : ""}
               </span>
             </div>
-            <span className="rounded-full bg-emerald-100 text-emerald-900 border border-emerald-300 text-[10px] font-bold px-2 py-0.5">
+            <span className="rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-900 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800/40 text-[10px] font-bold px-2 py-0.5">
               FESTIVAL REVENUE RECOGNITION
             </span>
           </div>
@@ -248,7 +248,7 @@ export function OpportunityApprovalModal({
               Includes In-Kind / Non-Cash Deliverables
             </label>
             {hasInKind && (
-              <span className="text-[11px] text-purple-700 font-semibold">
+              <span className="text-[11px] text-purple-700 dark:text-purple-300 font-semibold">
                 Valuation: {formatCurrencyINR(inKindEstimatedValue || 0)}
               </span>
             )}

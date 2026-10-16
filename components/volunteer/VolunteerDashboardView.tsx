@@ -244,8 +244,8 @@ export function VolunteerDashboardView() {
           change={`${safeMetrics.callsRemaining} to daily goal`}
           changeType={safeMetrics.callsRemaining === 0 ? "positive" : "neutral"}
           icon={PhoneCall}
-          iconBgColor="bg-emerald-50"
-          iconColor="text-emerald-600"
+          iconBgColor="bg-emerald-50 dark:bg-emerald-950/40"
+          iconColor="text-emerald-600 dark:text-emerald-400"
           sparklineColor="#10B981"
         />
         <StatCard
@@ -254,8 +254,8 @@ export function VolunteerDashboardView() {
           change={`${safeMetrics.toContact} uncontacted`}
           changeType="neutral"
           icon={Building2}
-          iconBgColor="bg-sky-50"
-          iconColor="text-sky-600"
+          iconBgColor="bg-sky-50 dark:bg-sky-950/40"
+          iconColor="text-sky-600 dark:text-sky-400"
           sparklineColor="#0284C7"
         />
         <StatCard
@@ -268,8 +268,8 @@ export function VolunteerDashboardView() {
           }
           changeType={safeMetrics.overdueFollowUps > 0 ? "negative" : "neutral"}
           icon={Calendar}
-          iconBgColor="bg-amber-50"
-          iconColor="text-amber-600"
+          iconBgColor="bg-amber-50 dark:bg-amber-950/40"
+          iconColor="text-amber-600 dark:text-amber-400"
           sparklineColor="#F59E0B"
         />
         <StatCard
@@ -278,8 +278,8 @@ export function VolunteerDashboardView() {
           change={`${safeMetrics.interestedCount} positive`}
           changeType={safeMetrics.interestedCount > 0 ? "positive" : "neutral"}
           icon={Trophy}
-          iconBgColor="bg-teal-50"
-          iconColor="text-teal-600"
+          iconBgColor="bg-teal-50 dark:bg-teal-950/40"
+          iconColor="text-teal-600 dark:text-teal-300"
           sparklineColor="#0D7A68"
         />
       </div>

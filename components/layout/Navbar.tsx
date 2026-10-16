@@ -201,7 +201,7 @@ export function Navbar({
                     {profile.department} • {profile.semester}
                   </p>
                   <div className="mt-2 flex items-center justify-between">
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full uppercase bg-teal-50 text-teal-700 border border-teal-200">
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full uppercase bg-teal-50 text-teal-700 border border-teal-200 dark:bg-teal-950/60 dark:text-teal-300 dark:border-teal-800/50">
                       {role || "volunteer"}
                     </span>
                     <span className="text-[10px] font-semibold text-text-muted">
@@ -346,7 +346,7 @@ export function Navbar({
                   setIsMobileMenuOpen(false);
                   signOut();
                 }}
-                className="flex w-full items-center gap-2 p-2 rounded-lg text-xs font-semibold text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
+                className="flex w-full items-center gap-2 p-2 rounded-lg text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors cursor-pointer"
               >
                 <LogOut className="h-4 w-4" />
                 <span>Sign Out of Cockpit</span>

@@ -156,20 +156,20 @@ export function FollowUpList({ onStartCall }: FollowUpListProps) {
           {/* 2. Due Today Callbacks */}
           {dueToday.length > 0 && (
             <div className="space-y-2">
-              <div className="flex items-center gap-1.5 text-[11px] font-bold text-amber-700 uppercase tracking-wider">
-                <Clock className="h-3.5 w-3.5 text-amber-600" />
+              <div className="flex items-center gap-1.5 text-[11px] font-bold text-amber-700 dark:text-amber-400 uppercase tracking-wider">
+                <Clock className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400" />
                 <span>Due Today ({dueToday.length})</span>
               </div>
               {dueToday.map((item) => (
                 <div
                   key={item._id}
-                  className="rounded-xl border border-amber-200 bg-amber-50/40 p-3 space-y-2 text-xs"
+                  className="rounded-xl border border-amber-200 dark:border-amber-800/40 bg-amber-50/40 dark:bg-amber-950/20 p-3 space-y-2 text-xs"
                 >
                   <div className="flex items-center justify-between">
                     <span className="font-bold text-text-primary">
                       {item.companyName}
                     </span>
-                    <span className="text-[10px] font-bold text-amber-800 bg-amber-100 px-1.5 py-0.2 rounded">
+                    <span className="text-[10px] font-bold text-amber-800 dark:text-amber-300 bg-amber-100 dark:bg-amber-950/60 border border-amber-200 dark:border-amber-800/40 px-1.5 py-0.2 rounded">
                       Due Today
                     </span>
                   </div>

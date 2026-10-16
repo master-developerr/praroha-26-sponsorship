@@ -415,7 +415,7 @@ export function MasterLeadDirectoryView() {
                   setSelectedPriority("all");
                   setShowArchived(false);
                 }}
-                className="h-8 text-xs text-rose-600 hover:text-rose-700 hover:bg-rose-50"
+                className="h-8 text-xs text-rose-600 dark:text-rose-400 hover:text-rose-700 dark:hover:text-rose-300 hover:bg-rose-50 dark:hover:bg-rose-950/40"
               >
                 Clear Filters
               </Button>
@@ -574,7 +574,7 @@ export function MasterLeadDirectoryView() {
                           size="sm"
                           isLoading={archivingId === comp._id}
                           onClick={() => handleRestoreLead(comp._id, comp.companyName)}
-                          className="h-7 px-2 text-xs text-amber-700 hover:bg-amber-50 border-amber-200"
+                          className="h-7 px-2 text-xs text-amber-700 dark:text-amber-300 hover:bg-amber-50 dark:hover:bg-amber-950/40 border-amber-200 dark:border-amber-800/50"
                         >
                           <ArchiveRestore className="h-3 w-3 mr-1" />
                           Restore
@@ -585,7 +585,7 @@ export function MasterLeadDirectoryView() {
                           size="sm"
                           isLoading={archivingId === comp._id}
                           onClick={() => handleArchiveLead(comp._id, comp.companyName)}
-                          className="h-7 px-2 text-xs text-amber-600 hover:bg-amber-50 border-amber-200"
+                          className="h-7 px-2 text-xs text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/40 border-amber-200 dark:border-amber-800/50"
                         >
                           <Archive className="h-3 w-3 mr-1" />
                           Archive
@@ -596,7 +596,7 @@ export function MasterLeadDirectoryView() {
                         size="sm"
                         isLoading={deletingId === comp._id}
                         onClick={() => handleDeleteLead(comp._id, comp.companyName)}
-                        className="h-7 px-2 text-xs text-rose-600 hover:bg-rose-50 border-rose-200"
+                        className="h-7 px-2 text-xs text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 border-rose-200 dark:border-rose-900/60"
                       >
                         <Trash2 className="h-3 w-3 mr-1" />
                         Delete

@@ -83,8 +83,8 @@ export function ReassignLeadModal({
     >
       <form onSubmit={handleSubmit} className="space-y-4 pt-2">
         {errorMessage && (
-          <div className="flex items-center gap-2 rounded-lg bg-rose-50 border border-rose-200 p-3 text-xs text-rose-700">
-            <AlertCircle className="h-4 w-4 shrink-0 text-rose-600" />
+          <div className="flex items-center gap-2 rounded-lg bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/60 p-3 text-xs text-rose-700 dark:text-rose-300">
+            <AlertCircle className="h-4 w-4 shrink-0 text-rose-600 dark:text-rose-400" />
             <span>{errorMessage}</span>
           </div>
         )}

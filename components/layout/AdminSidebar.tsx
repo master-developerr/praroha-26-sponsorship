@@ -167,7 +167,7 @@ export function AdminSidebar() {
                 <p className="truncate text-xs font-semibold text-text-primary">
                   {profile?.name || user?.fullName || "Admin"}
                 </p>
-                <p className="truncate text-[10px] font-medium text-sky-700">
+                <p className="truncate text-[10px] font-medium text-sky-700 dark:text-sky-400">
                   Sponsorship Head
                 </p>
               </div>
@@ -179,7 +179,7 @@ export function AdminSidebar() {
             <div className="absolute bottom-14 left-2 right-2 z-50 rounded-xl border border-border bg-surface p-1 shadow-lg animate-in fade-in">
               <button
                 onClick={() => signOut()}
-                className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
+                className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors cursor-pointer"
               >
                 <LogOut className="h-4 w-4" />
                 Sign out

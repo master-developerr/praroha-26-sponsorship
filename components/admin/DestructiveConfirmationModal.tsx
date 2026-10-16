@@ -129,9 +129,9 @@ export function DestructiveConfirmationModal({
         {/* Step 1 of Factory Reset: Preliminary Warning */}
         {isExtremeDanger && step === 1 && (
           <div className="space-y-4">
-            <div className="rounded-xl border border-rose-200 bg-rose-50/70 p-4 text-xs text-rose-900 space-y-2">
+            <div className="rounded-xl border border-rose-200 dark:border-rose-900/60 bg-rose-50/70 dark:bg-rose-950/30 p-4 text-xs text-rose-900 dark:text-rose-200 space-y-2">
               <p className="font-bold">Extreme Caution: Stage 1 of 2</p>
-              <p className="text-[11px] leading-relaxed text-rose-800">
+              <p className="text-[11px] leading-relaxed text-rose-800 dark:text-rose-300">
                 You are about to initiate an irreversible factory reset. This will wipe ALL volunteer records, corporate leads, call history, proposals, point transactions, and notifications. Only your current authenticated admin user will be kept.
               </p>
             </div>
@@ -220,7 +220,7 @@ export function DestructiveConfirmationModal({
 
             {/* Error Message */}
             {errorMsg && (
-              <div className="rounded-lg bg-rose-50 border border-rose-200 p-3 text-xs text-rose-800 font-medium">
+              <div className="rounded-lg bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/60 p-3 text-xs text-rose-800 dark:text-rose-300 font-medium">
                 {errorMsg}
               </div>
             )}

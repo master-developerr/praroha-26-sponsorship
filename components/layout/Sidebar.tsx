@@ -225,7 +225,7 @@ export function Sidebar() {
                   <p className="truncate text-xs font-semibold text-text-primary">
                     {profile?.name || user?.fullName || "Volunteer"}
                   </p>
-                  <span className="shrink-0 inline-flex items-center px-1.5 py-0.2 rounded-full text-[9px] font-bold uppercase bg-emerald-100 text-emerald-800">
+                  <span className="shrink-0 inline-flex items-center px-1.5 py-0.2 rounded-full text-[9px] font-bold uppercase bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/40">
                     {verificationStatus || "approved"}
                   </span>
                 </div>
@@ -253,7 +253,7 @@ export function Sidebar() {
               )}
               <button
                 onClick={() => signOut()}
-                className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
+                className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors cursor-pointer"
               >
                 <LogOut className="h-4 w-4" />
                 Sign out

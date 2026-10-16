@@ -257,8 +257,8 @@ export function CreateProposalModal({
     >
       <form onSubmit={handleSubmit} className="space-y-4 pt-2 max-h-[75vh] overflow-y-auto pr-1">
         {errorMsg && (
-          <div className="rounded-xl border border-rose-200 bg-rose-50 p-3 text-xs text-rose-800 flex items-center gap-2">
-            <AlertCircle className="h-4 w-4 shrink-0 text-rose-600" />
+          <div className="rounded-xl border border-rose-200 dark:border-rose-900/60 bg-rose-50 dark:bg-rose-950/40 p-3 text-xs text-rose-800 dark:text-rose-300 flex items-center gap-2">
+            <AlertCircle className="h-4 w-4 shrink-0 text-rose-600 dark:text-rose-400" />
             <span>{errorMsg}</span>
           </div>
         )}
@@ -472,7 +472,7 @@ export function CreateProposalModal({
                 onClick={() => setProposalStatus("draft")}
                 className={`rounded-xl border p-2 text-center text-xs font-medium ${
                   proposalStatus === "draft"
-                    ? "border-amber-500 bg-amber-50 text-amber-800 font-bold"
+                    ? "border-amber-500 bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 font-bold"
                     : "border-border text-text-secondary"
                 }`}
               >

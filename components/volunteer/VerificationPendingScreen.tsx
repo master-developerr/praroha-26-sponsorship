@@ -17,7 +17,7 @@ export function VerificationPendingScreen() {
           <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-accent-mint text-primary shadow-xs">
             <Clock className="h-7 w-7 animate-pulse" />
           </div>
-          <span className="mt-4 inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-700">
+          <span className="mt-4 inline-flex items-center gap-1.5 rounded-full border border-amber-200 dark:border-amber-800/40 bg-amber-50 dark:bg-amber-950/60 px-3 py-1 text-xs font-semibold text-amber-700 dark:text-amber-300">
             <span className="h-1.5 w-1.5 rounded-full bg-amber-500 animate-ping" />
             Status: Pending verification
           </span>

@@ -106,7 +106,7 @@ export function NotificationPopover({ onOpenCallMode }: NotificationPopoverProps
             <div className="flex items-center gap-2">
               <h3 className="text-xs font-bold text-text-primary">Outreach Notifications</h3>
               {totalActiveCount > 0 && (
-                <span className="rounded-full bg-rose-100 px-1.5 py-0.2 text-[10px] font-bold text-rose-700">
+                <span className="rounded-full bg-rose-100 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800/50 px-1.5 py-0.2 text-[10px] font-bold">
                   {totalActiveCount} new
                 </span>
               )}
@@ -138,14 +138,14 @@ export function NotificationPopover({ onOpenCallMode }: NotificationPopoverProps
                 {overdue.map((item) => (
                   <div
                     key={item._id}
-                    className="flex items-start gap-3 p-3 hover:bg-rose-50/40 rounded-lg transition-colors border-l-2 border-l-[#F18A70]"
+                    className="flex items-start gap-3 p-3 hover:bg-rose-50/40 dark:hover:bg-rose-950/20 rounded-lg transition-colors"
                   >
-                    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-rose-100 text-rose-700">
+                    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-rose-100 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800/40">
                       <AlertCircle className="h-4 w-4" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between">
-                        <span className="text-[10px] font-bold text-rose-700 uppercase tracking-wider">
+                        <span className="text-[10px] font-bold text-rose-700 dark:text-rose-300 uppercase tracking-wider">
                           Overdue Callback
                         </span>
                         <span className="text-[10px] text-text-muted">
@@ -167,7 +167,7 @@ export function NotificationPopover({ onOpenCallMode }: NotificationPopoverProps
                     {item.contactPhone && (
                       <a
                         href={`tel:${item.contactPhone}`}
-                        className="shrink-0 p-1.5 rounded-md bg-rose-100 hover:bg-rose-200 text-rose-800 transition-colors"
+                        className="shrink-0 p-1.5 rounded-md bg-rose-100 hover:bg-rose-200 text-rose-800 dark:bg-rose-900/50 dark:hover:bg-rose-900/80 dark:text-rose-200 transition-colors"
                         title="Call now"
                       >
                         <PhoneCall className="h-3.5 w-3.5" />
@@ -180,17 +180,17 @@ export function NotificationPopover({ onOpenCallMode }: NotificationPopoverProps
                 {dueToday.map((item) => (
                   <div
                     key={item._id}
-                    className="flex items-start gap-3 p-3 hover:bg-amber-50/40 rounded-lg transition-colors border-l-2 border-l-amber-500"
+                    className="flex items-start gap-3 p-3 hover:bg-amber-50/40 dark:hover:bg-amber-950/20 rounded-lg transition-colors"
                   >
-                    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-amber-100 text-amber-800">
+                    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800/40">
                       <Clock className="h-4 w-4" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between">
-                        <span className="text-[10px] font-bold text-amber-800 uppercase tracking-wider">
+                        <span className="text-[10px] font-bold text-amber-800 dark:text-amber-300 uppercase tracking-wider">
                           Due Today
                         </span>
-                        <span className="text-[10px] text-amber-700 font-medium">
+                        <span className="text-[10px] text-amber-700 dark:text-amber-400 font-medium">
                           {new Date(item.dueDate).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                         </span>
                       </div>
@@ -204,7 +204,7 @@ export function NotificationPopover({ onOpenCallMode }: NotificationPopoverProps
                     {item.contactPhone && (
                       <a
                         href={`tel:${item.contactPhone}`}
-                        className="shrink-0 p-1.5 rounded-md bg-amber-100 hover:bg-amber-200 text-amber-800 transition-colors"
+                        className="shrink-0 p-1.5 rounded-md bg-amber-100 hover:bg-amber-200 text-amber-800 dark:bg-amber-900/50 dark:hover:bg-amber-900/80 dark:text-amber-200 transition-colors"
                         title="Call now"
                       >
                         <PhoneCall className="h-3.5 w-3.5" />
@@ -217,14 +217,14 @@ export function NotificationPopover({ onOpenCallMode }: NotificationPopoverProps
                 {pendingUsers.map((u: any) => (
                   <div
                     key={u._id}
-                    className="flex items-start gap-3 p-3 hover:bg-sky-50/40 rounded-lg transition-colors border-l-2 border-l-sky-500"
+                    className="flex items-start gap-3 p-3 hover:bg-sky-50/40 dark:hover:bg-sky-950/20 rounded-lg transition-colors"
                   >
-                    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-sky-100 text-sky-700">
+                    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-sky-100 dark:bg-sky-950/60 text-sky-700 dark:text-sky-300 border border-sky-200 dark:border-sky-800/40">
                       <UserCheck className="h-4 w-4" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between">
-                        <span className="text-[10px] font-bold text-sky-800 uppercase tracking-wider">
+                        <span className="text-[10px] font-bold text-sky-800 dark:text-sky-300 uppercase tracking-wider">
                           Verification Queue
                         </span>
                         <span className="text-[10px] text-text-muted">
@@ -241,7 +241,7 @@ export function NotificationPopover({ onOpenCallMode }: NotificationPopoverProps
                     <Link
                       href="/admin/verifications"
                       onClick={() => setIsOpen(false)}
-                      className="shrink-0 p-1.5 rounded-md bg-sky-100 hover:bg-sky-200 text-sky-800 transition-colors"
+                      className="shrink-0 p-1.5 rounded-md bg-sky-100 hover:bg-sky-200 text-sky-800 dark:bg-sky-900/50 dark:hover:bg-sky-900/80 dark:text-sky-200 transition-colors"
                       title="Review application"
                     >
                       <ChevronRight className="h-3.5 w-3.5" />
@@ -253,17 +253,17 @@ export function NotificationPopover({ onOpenCallMode }: NotificationPopoverProps
                 {recentPoints.map((pt: any) => (
                   <div
                     key={pt._id}
-                    className="flex items-start gap-3 p-3 hover:bg-emerald-50/40 rounded-lg transition-colors border-l-2 border-l-emerald-500"
+                    className="flex items-start gap-3 p-3 hover:bg-emerald-50/40 dark:hover:bg-emerald-950/20 rounded-lg transition-colors"
                   >
-                    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-emerald-100 text-emerald-800">
+                    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/40">
                       <Award className="h-4 w-4" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between">
-                        <span className="text-[10px] font-bold text-emerald-800 uppercase tracking-wider">
+                        <span className="text-[10px] font-bold text-emerald-800 dark:text-emerald-300 uppercase tracking-wider">
                           Points Earned
                         </span>
-                        <span className="text-[10px] font-bold text-emerald-700">
+                        <span className="text-[10px] font-bold text-emerald-700 dark:text-emerald-400">
                           +{pt.points} pts
                         </span>
                       </div>

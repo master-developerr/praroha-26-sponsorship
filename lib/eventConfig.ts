@@ -284,10 +284,10 @@ export const sponsorshipPackages: SponsorshipPackageConfig[] = [
       "Option to host a keynote session, workshop, or product launch activation",
     ],
     color: {
-      border: "border-emerald-300",
-      bg: "bg-emerald-50/70",
-      text: "text-emerald-950",
-      badge: "bg-emerald-600 text-white",
+      border: "border-emerald-300 dark:border-emerald-800/60",
+      bg: "bg-emerald-50/70 dark:bg-emerald-950/20",
+      text: "text-emerald-950 dark:text-emerald-200",
+      badge: "bg-emerald-600 dark:bg-emerald-500 text-white",
     },
   },
   {
@@ -308,10 +308,10 @@ export const sponsorshipPackages: SponsorshipPackageConfig[] = [
       "Post-event photo and video coverage",
     ],
     color: {
-      border: "border-sky-300",
-      bg: "bg-sky-50/70",
-      text: "text-sky-950",
-      badge: "bg-sky-600 text-white",
+      border: "border-sky-300 dark:border-sky-800/60",
+      bg: "bg-sky-50/70 dark:bg-sky-950/20",
+      text: "text-sky-950 dark:text-sky-200",
+      badge: "bg-sky-600 dark:bg-sky-500 text-white",
     },
   },
   {
@@ -329,10 +329,10 @@ export const sponsorshipPackages: SponsorshipPackageConfig[] = [
       "Branding on selected event materials",
     ],
     color: {
-      border: "border-indigo-300",
-      bg: "bg-indigo-50/70",
-      text: "text-indigo-950",
-      badge: "bg-indigo-600 text-white",
+      border: "border-indigo-300 dark:border-indigo-800/60",
+      bg: "bg-indigo-50/70 dark:bg-indigo-950/20",
+      text: "text-indigo-950 dark:text-indigo-200",
+      badge: "bg-indigo-600 dark:bg-indigo-500 text-white",
     },
   },
   {
@@ -350,10 +350,10 @@ export const sponsorshipPackages: SponsorshipPackageConfig[] = [
       "Digital sponsor badge for partner use",
     ],
     color: {
-      border: "border-amber-300",
-      bg: "bg-amber-50/70",
-      text: "text-amber-950",
-      badge: "bg-amber-600 text-white",
+      border: "border-amber-300 dark:border-amber-800/60",
+      bg: "bg-amber-50/70 dark:bg-amber-950/20",
+      text: "text-amber-950 dark:text-amber-200",
+      badge: "bg-amber-600 dark:bg-amber-500 text-white",
     },
   },
   {
@@ -370,10 +370,10 @@ export const sponsorshipPackages: SponsorshipPackageConfig[] = [
       "Logo inclusion on the sponsor thank-you display",
     ],
     color: {
-      border: "border-purple-300",
-      bg: "bg-purple-50/70",
-      text: "text-purple-950",
-      badge: "bg-purple-600 text-white",
+      border: "border-purple-300 dark:border-purple-800/60",
+      bg: "bg-purple-50/70 dark:bg-purple-950/20",
+      text: "text-purple-950 dark:text-purple-200",
+      badge: "bg-purple-600 dark:bg-purple-500 text-white",
     },
   },
   {
@@ -390,10 +390,10 @@ export const sponsorshipPackages: SponsorshipPackageConfig[] = [
       "Sponsor acknowledgement during the sponsored event",
     ],
     color: {
-      border: "border-stone-300",
-      bg: "bg-stone-50/70",
-      text: "text-stone-900",
-      badge: "bg-stone-600 text-white",
+      border: "border-stone-300 dark:border-stone-700/60",
+      bg: "bg-stone-50/70 dark:bg-stone-900/30",
+      text: "text-stone-900 dark:text-stone-200",
+      badge: "bg-stone-600 dark:bg-stone-500 text-white",
     },
   },
 ];

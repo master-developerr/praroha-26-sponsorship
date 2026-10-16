@@ -15,10 +15,10 @@ export function VerificationRejectedScreen() {
     <div className="flex min-h-screen flex-col items-center justify-center bg-background px-4 py-12">
       <div className="w-full max-w-md space-y-6">
         <div className="text-center">
-          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-rose-50 text-error shadow-xs">
+          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-rose-50 dark:bg-rose-950/50 text-error shadow-xs border border-rose-200 dark:border-rose-900/40">
             <XCircle className="h-7 w-7" />
           </div>
-          <span className="mt-4 inline-flex items-center gap-1.5 rounded-full border border-rose-200 bg-rose-50 px-3 py-1 text-xs font-semibold text-rose-700">
+          <span className="mt-4 inline-flex items-center gap-1.5 rounded-full border border-rose-200 dark:border-rose-800/50 bg-rose-50 dark:bg-rose-950/60 px-3 py-1 text-xs font-semibold text-rose-700 dark:text-rose-300">
             Registration rejected
           </span>
           <h1 className="mt-3 text-2xl font-bold tracking-tight text-text-primary">
@@ -31,14 +31,14 @@ export function VerificationRejectedScreen() {
 
         {/* Reason Box */}
         {profile?.rejectionReason && (
-          <Card className="border-rose-200 bg-rose-50/50 shadow-xs">
+          <Card className="border-rose-200 dark:border-rose-900/60 bg-rose-50/50 dark:bg-rose-950/20 shadow-xs">
             <CardContent className="p-4 flex items-start gap-3">
-              <AlertCircle className="h-5 w-5 text-rose-600 shrink-0 mt-0.5" />
+              <AlertCircle className="h-5 w-5 text-rose-600 dark:text-rose-400 shrink-0 mt-0.5" />
               <div>
-                <h4 className="text-xs font-semibold text-rose-900">
+                <h4 className="text-xs font-semibold text-rose-900 dark:text-rose-200">
                   Feedback from Sponsorship Head:
                 </h4>
-                <p className="mt-1 text-xs text-rose-800 leading-relaxed">
+                <p className="mt-1 text-xs text-rose-800 dark:text-rose-300 leading-relaxed">
                   "{profile.rejectionReason}"
                 </p>
               </div>
@@ -87,10 +87,10 @@ export function AccountSuspendedScreen() {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-background px-4 py-12">
       <div className="w-full max-w-md space-y-6 text-center">
-        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-red-100 text-red-700 shadow-xs">
+        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-red-100 dark:bg-red-950/50 text-red-700 dark:text-red-300 shadow-xs border border-red-200 dark:border-red-900/40">
           <XCircle className="h-7 w-7" />
         </div>
-        <span className="inline-flex items-center gap-1.5 rounded-full border border-red-300 bg-red-50 px-3 py-1 text-xs font-semibold text-red-800">
+        <span className="inline-flex items-center gap-1.5 rounded-full border border-red-300 dark:border-red-800/50 bg-red-50 dark:bg-red-950/60 px-3 py-1 text-xs font-semibold text-red-800 dark:text-red-300">
           Account Suspended
         </span>
         <h1 className="text-2xl font-bold tracking-tight text-text-primary">

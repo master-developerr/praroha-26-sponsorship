@@ -260,8 +260,8 @@ export function CallReportModal({
     >
       <form onSubmit={handleSubmit} className="space-y-5 pt-2 max-h-[75vh] overflow-y-auto pr-1">
         {errorMessage && (
-          <div className="flex items-center gap-2 rounded-lg bg-rose-50 border border-rose-200 p-3 text-xs text-rose-700">
-            <AlertCircle className="h-4 w-4 shrink-0 text-rose-600" />
+          <div className="flex items-center gap-2 rounded-lg bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800/50 p-3 text-xs text-rose-700 dark:text-rose-300">
+            <AlertCircle className="h-4 w-4 shrink-0 text-rose-600 dark:text-rose-400" />
             <span>{errorMessage}</span>
           </div>
         )}
@@ -522,7 +522,7 @@ export function CallReportModal({
               </span>
             </label>
             {scheduleFollowUp && (
-              <span className="rounded bg-amber-100 text-amber-800 px-2 py-0.5 text-[10px] font-bold">
+              <span className="rounded bg-amber-100 dark:bg-amber-950/60 border border-amber-300 dark:border-amber-700/50 text-amber-800 dark:text-amber-300 px-2 py-0.5 text-[10px] font-bold">
                 Callback Queued
               </span>
             )}

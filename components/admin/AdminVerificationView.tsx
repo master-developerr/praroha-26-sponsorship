@@ -416,7 +416,7 @@ export function AdminVerificationView() {
                           size="sm"
                           isLoading={actionLoadingId === item._id}
                           onClick={() => handleSuspend(item._id)}
-                          className="h-7 px-2 text-xs text-rose-600 hover:bg-rose-50 border-rose-200"
+                          className="h-7 px-2 text-xs text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 border-rose-200 dark:border-rose-900/60"
                         >
                           <AlertTriangle className="h-3 w-3 mr-1" />
                           Suspend
@@ -672,7 +672,7 @@ function VolunteerInspectionModal({
           </div>
 
           {profile.rejectionReason && (
-            <div className="border-t border-border-subtle pt-2 text-rose-700 bg-rose-50 p-2.5 rounded-lg">
+            <div className="border-t border-border-subtle pt-2 text-rose-700 dark:text-rose-300 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/50 p-2.5 rounded-lg">
               <p className="font-semibold">Rejection Reason:</p>
               <p className="mt-0.5">{profile.rejectionReason}</p>
             </div>
@@ -687,7 +687,7 @@ function VolunteerInspectionModal({
                 variant="outline"
                 size="sm"
                 onClick={() => onSuspend(profile._id)}
-                className="text-rose-600 hover:bg-rose-50 border-rose-200"
+                className="text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 border-rose-200 dark:border-rose-900/60"
               >
                 <AlertTriangle className="h-3.5 w-3.5 mr-1" />
                 Suspend Account
@@ -698,7 +698,7 @@ function VolunteerInspectionModal({
                 variant="outline"
                 size="sm"
                 onClick={() => onRestore(profile._id)}
-                className="text-emerald-700 hover:bg-emerald-50 border-emerald-300"
+                className="text-emerald-700 dark:text-emerald-300 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 border-emerald-300 dark:border-emerald-800/50"
               >
                 <RotateCcw className="h-3.5 w-3.5 mr-1" />
                 Restore Account

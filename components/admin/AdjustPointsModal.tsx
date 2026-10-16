@@ -84,8 +84,8 @@ export function AdjustPointsModal({
     >
       <form onSubmit={handleSubmit} className="space-y-4 pt-2 text-xs">
         {errorMessage && (
-          <div className="flex items-center gap-2 rounded-lg bg-rose-50 border border-rose-200 p-3 text-rose-700">
-            <AlertCircle className="h-4 w-4 shrink-0 text-rose-600" />
+          <div className="flex items-center gap-2 rounded-lg bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/60 p-3 text-xs text-rose-700 dark:text-rose-300">
+            <AlertCircle className="h-4 w-4 shrink-0 text-rose-600 dark:text-rose-400" />
             <span>{errorMessage}</span>
           </div>
         )}
@@ -121,11 +121,11 @@ export function AdjustPointsModal({
               onClick={() => setIsDeduction(false)}
               className={`py-2 px-3 rounded-lg border font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer ${
                 !isDeduction
-                  ? "bg-emerald-50 text-emerald-800 border-emerald-300"
+                  ? "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 border-emerald-300 dark:border-emerald-800/50"
                   : "bg-surface border-border text-text-secondary hover:text-text-primary"
               }`}
             >
-              <Plus className="h-3.5 w-3.5 text-emerald-600" />
+              <Plus className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
               Award Bonus Points
             </button>
             <button
@@ -133,11 +133,11 @@ export function AdjustPointsModal({
               onClick={() => setIsDeduction(true)}
               className={`py-2 px-3 rounded-lg border font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer ${
                 isDeduction
-                  ? "bg-rose-50 text-rose-800 border-rose-300"
+                  ? "bg-rose-50 dark:bg-rose-950/40 text-rose-800 dark:text-rose-300 border-rose-300 dark:border-rose-900/50"
                   : "bg-surface border-border text-text-secondary hover:text-text-primary"
               }`}
             >
-              <Minus className="h-3.5 w-3.5 text-rose-600" />
+              <Minus className="h-3.5 w-3.5 text-rose-600 dark:text-rose-400" />
               Deduct Points
             </button>
           </div>

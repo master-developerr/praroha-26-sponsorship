@@ -46,11 +46,11 @@ export function StatCard({
                   className={cn(
                     "inline-flex items-center text-[11px] font-semibold px-1.5 py-0.5 rounded-full",
                     changeType === "positive" &&
-                      "bg-emerald-50 text-emerald-700",
+                      "bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/50",
                     changeType === "neutral" &&
-                      "bg-zinc-100 text-zinc-600",
+                      "bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-700",
                     changeType === "negative" &&
-                      "bg-rose-50 text-rose-700"
+                      "bg-rose-50 dark:bg-rose-950/50 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800/50"
                   )}
                 >
                   {change}

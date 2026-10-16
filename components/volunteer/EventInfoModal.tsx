@@ -424,24 +424,24 @@ export function EventInfoModal({ isOpen, onClose }: EventInfoModalProps) {
         {/* Tab 5: Sustainability */}
         {activeTab === "sustainability" && (
           <div className="space-y-4 text-xs">
-            <div className="rounded-xl border border-emerald-300 bg-emerald-50/70 p-5 space-y-3 text-emerald-950">
+            <div className="rounded-xl border border-emerald-300 dark:border-emerald-800/60 bg-emerald-50/70 dark:bg-emerald-950/20 p-5 space-y-3 text-emerald-950 dark:text-emerald-100">
               <div className="flex items-center gap-2">
-                <Leaf className="h-5 w-5 text-emerald-700" />
-                <span className="text-xs font-extrabold uppercase tracking-widest text-emerald-800">
+                <Leaf className="h-5 w-5 text-emerald-700 dark:text-emerald-400" />
+                <span className="text-xs font-extrabold uppercase tracking-widest text-emerald-800 dark:text-emerald-300">
                   {eventConfig.sustainability.motto}
                 </span>
               </div>
-              <h4 className="text-base font-bold tracking-tight text-emerald-950">
+              <h4 className="text-base font-bold tracking-tight text-emerald-950 dark:text-emerald-100">
                 Green Protocol & Sustainable Engineering Commitment
               </h4>
-              <p className="text-xs text-emerald-900 leading-relaxed">
+              <p className="text-xs text-emerald-900 dark:text-emerald-200 leading-relaxed">
                 {eventConfig.sustainability.description}
               </p>
-              <div className="space-y-2 pt-2 border-t border-emerald-200">
+              <div className="space-y-2 pt-2 border-t border-emerald-200 dark:border-emerald-800/50">
                 {eventConfig.sustainability.principles.map((pr, idx) => (
                   <div key={idx} className="flex items-start gap-2 text-xs">
-                    <Check className="h-3.5 w-3.5 text-emerald-700 shrink-0 mt-0.5" />
-                    <span>{pr}</span>
+                    <Check className="h-3.5 w-3.5 text-emerald-700 dark:text-emerald-400 shrink-0 mt-0.5" />
+                    <span className="text-emerald-950 dark:text-emerald-200">{pr}</span>
                   </div>
                 ))}
               </div>

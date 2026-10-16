@@ -228,22 +228,22 @@ export function DataManagementView() {
         <div
           className={`p-4 rounded-xl border text-xs flex items-start justify-between gap-3 ${
             feedback.type === "success"
-              ? "bg-emerald-50 border-emerald-300 text-emerald-900"
-              : "bg-rose-50 border-rose-300 text-rose-900"
+              ? "bg-emerald-50 dark:bg-emerald-950/40 border-emerald-300 dark:border-emerald-800/50 text-emerald-900 dark:text-emerald-200"
+              : "bg-rose-50 dark:bg-rose-950/40 border-rose-300 dark:border-rose-900/50 text-rose-900 dark:text-rose-200"
           }`}
         >
           <div className="flex items-start gap-2.5">
             {feedback.type === "success" ? (
-              <CheckCircle2 className="h-5 w-5 text-emerald-700 shrink-0 mt-0.5" />
+              <CheckCircle2 className="h-5 w-5 text-emerald-700 dark:text-emerald-400 shrink-0 mt-0.5" />
             ) : (
-              <ShieldAlert className="h-5 w-5 text-rose-700 shrink-0 mt-0.5" />
+              <ShieldAlert className="h-5 w-5 text-rose-700 dark:text-rose-400 shrink-0 mt-0.5" />
             )}
             <div>
               <p className="font-bold text-sm">{feedback.message}</p>
               {feedback.deletedCounts && (
                 <div className="mt-2 text-[11px] grid grid-cols-2 sm:grid-cols-4 gap-2 font-mono">
                   {Object.entries(feedback.deletedCounts).map(([key, val]) => (
-                    <span key={key} className="bg-white/60 px-2 py-1 rounded border border-emerald-200">
+                    <span key={key} className="bg-white/60 dark:bg-surface px-2 py-1 rounded border border-emerald-200 dark:border-emerald-800/40 text-text-primary">
                       {key}: <strong>{String(val)}</strong>
                     </span>
                   ))}
@@ -429,10 +429,10 @@ export function DataManagementView() {
           <div className="p-5 rounded-2xl border border-border bg-surface shadow-xs flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between mb-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-rose-50 text-rose-700">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-rose-50 dark:bg-rose-950/50 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-900/40">
                   <Building2 className="h-5 w-5" />
                 </div>
-                <span className="text-xs font-extrabold font-mono text-rose-700 bg-rose-50 px-2.5 py-0.5 rounded-full border border-rose-200">
+                <span className="text-xs font-extrabold font-mono text-rose-700 dark:text-rose-300 bg-rose-50 dark:bg-rose-950/60 px-2.5 py-0.5 rounded-full border border-rose-200 dark:border-rose-800/50">
                   {raw.companies} Leads
                 </span>
               </div>
@@ -460,10 +460,10 @@ export function DataManagementView() {
           <div className="p-5 rounded-2xl border border-border bg-surface shadow-xs flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between mb-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-50 text-amber-700">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-900/40">
                   <Users2 className="h-5 w-5" />
                 </div>
-                <span className="text-xs font-extrabold font-mono text-amber-700 bg-amber-50 px-2.5 py-0.5 rounded-full border border-amber-200">
+                <span className="text-xs font-extrabold font-mono text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/60 px-2.5 py-0.5 rounded-full border border-amber-200 dark:border-amber-800/50">
                   {raw.students} Students
                 </span>
               </div>
@@ -541,10 +541,10 @@ export function DataManagementView() {
           <div className="p-5 rounded-xl border border-rose-200 bg-surface shadow-2xs flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between mb-2">
-                <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded bg-amber-100 text-amber-900 border border-amber-300">
+                <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded bg-amber-100 dark:bg-amber-950/60 text-amber-900 dark:text-amber-300 border border-amber-300 dark:border-amber-800/40">
                   Event Reset
                 </span>
-                <span className="text-xs font-mono font-bold text-rose-700">
+                <span className="text-xs font-mono font-bold text-rose-700 dark:text-rose-400">
                   {impacts?.resetEventImpact.total || 0} records
                 </span>
               </div>
@@ -560,7 +560,7 @@ export function DataManagementView() {
                 variant="outline"
                 size="sm"
                 onClick={() => setActiveModal("RESET_EVENT")}
-                className="text-xs font-bold border-rose-300 text-rose-700 hover:bg-rose-50 cursor-pointer"
+                className="text-xs font-bold border-rose-300 dark:border-rose-800 text-rose-700 dark:text-rose-300 hover:bg-rose-50 dark:hover:bg-rose-950/40 cursor-pointer"
               >
                 <RotateCcw className="h-3.5 w-3.5 mr-1" />
                 Reset Event Data
@@ -569,24 +569,24 @@ export function DataManagementView() {
           </div>
 
           {/* Action 2: Factory Reset */}
-          <div className="p-5 rounded-xl border-2 border-rose-400 bg-rose-50/50 shadow-2xs flex flex-col justify-between">
+          <div className="p-5 rounded-xl border-2 border-rose-400 dark:border-rose-900/80 bg-rose-50/50 dark:bg-rose-950/30 shadow-2xs flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between mb-2">
                 <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded bg-rose-600 text-white">
                   Extreme Danger
                 </span>
-                <span className="text-xs font-mono font-bold text-rose-800">
+                <span className="text-xs font-mono font-bold text-rose-800 dark:text-rose-300">
                   {impacts?.factoryResetImpact.total || 0} records
                 </span>
               </div>
-              <h3 className="text-sm font-bold text-rose-950">Factory Reset PRAROHA'26</h3>
-              <p className="text-xs text-rose-900/80 mt-1 leading-relaxed">
+              <h3 className="text-sm font-bold text-rose-950 dark:text-rose-100">Factory Reset PRAROHA'26</h3>
+              <p className="text-xs text-rose-900/80 dark:text-rose-300/80 mt-1 leading-relaxed">
                 Completely wipes the entire database back to a pristine installation state. Removes all volunteers, other admin accounts, all leads, calls, commitments, and notifications.
                 <strong> Preserves ONLY:</strong> Your current admin user account.
               </p>
             </div>
-            <div className="mt-5 pt-4 border-t border-rose-200 flex items-center justify-between">
-              <span className="text-[11px] font-mono text-rose-900 font-bold">Phrase: FACTORY RESET PRAROHA26</span>
+            <div className="mt-5 pt-4 border-t border-rose-200 dark:border-rose-900/50 flex items-center justify-between">
+              <span className="text-[11px] font-mono text-rose-900 dark:text-rose-300 font-bold">Phrase: FACTORY RESET PRAROHA26</span>
               <Button
                 variant="danger"
                 size="sm"

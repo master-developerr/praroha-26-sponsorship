@@ -108,15 +108,15 @@ export function PointConfigDrawer({ isOpen, onClose }: PointConfigDrawerProps) {
 
         {/* Feedback Messages */}
         {successMessage && (
-          <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-xs text-emerald-800 flex items-center gap-2">
-            <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
+          <div className="rounded-xl border border-emerald-200 dark:border-emerald-900/50 bg-emerald-50 dark:bg-emerald-950/30 p-3 text-xs text-emerald-800 dark:text-emerald-300 flex items-center gap-2">
+            <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
             <span className="font-semibold">{successMessage}</span>
           </div>
         )}
 
         {errorMessage && (
-          <div className="rounded-xl border border-rose-200 bg-rose-50 p-3 text-xs text-rose-800 flex items-center gap-2">
-            <AlertCircle className="h-4 w-4 text-rose-600 shrink-0" />
+          <div className="rounded-xl border border-rose-200 dark:border-rose-900/60 bg-rose-50 dark:bg-rose-950/40 p-3 text-xs text-rose-800 dark:text-rose-300 flex items-center gap-2">
+            <AlertCircle className="h-4 w-4 text-rose-600 dark:text-rose-400 shrink-0" />
             <span className="font-semibold">{errorMessage}</span>
           </div>
         )}

@@ -308,9 +308,9 @@ export function LeadImportModal({
           <div className="space-y-4">
             {/* Header Missing Error */}
             {missingHeaders.length > 0 && (
-              <div className="rounded-xl border border-rose-300 bg-rose-50 p-3.5 text-xs text-rose-800 space-y-1">
+              <div className="rounded-xl border border-rose-300 dark:border-rose-900/60 bg-rose-50 dark:bg-rose-950/40 p-3.5 text-xs text-rose-800 dark:text-rose-300 space-y-1">
                 <p className="font-bold flex items-center gap-1.5">
-                  <XCircle className="h-4 w-4 text-rose-600" />
+                  <XCircle className="h-4 w-4 text-rose-600 dark:text-rose-400" />
                   Missing Required Canonical Columns ({missingHeaders.length}):
                 </p>
                 <p className="font-mono text-[11px]">{missingHeaders.join(", ")}</p>
@@ -330,27 +330,27 @@ export function LeadImportModal({
                   {totalRows}
                 </span>
               </div>
-              <div className="rounded-xl border border-emerald-200 bg-emerald-50/50 p-3">
-                <span className="text-[10px] uppercase font-bold text-emerald-800 block">
+              <div className="rounded-xl border border-emerald-200 dark:border-emerald-900/50 bg-emerald-50/50 dark:bg-emerald-950/20 p-3">
+                <span className="text-[10px] uppercase font-bold text-emerald-800 dark:text-emerald-300 block">
                   Valid Leads
                 </span>
-                <span className="text-xl font-bold text-emerald-700 mt-1 block">
+                <span className="text-xl font-bold text-emerald-700 dark:text-emerald-400 mt-1 block">
                   {validRows.length}
                 </span>
               </div>
-              <div className="rounded-xl border border-amber-200 bg-amber-50/50 p-3">
-                <span className="text-[10px] uppercase font-bold text-amber-800 block">
+              <div className="rounded-xl border border-amber-200 dark:border-amber-900/50 bg-amber-50/50 dark:bg-amber-950/20 p-3">
+                <span className="text-[10px] uppercase font-bold text-amber-800 dark:text-amber-300 block">
                   Duplicates
                 </span>
-                <span className="text-xl font-bold text-amber-700 mt-1 block">
+                <span className="text-xl font-bold text-amber-700 dark:text-amber-400 mt-1 block">
                   {collisions.length}
                 </span>
               </div>
-              <div className="rounded-xl border border-rose-200 bg-rose-50/50 p-3">
-                <span className="text-[10px] uppercase font-bold text-rose-800 block">
+              <div className="rounded-xl border border-rose-200 dark:border-rose-900/50 bg-rose-50/50 dark:bg-rose-950/20 p-3">
+                <span className="text-[10px] uppercase font-bold text-rose-800 dark:text-rose-300 block">
                   Invalid Rows
                 </span>
-                <span className="text-xl font-bold text-rose-700 mt-1 block">
+                <span className="text-xl font-bold text-rose-700 dark:text-rose-400 mt-1 block">
                   {invalidRows.length}
                 </span>
               </div>
@@ -361,7 +361,7 @@ export function LeadImportModal({
               <div className="rounded-xl border border-border bg-surface p-3.5 text-xs space-y-2">
                 <button
                   onClick={() => setShowInvalidDetails(!showInvalidDetails)}
-                  className="flex w-full items-center justify-between font-semibold text-rose-700 cursor-pointer"
+                  className="flex w-full items-center justify-between font-semibold text-rose-700 dark:text-rose-400 cursor-pointer"
                 >
                   <span className="flex items-center gap-1.5">
                     <AlertTriangle className="h-4 w-4" />
@@ -376,7 +376,7 @@ export function LeadImportModal({
                     {invalidRows.map((inv) => (
                       <div
                         key={inv.rowNumber}
-                        className="rounded bg-rose-50/60 p-2 text-[11px] text-rose-800 font-mono"
+                        className="rounded bg-rose-50/60 dark:bg-rose-950/40 p-2 text-[11px] text-rose-800 dark:text-rose-300 border border-rose-200/50 dark:border-rose-900/40 font-mono"
                       >
                         Line {inv.rowNumber}: {inv.errors.join("; ")}
                       </div>
@@ -391,7 +391,7 @@ export function LeadImportModal({
               <div className="space-y-2.5">
                 <div className="flex items-center justify-between">
                   <h4 className="text-xs font-bold text-text-primary uppercase tracking-wider flex items-center gap-1.5">
-                    <Layers className="h-4 w-4 text-amber-600" />
+                    <Layers className="h-4 w-4 text-amber-600 dark:text-amber-400" />
                     Duplicate Collisions ({collisions.length})
                   </h4>
                   <span className="text-[10px] text-text-muted">
@@ -403,16 +403,16 @@ export function LeadImportModal({
                   {collisions.map((col) => (
                     <div
                       key={col.rowIndex}
-                      className="rounded-xl border border-amber-200 bg-amber-50/30 p-3 text-xs space-y-2"
+                      className="rounded-xl border border-amber-200 dark:border-amber-900/50 bg-amber-50/30 dark:bg-amber-950/20 p-3 text-xs space-y-2"
                     >
-                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-amber-200/60 pb-2">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-amber-200/60 dark:border-amber-900/40 pb-2">
                         <div>
                           <p className="font-bold text-text-primary">
                             {col.incomingRow.company_name}
                           </p>
                           <p className="text-[11px] text-text-secondary">
                             Matches existing entity:{" "}
-                            <strong className="text-amber-900">{col.existingCompanyName}</strong>{" "}
+                            <strong className="text-amber-900 dark:text-amber-300">{col.existingCompanyName}</strong>{" "}
                             (by {col.matchedBy})
                           </p>
                         </div>
