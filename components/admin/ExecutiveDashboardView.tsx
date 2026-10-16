@@ -30,6 +30,7 @@ import {
   Bar,
 } from "recharts";
 import { LeaderboardPodium } from "@/components/volunteer/LeaderboardPodium";
+import { eventConfig } from "@/lib/eventConfig";
 
 export function ExecutiveDashboardView() {
   const dashboard = useQuery(api.analytics.getExecutiveDashboard);
@@ -57,9 +58,14 @@ export function ExecutiveDashboardView() {
       {/* Top Header & Tab Controls */}
       <div className="flex flex-wrap items-center justify-between gap-4 border-b border-border pb-4">
         <div>
-          <span className="text-[10px] font-extrabold uppercase tracking-widest text-teal-700 dark:text-teal-300 bg-teal-500/10 px-2.5 py-0.5 rounded-full border border-teal-500/20">
-            PRAROHA&apos;26 Executive Cockpit
-          </span>
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] font-extrabold uppercase tracking-widest text-teal-700 dark:text-teal-300 bg-teal-500/10 px-2.5 py-0.5 rounded-full border border-teal-500/20">
+              {eventConfig.name} • {eventConfig.datesCompact}
+            </span>
+            <span className="text-[10px] font-semibold text-text-muted hidden sm:inline">
+              {eventConfig.organizer} • {eventConfig.institution}
+            </span>
+          </div>
           <h2 className="text-xl font-black text-text-primary mt-1">
             Sponsorship Operations Overview
           </h2>

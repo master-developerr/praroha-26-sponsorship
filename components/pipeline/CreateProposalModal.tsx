@@ -32,16 +32,20 @@ interface CreateProposalModalProps {
 }
 
 const STANDARD_DELIVERABLES = [
-  "Main Stage Digital Backdrop Banner",
-  "Central Promenade Exhibition Stall Space",
-  "Keynote Session / Technical Workshop Slot",
-  "Festival Website & Mobile App Branding",
-  "Logo on 3,000+ Delegate Badges & Lanyards",
-  "Logo on 300+ Volunteer Core T-Shirts",
-  "Dedicated Social Media Series (100K+ Impressions)",
-  "Flyer / Brochure Insertion in Welcome Delegate Kits",
-  "Exclusive Category Partner Naming Rights",
-  "VIP Stage Banquet Passes & Dinner Invitation",
+  "Event named/presented as 'Civil Fest powered by [Sponsor]'",
+  "Prominent logo placement on posters, banners and event creatives",
+  "Large flex branding at the venue",
+  "Dedicated social media promotion and stories",
+  "Sponsor mentions during major events and announcements",
+  "Branding on stage/backdrop and prize distribution",
+  "Space for promotional materials/stall or standee",
+  "Priority access to event attendees for lead generation & product demos",
+  "Complimentary booth staff passes and VIP access for sponsor representatives",
+  "Post-event report with attendee engagement metrics and brand visibility insights",
+  "Option to host a keynote session, workshop, or product launch activation",
+  "Brand mention in event email updates and official website",
+  "Digital sponsor badge for partner use",
+  "Logo inclusion on the sponsor thank-you display",
 ];
 
 const TIER_DEFAULTS: Record<
@@ -49,48 +53,102 @@ const TIER_DEFAULTS: Record<
   { cash: number; inKindVal: number; deliverables: string[] }
 > = {
   Title: {
-    cash: 500000,
+    cash: 400000,
     inKindVal: 0,
     deliverables: [
-      "Main Stage Digital Backdrop Banner",
-      "Central Promenade Exhibition Stall Space",
-      "Keynote Session / Technical Workshop Slot",
-      "Festival Website & Mobile App Branding",
-      "Logo on 3,000+ Delegate Badges & Lanyards",
-      "Logo on 300+ Volunteer Core T-Shirts",
-      "Dedicated Social Media Series (100K+ Impressions)",
-      "VIP Stage Banquet Passes & Dinner Invitation",
+      "Event named/presented as 'Civil Fest powered by [Sponsor]'",
+      "Prominent logo placement on posters, banners and event creatives",
+      "Large flex branding at the venue",
+      "Dedicated social media promotion and stories",
+      "Sponsor mentions during major events and announcements",
+      "Branding on stage/backdrop and prize distribution",
+      "Space for promotional materials/stall or standee",
+      "Priority access to event attendees for lead generation & product demos",
+      "Complimentary booth staff passes and VIP access for sponsor representatives",
+      "Post-event report with attendee engagement metrics and brand visibility insights",
+      "Option to host a keynote session, workshop, or product launch activation",
     ],
   },
-  "Powered By": {
-    cash: 300000,
+  "Co-Sponsor": {
+    cash: 200000,
     inKindVal: 0,
     deliverables: [
-      "Main Stage Digital Backdrop Banner",
-      "Central Promenade Exhibition Stall Space",
-      "Keynote Session / Technical Workshop Slot",
-      "Festival Website & Mobile App Branding",
-      "Flyer / Brochure Insertion in Welcome Delegate Kits",
+      "Prominent logo placement on posters, banners and event creatives",
+      "Large flex branding at the venue",
+      "Dedicated social media promotion and stories",
+      "Sponsor mentions during major events and announcements",
+      "Branding on stage/backdrop and prize distribution",
+      "Space for promotional materials/stall or standee",
+      "Complimentary booth staff passes and VIP access for sponsor representatives",
+      "Post-event report with attendee engagement metrics and brand visibility insights",
     ],
   },
   Associate: {
-    cash: 150000,
+    cash: 100000,
     inKindVal: 0,
     deliverables: [
-      "Central Promenade Exhibition Stall Space",
-      "Festival Website & Mobile App Branding",
-      "Exclusive Category Partner Naming Rights",
+      "Prominent logo placement on posters, banners and event creatives",
+      "Large flex branding at the venue",
+      "Dedicated social media promotion and stories",
+      "Sponsor mentions during major events and announcements",
+      "Branding on stage/backdrop and prize distribution",
+    ],
+  },
+  Supporting: {
+    cash: 50000,
+    inKindVal: 0,
+    deliverables: [
+      "Prominent logo placement on posters, banners and event creatives",
+      "Dedicated social media promotion and stories",
+      "Sponsor mentions during major events and announcements",
+      "Brand mention in event email updates and official website",
+      "Digital sponsor badge for partner use",
+    ],
+  },
+  Community: {
+    cash: 25000,
+    inKindVal: 0,
+    deliverables: [
+      "Prominent logo placement on posters, banners and event creatives",
+      "Dedicated social media promotion and stories",
+      "Sponsor mentions during major events and announcements",
+      "Logo inclusion on the sponsor thank-you display",
+    ],
+  },
+  "Event Sponsor": {
+    cash: 10000,
+    inKindVal: 0,
+    deliverables: [
+      "Prominent logo placement on posters, banners and event creatives",
+      "Dedicated social media promotion and stories",
+      "Sponsor mentions during major events and announcements",
+    ],
+  },
+  "Powered By": {
+    cash: 200000,
+    inKindVal: 0,
+    deliverables: [
+      "Prominent logo placement on posters, banners and event creatives",
+      "Large flex branding at the venue",
+      "Dedicated social media promotion and stories",
+      "Sponsor mentions during major events and announcements",
     ],
   },
   Custom: {
-    cash: 100000,
+    cash: 50000,
     inKindVal: 0,
-    deliverables: ["Central Promenade Exhibition Stall Space", "Festival Website & Mobile App Branding"],
+    deliverables: [
+      "Prominent logo placement on posters, banners and event creatives",
+      "Dedicated social media promotion and stories",
+    ],
   },
   "In-Kind": {
     cash: 0,
-    inKindVal: 100000,
-    deliverables: ["Festival Website & Mobile App Branding", "Central Promenade Exhibition Stall Space"],
+    inKindVal: 50000,
+    deliverables: [
+      "Prominent logo placement on posters, banners and event creatives",
+      "Dedicated social media promotion and stories",
+    ],
   },
 };
 
@@ -211,9 +269,19 @@ export function CreateProposalModal({
             <Trophy className="h-3.5 w-3.5 text-primary" />
             Sponsorship Tier
           </label>
-          <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
-            {(["Title", "Powered By", "Associate", "Custom", "In-Kind"] as SponsorshipTier[]).map(
-              (t) => (
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            {(
+              [
+                "Title",
+                "Co-Sponsor",
+                "Associate",
+                "Supporting",
+                "Community",
+                "Event Sponsor",
+                "In-Kind",
+                "Custom",
+              ] as SponsorshipTier[]
+            ).map((t) => (
                 <button
                   key={t}
                   type="button"
@@ -332,7 +400,7 @@ export function CreateProposalModal({
                   rows={2}
                   value={inKindDescription}
                   onChange={(e) => setInKindDescription(e.target.value)}
-                  placeholder="e.g. 5,000 bottles of 500ml mineral water with cold-chain delivery on Days 1-3."
+                  placeholder="e.g. 1,000 units of refreshments with eco-friendly distribution on Dec 04–05."
                   className="w-full rounded-lg border border-border bg-surface p-2 text-xs text-text-primary placeholder:text-text-muted focus:border-primary focus:outline-hidden"
                 />
               </div>

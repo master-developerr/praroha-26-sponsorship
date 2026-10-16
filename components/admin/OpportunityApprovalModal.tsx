@@ -30,16 +30,20 @@ interface OpportunityApprovalModalProps {
 }
 
 const STANDARD_DELIVERABLES = [
-  "Main Stage Digital Backdrop Banner",
-  "Central Promenade Exhibition Stall Space",
-  "Keynote Session / Technical Workshop Slot",
-  "Festival Website & Mobile App Branding",
-  "Logo on 3,000+ Delegate Badges & Lanyards",
-  "Logo on 300+ Volunteer Core T-Shirts",
-  "Dedicated Social Media Spotlight Series",
-  "Flyer / Brochure Insertion in Welcome Delegate Kits",
-  "Exclusive Category Partner Naming Rights",
-  "VIP Stage Banquet Passes & Dinner Invitation",
+  "Event named/presented as 'Civil Fest powered by [Sponsor]'",
+  "Prominent logo placement on posters, banners and creatives",
+  "Large flex branding at the venue",
+  "Dedicated social media promotion and stories",
+  "Sponsor mentions during major events and announcements",
+  "Branding on stage backdrop and prize distribution",
+  "Space for promotional materials/stall or standee",
+  "Priority access to event attendees for lead generation & demos",
+  "Complimentary booth staff passes & VIP access",
+  "Post-event report with attendee engagement metrics & insights",
+  "Option to host a keynote session, workshop, or activation",
+  "Official website logo placement",
+  "Digital sponsor badge for partner use",
+  "Logo inclusion on the sponsor thank-you display",
 ];
 
 const IN_KIND_CATEGORIES: { value: SponsorshipCategory; label: string }[] = [
@@ -67,14 +71,14 @@ export function OpportunityApprovalModal({
   const authorizeCommitmentMutation = useMutation(api.pipeline.authorizeCommitment);
 
   const [packageTier, setPackageTier] = useState<string>("Associate");
-  const [cashAmount, setCashAmount] = useState<number>(150000);
+  const [cashAmount, setCashAmount] = useState<number>(100000);
   const [hasInKind, setHasInKind] = useState<boolean>(false);
   const [inKindCategory, setInKindCategory] = useState<SponsorshipCategory>("PRODUCT");
   const [inKindEstimatedValue, setInKindEstimatedValue] = useState<number>(0);
   const [inKindDescription, setInKindDescription] = useState<string>("");
   const [deliverables, setDeliverables] = useState<string[]>([
-    "Central Promenade Exhibition Stall Space",
-    "Festival Website & Mobile App Branding",
+    "Prominent logo placement on posters, banners and creatives",
+    "Large flex branding at the venue",
   ]);
   const [mouReference, setMouReference] = useState<string>("");
   const [notes, setNotes] = useState<string>("");
@@ -85,7 +89,7 @@ export function OpportunityApprovalModal({
     if (company) {
       if (company.latestProposal) {
         setPackageTier(company.latestProposal.packageTier || "Associate");
-        setCashAmount(company.latestProposal.cashAmount || 150000);
+        setCashAmount(company.latestProposal.cashAmount || 100000);
         if (company.latestProposal.inKindEstimatedValue) {
           setHasInKind(true);
           setInKindEstimatedValue(company.latestProposal.inKindEstimatedValue);
@@ -180,10 +184,13 @@ export function OpportunityApprovalModal({
               onChange={(e) => setPackageTier(e.target.value)}
               className="w-full rounded-lg border border-border bg-surface p-2 text-xs font-semibold text-text-primary focus:border-primary focus:outline-hidden"
             >
-              <option value="Title">Title Sponsor</option>
-              <option value="Powered By">Powered By Sponsor</option>
-              <option value="Associate">Associate / Category Partner</option>
-              <option value="Custom">Custom Partnership</option>
+              <option value="Title">Title Sponsor (₹4 Lakhs)</option>
+              <option value="Co-Sponsor">Co-Sponsor (₹2 Lakhs)</option>
+              <option value="Associate">Associate Sponsor (₹1 Lakh)</option>
+              <option value="Supporting">Supporting Sponsor (₹50K)</option>
+              <option value="Community">Community Sponsor (₹25K)</option>
+              <option value="Event Sponsor">Event Sponsor* (₹10K+)</option>
+              <option value="Custom">Custom Commercial Partnership</option>
               <option value="In-Kind">In-Kind / Non-Cash Partner</option>
             </select>
 
@@ -291,7 +298,7 @@ export function OpportunityApprovalModal({
                   rows={2}
                   value={inKindDescription}
                   onChange={(e) => setInKindDescription(e.target.value)}
-                  placeholder="e.g. 5,000 units of mineral water bottles + logistics provided."
+                  placeholder="e.g. 1,000 units of refreshments + logistics support for Dec 04–05."
                   className="w-full rounded-lg border border-border bg-surface p-2 text-xs text-text-primary focus:border-primary focus:outline-hidden"
                 />
               </div>

@@ -27,6 +27,7 @@ import { NotificationPopover } from "@/components/layout/NotificationPopover";
 import { GlobalCommandPalette } from "@/components/search/GlobalCommandPalette";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { eventConfig } from "@/lib/eventConfig";
 
 export function Navbar({
   onLogCallClick,
@@ -119,9 +120,9 @@ export function Navbar({
             title="View PRAROHA'26 Event Information & Pitch Brochure"
           >
             <Calendar className="h-3.5 w-3.5 text-primary" />
-            <span className="font-medium text-text-primary">PRAROHA'26</span>
+            <span className="font-medium text-text-primary">{eventConfig.name}</span>
             <span className="text-text-muted">•</span>
-            <span>Feb 12 – 15, 2026</span>
+            <span>{eventConfig.datesCompact}</span>
           </div>
 
           {/* Primary Call Action */}

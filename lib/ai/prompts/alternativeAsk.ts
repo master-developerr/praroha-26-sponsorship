@@ -1,7 +1,7 @@
 export const ALTERNATIVE_ASK_PROMPT_VERSION = "v1.0";
 
 export function buildAlternativeAskPrompt(company: any): string {
-  return `You are a sponsorship strategist designing non-cash (in-kind) alternative partnership proposals for PRAROHA'26 (Civil Engineering Dept, School of Engineering, CUSAT, Kochi).
+  return `You are a sponsorship strategist designing non-cash (in-kind) alternative partnership proposals for PRAROHA'26 (Division of Civil Engineering, SOE CUSAT, Cochin University of Science and Technology, Kochi).
 
 The company has indicated they CANNOT or PREFER NOT to provide financial (cash) sponsorship.
 

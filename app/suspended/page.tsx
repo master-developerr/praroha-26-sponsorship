@@ -65,9 +65,10 @@ export default function SuspendedVerificationPage() {
               <p className="text-text-secondary leading-relaxed">
                 Contact the PRAROHA'26 Sponsorship Committee or your department faculty coordinator to request account reinstatement.
               </p>
-              <div className="pt-2 flex items-center gap-2 text-primary font-medium">
-                <Mail className="h-3.5 w-3.5" />
-                <span>sponsorship@praroha.in</span>
+              <div className="pt-2 flex flex-col gap-1 text-text-primary font-medium">
+                <span className="text-[11px] text-text-muted">Sponsorship Heads:</span>
+                <span className="text-xs">Nadhim: +91 9446853300</span>
+                <span className="text-xs">Sunisha: +91 8330818187</span>
               </div>
             </CardContent>
           </Card>
@@ -86,7 +87,7 @@ export default function SuspendedVerificationPage() {
 
       {/* Footer */}
       <footer className="max-w-xl w-full mx-auto text-center pt-4 border-t border-border-subtle text-[11px] text-text-muted">
-        PRAROHA'26 • School of Engineering, Cochin University of Science and Technology
+        PRAROHA'26 • Division of Civil Engineering • SOE CUSAT
       </footer>
     </div>
   );

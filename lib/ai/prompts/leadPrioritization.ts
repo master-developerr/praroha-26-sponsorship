@@ -22,7 +22,7 @@ export interface LeadPrioritizationPromptInput {
 }
 
 export function buildLeadPrioritizationPrompt(input: LeadPrioritizationPromptInput): string {
-  return `You are a sponsorship pipeline director for PRAROHA'26 (Civil Engineering Dept, School of Engineering, CUSAT, Kochi).
+  return `You are a sponsorship pipeline director for PRAROHA'26 (Division of Civil Engineering, SOE CUSAT, Cochin University of Science and Technology, Kochi).
 
 The application has computed a deterministic priority baseline for this company:
 - Baseline Score: ${input.calculatedScore} / 100

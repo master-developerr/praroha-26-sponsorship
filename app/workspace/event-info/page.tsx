@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import Image from "next/image";
+import Link from "next/link";
 import {
   Calendar,
   MapPin,
@@ -21,418 +21,549 @@ import {
   Phone,
   Mail,
   Compass,
+  Leaf,
+  Layers,
+  Wrench,
+  Radio,
+  FileText,
+  ChevronRight,
+  ArrowRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  eventConfig,
+  mainEvents,
+  panelDiscussions,
+  workshops,
+  preEvents,
+  sponsorshipPackages,
+  officialContacts,
+  quickPitchGuidelines,
+} from "@/lib/eventConfig";
 
 export default function EventInfoPage() {
-  const [activeTab, setActiveTab] = useState<"overview" | "tiers" | "competitions" | "inkind" | "contacts">(
-    "overview"
-  );
   const [isCopied, setIsCopied] = useState(false);
 
   const handleCopyPitchLink = () => {
     if (typeof window !== "undefined") {
-      navigator.clipboard.writeText("https://praroha26.cusat.ac.in/sponsorship-brochure.pdf");
+      navigator.clipboard.writeText(
+        window.location.origin + "/brochure/praroha-2026-sponsorship-brochure.pdf"
+      );
       setIsCopied(true);
       setTimeout(() => setIsCopied(false), 2000);
     }
   };
 
-  const tiers = [
-    {
-      name: "Title Sponsor",
-      ask: "₹5,00,000",
-      tag: "1 Available (Exclusive)",
-      color: "border-emerald-300 bg-emerald-50/60 text-emerald-950",
-      badgeColor: "bg-emerald-600 text-white",
-      deliverables: [
-        "Naming rights: 'PRAROHA'26 presented by [Brand]'",
-        "Prime 20x20 ft central exhibition stall in Main SOE Atrium",
-        "15-minute inaugural keynote address to 3,000+ student delegates",
-        "Prominent logo on main stage backdrop & 3,500+ festival delegate badges",
-        "Exclusive social media spotlight series (100K+ reach across Kerala & South India)",
-        "VIP banquet passes and student SDR recruitment desk clearance",
-      ],
-    },
-    {
-      name: "Powered By Sponsor",
-      ask: "₹3,00,000",
-      tag: "2 Available",
-      color: "border-sky-300 bg-sky-50/60 text-sky-950",
-      badgeColor: "bg-sky-600 text-white",
-      deliverables: [
-        "Co-branding: 'PRAROHA'26 Powered by [Brand]'",
-        "15x15 ft outdoor display pavilion on campus promenade",
-        "Technical masterclass / workshop slot for engineering students",
-        "Prominent logo on official delegate kits & festival web portal",
-        "Promotional flyer insertion in 2,500+ welcome kits",
-      ],
-    },
-    {
-      name: "Associate / Category Partner",
-      ask: "₹1,50,000",
-      tag: "4 Available",
-      color: "border-indigo-300 bg-indigo-50/60 text-indigo-950",
-      badgeColor: "bg-indigo-600 text-white",
-      deliverables: [
-        "Exclusive category title (e.g., 'Official Infrastructure Partner' or 'Official Cloud Partner')",
-        "10x10 ft exhibition stall during all 3 days",
-        "Logo on banner stands across technical event tracks",
-        "Company promotional video played between auditorium sessions",
-      ],
-    },
-    {
-      name: "Event / Competition Partner",
-      ask: "₹50,000 – ₹75,000",
-      tag: "Multiple Tracks",
-      color: "border-amber-300 bg-amber-50/60 text-amber-950",
-      badgeColor: "bg-amber-600 text-white",
-      deliverables: [
-        "Naming rights to flagship competition (Hackathon, Bridge Design, CAD Modeling)",
-        "Representative on the competition judge panel",
-        "Trophy branding & prize distribution stage presentation",
-      ],
-    },
-  ];
-
-  const inKindWishlist = [
-    { category: "Beverage Partner", requirement: "3,000 bottles energy drinks / packaged water", value: "₹60,000" },
-    { category: "Snack & Food Partner", requirement: "Meal boxes / snack hampers for 120 volunteers & judges", value: "₹45,000" },
-    { category: "Cloud & Dev Credits", requirement: "Free API keys, hosting credits for 24-hr Hackathon", value: "₹1,50,000" },
-    { category: "Print & Merch Partner", requirement: "500 participant t-shirts + lanyard printing", value: "₹85,000" },
-    { category: "Equipment / Tech Gear", requirement: "Surveying equipment, VR headsets for expo demo", value: "₹75,000" },
-    { category: "Travel / Hospitality", requirement: "Cab vouchers / hotel stays for outstation keynote speakers", value: "₹50,000" },
-  ];
-
-  const competitions = [
-    { title: "CivicHack'26", description: "24-hour national sustainable smart cities hackathon", prize: "₹50,000 Cash Pool" },
-    { title: "BIM & Structural CAD Sprint", description: "Multi-storey seismic structural design & 3D BIM modeling", prize: "₹30,000 Cash Pool" },
-    { title: "Truss Bridge Dynamics", description: "High-stress load testing of lightweight model bridge trusses", prize: "₹25,000 Cash Pool" },
-    { title: "Concrete Tech Challenge", description: "Eco-friendly self-compacting geopolymer mix design showcase", prize: "₹20,000 Cash Pool" },
-    { title: "Surveying Mastermind", description: "Total Station & GIS mapping accuracy race across campus", prize: "₹15,000 Cash Pool" },
-  ];
-
   return (
-    <div className="space-y-6">
-      {/* Header Banner */}
-      <div className="relative overflow-hidden rounded-2xl border border-border bg-surface p-6 shadow-xs">
-        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div className="space-y-2 max-w-2xl">
-            <div className="inline-flex items-center gap-2 rounded-full bg-accent-mint px-3 py-1 text-xs font-semibold text-accent-mint-text">
-              <Sparkles className="h-3.5 w-3.5" />
-              Flagship Techno-Managerial Festival • SOE CUSAT
-            </div>
-            <h1 className="text-3xl font-black tracking-tight text-text-primary">
-              PRAROHA'26 Event Intelligence
-            </h1>
-            <p className="text-sm text-text-secondary leading-relaxed">
-              Organized by the Department of Civil Engineering, School of Engineering, Cochin University of Science and Technology.
-              Use this internal knowledge dossier to pitch verified deliverables to corporate sponsors.
-            </p>
-            <div className="flex flex-wrap items-center gap-4 pt-2 text-xs text-text-muted">
-              <span className="flex items-center gap-1.5 font-medium text-text-primary">
-                <Calendar className="h-4 w-4 text-primary" /> Feb 12 – 15, 2026
-              </span>
-              <span className="flex items-center gap-1.5 font-medium text-text-primary">
-                <MapPin className="h-4 w-4 text-primary" /> SOE Campus, CUSAT, Kochi, Kerala
-              </span>
-              <span className="flex items-center gap-1.5 font-medium text-text-primary">
-                <Users className="h-4 w-4 text-primary" /> 3,000+ Delegates • 45+ Colleges
-              </span>
-            </div>
+    <div className="space-y-12 pb-16 max-w-6xl mx-auto px-4 sm:px-6">
+      {/* 1. HERO HEADER: Authoritative Event Identity */}
+      <section className="relative overflow-hidden rounded-3xl border border-border bg-gradient-to-br from-surface via-[#FBFDFB] to-emerald-50/40 p-8 sm:p-12 shadow-sm">
+        <div className="relative z-10 max-w-3xl space-y-4">
+          <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-3.5 py-1 text-xs font-bold text-primary">
+            <Calendar className="h-3.5 w-3.5" />
+            <span>{eventConfig.dates}</span>
+            <span className="text-primary/40">•</span>
+            <span>{eventConfig.venue}</span>
           </div>
 
-          <div className="flex flex-col gap-2 shrink-0">
+          <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-text-primary">
+            {eventConfig.name}
+          </h1>
+
+          <p className="text-xl sm:text-2xl font-serif italic text-primary font-medium tracking-tight">
+            "{eventConfig.tagline}"
+          </p>
+
+          <p className="text-sm sm:text-base text-text-secondary leading-relaxed pt-1">
+            {eventConfig.organizer} • {eventConfig.institution}
+          </p>
+
+          <div className="flex flex-wrap items-center gap-3 pt-4">
+            <a
+              href="/brochure/praroha-2026-sponsorship-brochure.pdf"
+              target="_blank"
+              download
+              className="inline-flex items-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-xs sm:text-sm font-semibold text-white hover:bg-primary/90 transition-all shadow-xs"
+            >
+              <Download className="h-4 w-4" />
+              Download Official Brochure (PDF)
+            </a>
+
             <Button
-              variant="primary"
+              variant="outline"
               size="md"
               onClick={handleCopyPitchLink}
-              className="gap-2 shadow-xs"
+              className="rounded-xl border-border bg-surface text-xs sm:text-sm font-medium"
             >
-              {isCopied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-              {isCopied ? "Brochure Link Copied!" : "Copy Pitch Link"}
+              {isCopied ? (
+                <>
+                  <Check className="h-4 w-4 mr-1.5 text-emerald-600" />
+                  Copied Brochure Link
+                </>
+              ) : (
+                <>
+                  <Copy className="h-4 w-4 mr-1.5 text-text-muted" />
+                  Copy Shareable Link
+                </>
+              )}
             </Button>
-            <a
-              href="https://praroha26.cusat.ac.in"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center justify-center gap-2 rounded-lg border border-border bg-surface px-4 py-2 text-xs font-medium text-text-secondary hover:bg-surface-subtle hover:text-text-primary transition-colors"
-            >
-              <ExternalLink className="h-3.5 w-3.5" />
-              Visit Festival Portal
-            </a>
           </div>
         </div>
 
-        {/* Decorative Backdrop Illustration Banner */}
-        <div className="mt-6 rounded-xl overflow-hidden border border-border-subtle relative h-48 md:h-56 w-full">
-          <Image
-            src="/images/praroha-outreach-banner.png"
-            alt="PRAROHA'26 Banner"
-            fill
-            className="object-cover object-center"
-            priority
-          />
+        {/* Subtle Decorative Architectural Accent */}
+        <div className="absolute top-0 right-0 -mt-12 -mr-12 h-64 w-64 rounded-full bg-emerald-100/40 blur-3xl pointer-events-none" />
+        <div className="absolute bottom-0 right-1/4 -mb-16 h-48 w-48 rounded-full bg-primary/5 blur-2xl pointer-events-none" />
+      </section>
+
+      {/* 2. ABOUT PRAROHA */}
+      <section className="space-y-4">
+        <div className="border-b border-border-subtle pb-3">
+          <span className="text-xs font-bold uppercase tracking-wider text-primary">
+            Overview & Vision
+          </span>
+          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-text-primary mt-1">
+            About PRAROHA
+          </h2>
         </div>
-      </div>
 
-      {/* Navigation Sub-Tabs */}
-      <div className="flex items-center gap-2 border-b border-border-subtle pb-2 overflow-x-auto text-xs">
-        {[
-          { key: "overview", label: "Event Overview", icon: Compass },
-          { key: "tiers", label: "Sponsorship Packages", icon: Briefcase },
-          { key: "competitions", label: "Competitions & Workshops", icon: Trophy },
-          { key: "inkind", label: "In-Kind / Non-Cash Needs", icon: Gift },
-          { key: "contacts", label: "Committee Directory", icon: Phone },
-        ].map((tab) => {
-          const Icon = tab.icon;
-          return (
-            <button
-              key={tab.key}
-              onClick={() => setActiveTab(tab.key as any)}
-              className={`flex items-center gap-2 rounded-lg px-3.5 py-2 font-semibold transition-colors cursor-pointer ${
-                activeTab === tab.key
-                  ? "bg-primary text-white shadow-xs"
-                  : "text-text-secondary hover:bg-surface-subtle hover:text-text-primary"
-              }`}
-            >
-              <Icon className="h-3.5 w-3.5" />
-              {tab.label}
-            </button>
-          );
-        })}
-      </div>
-
-      {/* Tab 1: Overview */}
-      {activeTab === "overview" && (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="md:col-span-2 space-y-6">
-            <div className="rounded-xl border border-border bg-surface p-5 shadow-xs space-y-4">
-              <h2 className="text-base font-bold text-text-primary flex items-center gap-2">
-                <Target className="h-4 w-4 text-primary" /> Festival Mission & Objectives
-              </h2>
-              <p className="text-xs text-text-secondary leading-relaxed">
-                PRAROHA'26 is the annual national festival celebrating engineering excellence, urban innovation, sustainable materials, and managerial acumen. Hosted in Kochi — Kerala's primary commercial hub — the event brings together the brightest undergraduate, postgraduate, and doctoral students from premier technical institutions across India (IITs, NITs, and top engineering colleges).
+          <div className="md:col-span-2 rounded-2xl border border-border bg-surface p-6 sm:p-8 space-y-4 shadow-xs">
+            <h3 className="text-lg font-bold text-text-primary">
+              {eventConfig.eventType}
+            </h3>
+            <p className="text-sm text-text-secondary leading-relaxed">
+              {eventConfig.about.concept}
+            </p>
+            <p className="text-sm text-text-secondary leading-relaxed">
+              {eventConfig.about.purpose}
+            </p>
+            <div className="pt-2 border-t border-border-subtle grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
+              <div className="space-y-1">
+                <span className="font-bold text-text-primary block text-sm">Engineers</span>
+                <span className="text-text-muted">Next-generation technical problem solvers</span>
+              </div>
+              <div className="space-y-1">
+                <span className="font-bold text-text-primary block text-sm">Innovators</span>
+                <span className="text-text-muted">Pioneers in sustainable construction & design</span>
+              </div>
+              <div className="space-y-1">
+                <span className="font-bold text-text-primary block text-sm">Industry Leaders</span>
+                <span className="text-text-muted">Corporate mentors & infrastructural directors</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Audience Metric Card */}
+          <div className="rounded-2xl border border-primary/20 bg-primary/5 p-6 sm:p-8 flex flex-col justify-between space-y-4 shadow-xs">
+            <div className="space-y-2">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-primary">
+                Official Brochure Reach
+              </span>
+              <p className="text-2xl sm:text-3xl font-extrabold tracking-tight text-primary">
+                1000+
               </p>
-              <div className="grid grid-cols-2 gap-3 pt-2">
-                <div className="p-3 bg-surface-subtle border border-border-subtle rounded-xl">
-                  <p className="text-xs font-bold text-text-primary">3,000+ Footfall</p>
-                  <p className="text-[11px] text-text-muted mt-0.5">High-intent student engineers, architects, developers, and future founders.</p>
-                </div>
-                <div className="p-3 bg-surface-subtle border border-border-subtle rounded-xl">
-                  <p className="text-xs font-bold text-text-primary">100,000+ Digital Reach</p>
-                  <p className="text-[11px] text-text-muted mt-0.5">Campus ambassadors, LinkedIn spotlights, YouTube livestreams, and regional press.</p>
-                </div>
-                <div className="p-3 bg-surface-subtle border border-border-subtle rounded-xl">
-                  <p className="text-xs font-bold text-text-primary">₹3,50,000+ Prize Pool</p>
-                  <p className="text-[11px] text-text-muted mt-0.5">Prestigious national competitions drawing top talent and pan-India press coverage.</p>
-                </div>
-                <div className="p-3 bg-surface-subtle border border-border-subtle rounded-xl">
-                  <p className="text-xs font-bold text-text-primary">Recruitment Pipeline</p>
-                  <p className="text-[11px] text-text-muted mt-0.5">Direct hiring access for civil, software, robotics, and managerial roles.</p>
-                </div>
-              </div>
+              <p className="text-xs font-semibold text-text-primary">
+                Students from colleges across Kerala
+              </p>
+              <p className="text-xs text-text-secondary leading-relaxed pt-1">
+                Engaging undergraduate and postgraduate engineers, research scholars, faculty members, and corporate delegates.
+              </p>
             </div>
-
-            <div className="rounded-xl border border-border bg-surface p-5 shadow-xs space-y-3">
-              <h2 className="text-base font-bold text-text-primary flex items-center gap-2">
-                <Building2 className="h-4 w-4 text-primary" /> Key Demographics & Audience Breakdown
-              </h2>
-              <div className="space-y-2 text-xs">
-                <div className="flex items-center justify-between p-2 rounded-lg bg-surface-subtle">
-                  <span className="font-medium text-text-primary">Engineering & Architecture Students</span>
-                  <span className="font-bold text-primary">68%</span>
-                </div>
-                <div className="flex items-center justify-between p-2 rounded-lg bg-surface-subtle">
-                  <span className="font-medium text-text-primary">Computer Science & AI Hackers</span>
-                  <span className="font-bold text-primary">18%</span>
-                </div>
-                <div className="flex items-center justify-between p-2 rounded-lg bg-surface-subtle">
-                  <span className="font-medium text-text-primary">Management & MBA Delegates</span>
-                  <span className="font-bold text-primary">14%</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="space-y-6">
-            <div className="rounded-xl border border-border bg-surface p-5 shadow-xs space-y-4">
-              <h3 className="text-sm font-bold text-text-primary flex items-center gap-2">
-                <Megaphone className="h-4 w-4 text-primary" /> Volunteer Pitch Elevator
-              </h3>
-              <div className="rounded-lg bg-accent-mint/40 border border-emerald-200 p-3 text-xs text-text-primary space-y-2">
-                <p className="font-semibold text-emerald-950">
-                  "Why should your brand partner with PRAROHA'26?"
-                </p>
-                <p className="text-[11px] text-emerald-900 leading-relaxed">
-                  "PRAROHA'26 puts your product directly in the hands of 3,000+ future engineers and corporate leaders. Whether you're hiring top tech talent, launching in the Kerala market, or reinforcing industry leadership, our physical exhibition stalls, inaugural keynote, and co-branded competitions provide measurable ROI far superior to generic online banners."
-                </p>
-              </div>
-            </div>
-
-            <div className="rounded-xl border border-border bg-surface p-5 shadow-xs space-y-3">
-              <h3 className="text-sm font-bold text-text-primary">Important Dates</h3>
-              <div className="space-y-2 text-xs">
-                <div className="flex justify-between border-b border-border-subtle pb-1.5">
-                  <span className="text-text-secondary">Sponsorship Deadline:</span>
-                  <span className="font-bold text-text-primary">Jan 25, 2026</span>
-                </div>
-                <div className="flex justify-between border-b border-border-subtle pb-1.5">
-                  <span className="text-text-secondary">Print Collateral Freeze:</span>
-                  <span className="font-bold text-text-primary">Feb 01, 2026</span>
-                </div>
-                <div className="flex justify-between border-b border-border-subtle pb-1.5">
-                  <span className="text-text-secondary">Stall Setup Date:</span>
-                  <span className="font-bold text-text-primary">Feb 11, 2026</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-text-secondary">Festival Dates:</span>
-                  <span className="font-bold text-primary">Feb 12 – 15, 2026</span>
-                </div>
-              </div>
+            <div className="pt-4 border-t border-primary/10 text-[11px] text-text-muted">
+              Location: SOE CUSAT, Kochi
             </div>
           </div>
         </div>
-      )}
+      </section>
 
-      {/* Tab 2: Sponsorship Tiers */}
-      {activeTab === "tiers" && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          {tiers.map((tier) => (
+      {/* 3. MAIN EVENTS */}
+      <section className="space-y-4">
+        <div className="border-b border-border-subtle pb-3 flex items-center justify-between">
+          <div>
+            <span className="text-xs font-bold uppercase tracking-wider text-primary">
+              Flagship Schedule
+            </span>
+            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-text-primary mt-1">
+              Main Events
+            </h2>
+          </div>
+          <span className="text-xs font-medium text-text-muted">
+            7 Official Tracks
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {mainEvents.map((evt, idx) => (
             <div
-              key={tier.name}
-              className={`rounded-2xl border p-5 shadow-xs flex flex-col justify-between ${tier.color}`}
+              key={evt.id}
+              className="rounded-2xl border border-border bg-surface p-5 space-y-2.5 shadow-xs hover:border-primary/40 transition-colors"
             >
-              <div>
-                <div className="flex items-center justify-between">
-                  <span className={`text-[10px] font-bold uppercase tracking-wider rounded-full px-2.5 py-0.5 ${tier.badgeColor}`}>
-                    {tier.tag}
-                  </span>
-                  <span className="text-xl font-black">{tier.ask}</span>
-                </div>
-                <h3 className="text-lg font-bold mt-2">{tier.name}</h3>
-                <ul className="mt-4 space-y-2 text-xs">
-                  {tier.deliverables.map((item, idx) => (
-                    <li key={idx} className="flex items-start gap-2">
-                      <CheckCircle2 className="h-3.5 w-3.5 shrink-0 mt-0.5 text-primary" />
-                      <span>{item}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              <div className="mt-6 pt-4 border-t border-black/10 flex items-center justify-between text-xs">
-                <span className="font-medium text-text-secondary">Tax Deductible Receipt Available</span>
-                <span className="font-bold">Formal MoU Required</span>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Tab 3: Competitions */}
-      {activeTab === "competitions" && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {competitions.map((comp) => (
-            <div key={comp.title} className="rounded-xl border border-border bg-surface p-5 shadow-xs space-y-2">
               <div className="flex items-center justify-between">
-                <h3 className="text-sm font-bold text-text-primary">{comp.title}</h3>
-                <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
-                  {comp.prize}
+                <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/10 text-xs font-bold text-primary">
+                  0{idx + 1}
+                </span>
+                <span className="text-[10px] font-semibold uppercase tracking-wider text-text-muted">
+                  Main Track
                 </span>
               </div>
-              <p className="text-xs text-text-secondary leading-relaxed">{comp.description}</p>
-              <div className="pt-2 text-[11px] text-text-muted flex items-center justify-between border-t border-border-subtle">
-                <span>Category: Technical Competition</span>
-                <span className="text-primary font-medium">Sponsorship Ask: ₹50,000</span>
+              <h3 className="font-bold text-text-primary text-sm leading-snug">
+                {evt.title}
+              </h3>
+              <p className="text-xs text-text-secondary leading-relaxed">
+                {evt.description}
+              </p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* 4. PANEL DISCUSSIONS */}
+      <section className="space-y-4">
+        <div className="border-b border-border-subtle pb-3 flex items-center justify-between">
+          <div>
+            <span className="text-xs font-bold uppercase tracking-wider text-primary">
+              Thought Leadership
+            </span>
+            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-text-primary mt-1">
+              Panel Discussions
+            </h2>
+          </div>
+          <span className="text-xs font-medium text-text-muted">
+            With Industry Experts
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {panelDiscussions.map((pd, idx) => (
+            <div
+              key={pd.id}
+              className="rounded-2xl border border-border bg-surface p-6 space-y-2 shadow-xs hover:border-primary/40 transition-colors flex items-start gap-4"
+            >
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-accent-mint/60 text-primary">
+                <Layers className="h-5 w-5" />
+              </div>
+              <div className="space-y-1">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-text-muted">
+                  Session 0{idx + 1}
+                </span>
+                <h3 className="font-bold text-text-primary text-base leading-snug">
+                  {pd.title}
+                </h3>
+                <p className="text-xs text-text-secondary leading-relaxed">
+                  {pd.description}
+                </p>
               </div>
             </div>
           ))}
         </div>
-      )}
+      </section>
 
-      {/* Tab 4: In-Kind */}
-      {activeTab === "inkind" && (
-        <div className="rounded-xl border border-border bg-surface p-5 shadow-xs space-y-4">
+      {/* 5. WORKSHOPS */}
+      <section className="space-y-4">
+        <div className="border-b border-border-subtle pb-3 flex items-center justify-between">
           <div>
-            <h2 className="text-base font-bold text-text-primary">Non-Cash / In-Kind Partnerships</h2>
-            <p className="text-xs text-text-secondary mt-1">
-              If a sponsor cannot commit monetary budget, pitch these essential logistics, beverage, or developer credit partnerships.
+            <span className="text-xs font-bold uppercase tracking-wider text-primary">
+              Hands-On Engineering
+            </span>
+            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-text-primary mt-1">
+              Workshops
+            </h2>
+          </div>
+          <span className="text-xs font-medium text-text-muted">
+            6 Specialized Masterclasses
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {workshops.map((ws, idx) => (
+            <div
+              key={ws.id}
+              className="rounded-2xl border border-border bg-surface p-5 space-y-2 shadow-xs hover:border-primary/40 transition-colors"
+            >
+              <div className="flex items-center gap-2">
+                <Wrench className="h-4 w-4 text-primary" />
+                <span className="text-[10px] font-bold uppercase tracking-wider text-primary">
+                  Workshop 0{idx + 1}
+                </span>
+              </div>
+              <h3 className="font-bold text-text-primary text-sm leading-snug">
+                {ws.title}
+              </h3>
+              <p className="text-xs text-text-secondary leading-relaxed">
+                {ws.description}
+              </p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* 6. PRE-EVENTS */}
+      <section className="space-y-4">
+        <div className="border-b border-border-subtle pb-3 flex items-center justify-between">
+          <div>
+            <span className="text-xs font-bold uppercase tracking-wider text-primary">
+              Campus Engagement
+            </span>
+            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-text-primary mt-1">
+              Pre-Events
+            </h2>
+          </div>
+          <span className="text-xs font-medium text-text-muted">
+            8 Campus Contests
+          </span>
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          {preEvents.map((pe, idx) => (
+            <div
+              key={pe.id}
+              className="rounded-xl border border-border bg-surface p-4 space-y-1 shadow-xs"
+            >
+              <span className="text-[10px] font-bold text-primary">
+                0{idx + 1}
+              </span>
+              <h3 className="font-bold text-text-primary text-xs leading-snug">
+                {pe.title}
+              </h3>
+              <p className="text-[11px] text-text-secondary leading-snug">
+                {pe.description}
+              </p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* 7. WHY SPONSOR PRAROHA? & SPONSOR BENEFITS */}
+      <section className="space-y-6">
+        <div className="border-b border-border-subtle pb-3">
+          <span className="text-xs font-bold uppercase tracking-wider text-primary">
+            Partnership Value
+          </span>
+          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-text-primary mt-1">
+            Why Sponsor PRAROHA?
+          </h2>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Core Capabilities */}
+          <div className="rounded-2xl border border-border bg-surface p-6 sm:p-8 space-y-4 shadow-xs">
+            <h3 className="text-base font-bold text-text-primary flex items-center gap-2">
+              <Target className="h-5 w-5 text-primary" />
+              Sponsor Opportunities On Campus
+            </h3>
+            <p className="text-xs text-text-secondary leading-relaxed">
+              Sponsors can directly activate on the SOE CUSAT campus to connect with the student and engineering community:
             </p>
-          </div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs text-text-secondary">
-              <thead className="border-b border-border-subtle bg-surface-subtle/50 text-[11px] font-semibold uppercase tracking-wider text-text-muted">
-                <tr>
-                  <th className="px-4 py-3">In-Kind Category</th>
-                  <th className="px-4 py-3">Requirement Deliverable</th>
-                  <th className="px-4 py-3">Estimated Value (INR)</th>
-                  <th className="px-4 py-3 text-right">Offer Reciprocal</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border-subtle">
-                {inKindWishlist.map((item, i) => (
-                  <tr key={i} className="hover:bg-surface-subtle/50 transition-colors">
-                    <td className="px-4 py-3 font-semibold text-text-primary">{item.category}</td>
-                    <td className="px-4 py-3">{item.requirement}</td>
-                    <td className="px-4 py-3 font-mono font-bold text-text-primary">{item.value}</td>
-                    <td className="px-4 py-3 text-right text-text-muted">Co-branding & Stall placement</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
-
-      {/* Tab 5: Contacts */}
-      {activeTab === "contacts" && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          <div className="rounded-xl border border-border bg-surface p-5 shadow-xs space-y-4">
-            <h3 className="text-sm font-bold text-text-primary flex items-center gap-2">
-              <Building2 className="h-4 w-4 text-primary" /> Faculty & Institutional Governance
-            </h3>
-            <div className="space-y-3 text-xs">
-              <div className="p-3 bg-surface-subtle rounded-lg">
-                <p className="font-bold text-text-primary">Dr. Deepa G. Nair</p>
-                <p className="text-text-muted">Head of Department, Civil Engineering</p>
-                <p className="text-[11px] text-text-secondary mt-1">School of Engineering, CUSAT</p>
-              </div>
-              <div className="p-3 bg-surface-subtle rounded-lg">
-                <p className="font-bold text-text-primary">Prof. K. S. Beena</p>
-                <p className="text-text-muted">Staff Coordinator, PRAROHA'26</p>
-                <p className="text-[11px] text-text-secondary mt-1">School of Engineering, CUSAT</p>
-              </div>
+            <div className="space-y-2.5 pt-1">
+              {eventConfig.valueProposition.coreOpportunities.map((opp, idx) => (
+                <div key={idx} className="flex items-start gap-2.5 text-xs text-text-secondary">
+                  <CheckCircle2 className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                  <span className="leading-snug">{opp}</span>
+                </div>
+              ))}
             </div>
           </div>
 
-          <div className="rounded-xl border border-border bg-surface p-5 shadow-xs space-y-4">
-            <h3 className="text-sm font-bold text-text-primary flex items-center gap-2">
-              <Users className="h-4 w-4 text-primary" /> Student Sponsorship Convenors
+          {/* Brand Visibility Benefits */}
+          <div className="rounded-2xl border border-border bg-surface p-6 sm:p-8 space-y-4 shadow-xs">
+            <h3 className="text-base font-bold text-text-primary flex items-center gap-2">
+              <Megaphone className="h-5 w-5 text-primary" />
+              Official Brand Visibility Benefits
             </h3>
-            <div className="space-y-3 text-xs">
-              <div className="p-3 bg-surface-subtle rounded-lg space-y-1">
-                <p className="font-bold text-text-primary">Adil M</p>
-                <p className="text-text-muted">Convenor, Corporate Outreach & Sponsorships</p>
-                <div className="flex items-center gap-3 pt-1 text-[11px] text-text-secondary font-mono">
-                  <span>+91 94951 23456</span>
-                  <span>•</span>
-                  <span>sponsorship@praroha.cusat.ac.in</span>
+            <p className="text-xs text-text-secondary leading-relaxed">
+              Extensive multi-channel corporate exposure throughout the festival lifecycle:
+            </p>
+            <div className="space-y-2.5 pt-1">
+              {eventConfig.brandVisibilityBenefits.map((item, idx) => (
+                <div key={idx} className="flex items-start gap-2.5 text-xs text-text-secondary">
+                  <Check className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                  <span className="leading-snug">{item}</span>
                 </div>
-              </div>
-              <div className="p-3 bg-surface-subtle rounded-lg space-y-1">
-                <p className="font-bold text-text-primary">Arjun Nair</p>
-                <p className="text-text-muted">Joint Convenor, Industry Relations</p>
-                <div className="flex items-center gap-3 pt-1 text-[11px] text-text-secondary font-mono">
-                  <span>+91 98470 65432</span>
-                  <span>•</span>
-                  <span>outreach@praroha.cusat.ac.in</span>
-                </div>
-              </div>
+              ))}
             </div>
           </div>
         </div>
-      )}
+      </section>
+
+      {/* 8. SPONSORSHIP CATEGORIES — AUTHORITATIVE PACKAGES */}
+      <section className="space-y-6">
+        <div className="border-b border-border-subtle pb-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+          <div>
+            <span className="text-xs font-bold uppercase tracking-wider text-primary">
+              Investment Tiers
+            </span>
+            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-text-primary mt-1">
+              Sponsorship Categories
+            </h2>
+          </div>
+          <div className="text-xs font-medium text-text-secondary">
+            Primary Hierarchy: <strong className="text-primary font-bold">₹4 LAKHS • ₹2 LAKHS • ₹1 LAKH • ₹50K • ₹25K • ₹10K+</strong>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {sponsorshipPackages.map((pkg) => (
+            <div
+              key={pkg.tier}
+              className={`rounded-2xl border p-6 flex flex-col justify-between space-y-4 shadow-xs transition-all ${
+                pkg.color?.border || "border-border"
+              } ${pkg.color?.bg || "bg-surface"}`}
+            >
+              <div className="space-y-3">
+                <div className="flex items-start justify-between">
+                  <span
+                    className={`text-[11px] font-bold px-3 py-1 rounded-full ${
+                      pkg.color?.badge || "bg-primary text-white"
+                    }`}
+                  >
+                    {pkg.name}
+                  </span>
+                </div>
+
+                <div>
+                  <h3 className="text-3xl font-extrabold tracking-tight text-text-primary">
+                    {pkg.formattedAmount}
+                  </h3>
+                  {pkg.footnote && (
+                    <p className="text-[11px] text-text-muted mt-1 italic">
+                      {pkg.footnote}
+                    </p>
+                  )}
+                </div>
+
+                <div className="space-y-2 pt-3 border-t border-border-subtle text-xs text-text-secondary">
+                  {pkg.benefits.map((benefit, i) => (
+                    <div key={i} className="flex items-start gap-2">
+                      <Check className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                      <span className="leading-snug">{benefit}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="pt-2">
+                <Link
+                  href="/workspace"
+                  className="inline-flex w-full items-center justify-center rounded-xl bg-surface border border-border px-4 py-2 text-xs font-semibold text-text-primary hover:border-primary/50 transition-colors shadow-2xs"
+                >
+                  Pitch in Volunteer Cockpit
+                  <ArrowRight className="h-3.5 w-3.5 ml-1.5 text-primary" />
+                </Link>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* 9. SUSTAINABILITY */}
+      <section className="space-y-4">
+        <div className="rounded-3xl border border-emerald-300 bg-gradient-to-br from-emerald-50/80 via-surface to-emerald-50/30 p-8 sm:p-10 shadow-xs space-y-4">
+          <div className="flex items-center gap-2.5">
+            <Leaf className="h-6 w-6 text-emerald-700" />
+            <span className="text-xs font-extrabold uppercase tracking-widest text-emerald-800">
+              {eventConfig.sustainability.motto}
+            </span>
+          </div>
+
+          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-emerald-950">
+            Green Protocol & Sustainability Commitment
+          </h2>
+
+          <p className="text-sm text-emerald-900 leading-relaxed max-w-3xl">
+            {eventConfig.sustainability.description}
+          </p>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+            {eventConfig.sustainability.principles.map((pr, idx) => (
+              <div
+                key={idx}
+                className="flex items-start gap-2.5 text-xs text-emerald-900 bg-white/70 p-3 rounded-xl border border-emerald-200"
+              >
+                <Check className="h-4 w-4 text-emerald-700 shrink-0 mt-0.5" />
+                <span className="leading-snug font-medium">{pr}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* 10. CONTACT US (Official Brochure Contacts) */}
+      <section className="space-y-6">
+        <div className="border-b border-border-subtle pb-3">
+          <span className="text-xs font-bold uppercase tracking-wider text-primary">
+            Official Directory
+          </span>
+          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-text-primary mt-1">
+            Contact Us
+          </h2>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Convenors */}
+          <div className="rounded-2xl border border-border bg-surface p-6 sm:p-8 space-y-4 shadow-xs">
+            <div className="flex items-center gap-2">
+              <Users className="h-5 w-5 text-primary" />
+              <h3 className="text-base font-bold text-text-primary">
+                Convenors
+              </h3>
+            </div>
+            <p className="text-xs text-text-muted">
+              Division of Civil Engineering, SOE CUSAT
+            </p>
+            <div className="space-y-3 pt-1">
+              {officialContacts.convenors.map((c) => (
+                <div
+                  key={c.name}
+                  className="flex items-center justify-between p-3 rounded-xl bg-surface-subtle border border-border-subtle"
+                >
+                  <span className="font-semibold text-text-primary text-sm">
+                    {c.name}
+                  </span>
+                  <a
+                    href={`tel:${c.phone}`}
+                    className="inline-flex items-center gap-1.5 text-primary font-mono text-sm hover:underline font-semibold"
+                  >
+                    <Phone className="h-3.5 w-3.5" />
+                    {c.phone}
+                  </a>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Sponsorship Heads */}
+          <div className="rounded-2xl border border-border bg-surface p-6 sm:p-8 space-y-4 shadow-xs">
+            <div className="flex items-center gap-2">
+              <Briefcase className="h-5 w-5 text-primary" />
+              <h3 className="text-base font-bold text-text-primary">
+                Sponsorship Heads
+              </h3>
+            </div>
+            <p className="text-xs text-text-muted">
+              PRAROHA'26 Sponsorship & Corporate Relations Committee
+            </p>
+            <div className="space-y-3 pt-1">
+              {officialContacts.sponsorshipHeads.map((s) => (
+                <div
+                  key={s.name}
+                  className="flex items-center justify-between p-3 rounded-xl bg-surface-subtle border border-border-subtle"
+                >
+                  <span className="font-semibold text-text-primary text-sm">
+                    {s.name}
+                  </span>
+                  <a
+                    href={`tel:${s.phone}`}
+                    className="inline-flex items-center gap-1.5 text-primary font-mono text-sm hover:underline font-semibold"
+                  >
+                    <Phone className="h-3.5 w-3.5" />
+                    {s.phone}
+                  </a>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
     </div>
   );
 }

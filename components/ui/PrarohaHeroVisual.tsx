@@ -52,9 +52,9 @@ export function PrarohaHeroVisual({
         <div className="absolute bottom-6 left-6 right-6 z-10 hidden sm:flex items-center justify-between text-white/90 drop-shadow-md">
           <div className="flex items-center gap-2 text-xs font-semibold tracking-wide">
             <span className="h-2 w-2 rounded-full bg-teal-400 animate-pulse" />
-            <span>School of Engineering, CUSAT</span>
+            <span>SOE CUSAT</span>
             <span className="text-white/40">•</span>
-            <span className="text-teal-200">Department of Civil Engineering</span>
+            <span className="text-teal-200">Division of Civil Engineering</span>
           </div>
           <span className="text-[11px] font-mono text-white/70">PRAROHA'26</span>
         </div>

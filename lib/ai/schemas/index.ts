@@ -13,7 +13,17 @@ export const companyAnalysisSchema = z.object({
   recommendedApproach: z.array(z.string()),
   recommendedContactDepartment: z.array(z.string()),
   recommendedAsk: z.object({
-    tier: z.enum(["Title", "Powered By", "Associate", "Custom", "In-Kind"]),
+    tier: z.enum([
+      "Title",
+      "Co-Sponsor",
+      "Associate",
+      "Supporting",
+      "Community",
+      "Event Sponsor",
+      "Powered By",
+      "Custom",
+      "In-Kind",
+    ]),
     minAmount: z.number(),
     maxAmount: z.number(),
     rationale: z.string(),

@@ -40,14 +40,20 @@ const IN_KIND_CATEGORIES = [
 ];
 
 const STANDARD_DELIVERABLES = [
-  "Main Stage Digital Backdrop Logo",
-  "Dedicated 10x10 Exhibition Stall",
-  "Official Website Logo & Hyperlink",
-  "Festival Brochure Full Page Ad",
-  "Opening Ceremony VIP Seating (2 passes)",
-  "Social Media Sponsor Spotlight (Instagram & LinkedIn)",
-  "Volunteer & Participant T-Shirt Branding",
-  "Prize Distribution Ceremony Presentation",
+  "Event named/presented as 'Civil Fest powered by [Sponsor]'",
+  "Prominent logo placement on posters, banners and creatives",
+  "Large flex branding at the venue",
+  "Dedicated social media promotion and stories",
+  "Sponsor mentions during major events and announcements",
+  "Branding on stage backdrop and prize distribution",
+  "Space for promotional materials/stall or standee",
+  "Priority access to event attendees for lead generation & demos",
+  "Complimentary booth staff passes & VIP access",
+  "Post-event report with attendee engagement metrics & insights",
+  "Option to host a keynote session, workshop, or activation",
+  "Official website logo placement",
+  "Digital sponsor badge for partner use",
+  "Logo inclusion on the sponsor thank-you display",
 ];
 
 const COMMITMENT_STATUSES = [
@@ -219,10 +225,12 @@ export function CreateCommitmentModal({
               onChange={(e) => setPackageTier(e.target.value)}
               className="w-full h-8 rounded-lg border border-border bg-surface px-2.5 text-xs text-text-primary focus:border-primary focus:outline-none"
             >
-              <option value="Title">Title Sponsor (₹5,00,000+)</option>
-              <option value="Powered By">Powered By Sponsor (₹3,00,000+)</option>
-              <option value="Associate">Associate Sponsor (₹1,50,000+)</option>
-              <option value="Event Partner">Event Partner (₹50,000+)</option>
+              <option value="Title">Title Sponsor (₹4 Lakhs)</option>
+              <option value="Co-Sponsor">Co-Sponsor (₹2 Lakhs)</option>
+              <option value="Associate">Associate Sponsor (₹1 Lakh)</option>
+              <option value="Supporting">Supporting Sponsor (₹50K)</option>
+              <option value="Community">Community Sponsor (₹25K)</option>
+              <option value="Event Sponsor">Event Sponsor* (₹10K+)</option>
               <option value="Custom">Custom Commercial Partnership</option>
               <option value="In-Kind">Exclusive In-Kind Partner</option>
             </select>

@@ -154,7 +154,7 @@ export default function RegisterProfilePage() {
               PRAROHA'26
             </h1>
             <p className="text-[11px] text-text-secondary">
-              Department of Civil Engineering • SOE CUSAT
+              Division of Civil Engineering • SOE CUSAT
             </p>
           </div>
         </div>

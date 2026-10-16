@@ -37,40 +37,41 @@ export function ConciseTalkingPoints({
     "hook" | "talkingPoints" | "questions" | "objections" | "inKind"
   >("talkingPoints");
 
-  // Dynamic context tailored to company
-  const hookText = `Hi, this is [Your Name] from the PRAROHA'26 Sponsorship Directorate at SOE CUSAT. I’m reaching out because ${
+  // Dynamic context tailored to company from authoritative event configuration
+  const hookText = `Hi, this is [Your Name] from the PRAROHA'26 Sponsorship Committee at SOE CUSAT. I’m reaching out because ${
     companyName
-  }'s leadership in ${niche || industry} directly aligns with Kerala's premier techno-managerial congregation of 15,000+ engineering and management youth.`;
+  }'s leadership in ${niche || industry} directly aligns with PRAROHA'26 — the Intercollegiate Civil Engineering Fest organized by the Division of Civil Engineering at CUSAT (Dec 04–05), connecting 1000+ students from colleges across Kerala.`;
 
   const talkingPoints = [
-    `Brand Footfall & Campus Reach: PRAROHA'26 convenes students from 120+ top institutions across South India, offering ${companyName} direct engagement with future engineering talent.`,
+    `Brand Footfall & Reach: PRAROHA'26 brings together 1000+ students from colleges across Kerala, along with faculty members, researchers, and industry professionals at SOE CUSAT.`,
     whyCompanyBenefits ||
-      `${keralaPresence ? `Leverage your presence across Kerala (${keralaPresence})` : `Expand brand awareness in Kerala`} through tier-1 stage branding, technical stalls, and exclusive festival zones.`,
+      `Direct Brand Exposure & Product Demonstrations: Set up exhibition stalls, demonstrate products, distribute collateral, and interact directly with future civil engineers.`,
     whyGoodLead ||
-      `Direct recruitment & technical mindshare: Position ${companyName} as the premier employer and partner of choice among premier CUSAT graduates.`,
+      `Talent & Recruitment Access: Position ${companyName} directly in front of motivated future engineers and innovators for graduate recruitment, internships, and brand equity.`,
+    `Focus on Sustainability: PRAROHA'26 strictly follows Green Protocol under the motto "OUR EARTH, OUR RESPONSIBILITY", featuring Waste-to-Art, Sustainable Construction, and Industry Expert Panels.`,
   ];
 
   const discoveryQuestions = [
     `"What are ${companyName}'s key student outreach and brand priorities across Kerala for this academic year?"`,
-    `"Are you currently prioritizing technical event sponsorships, hackathon prize partnerships, or graduate talent acquisition?"`,
+    `"Are you currently prioritizing technical event sponsorships, student recruitment, or exhibition stall demonstrations?"`,
     `"Who oversees corporate brand partnerships or CSR initiatives for collegiate events in your regional office?"`,
   ];
 
   const objections = [
     {
-      objection: "We don't sponsor collegiate fests.",
+      objection: "We don't sponsor generic college fests.",
       response:
-        "We understand! PRAROHA isn't just an entertainment festival — it's an industry-academia bridge featuring accredited workshops, technical paper symposiums, and corporate recruitment pipelines.",
+        "We completely agree! PRAROHA'26 is strictly an Intercollegiate Civil Engineering Fest organized by the Division of Civil Engineering, CUSAT, connecting future engineers through industry expert panels, accredited workshops, and hands-on competitions.",
     },
     {
       objection: "Our sponsorship budget for this quarter is closed.",
       response:
-        "Totally understandable. We also have non-cash partnership avenues such as workshop software licenses, technical mentor tracks, and merchandise tie-ups that require zero cash outlay.",
+        "Totally understandable. We also provide non-cash partnership avenues such as technical equipment demonstrations, software credits, workshop materials, or competition prizes.",
     },
     {
       objection: "Send your brochure by email and we will review.",
       response:
-        "I'd love to! To ensure I dispatch the exact package matching your regional marketing priorities, could I confirm whether brand visibility or student recruitment matters most to you?",
+        "I'd love to! To ensure I highlight the exact package matching your goals, could I confirm whether brand visibility, product demonstration, or student recruitment matters most to you?",
     },
   ];
 

@@ -32,6 +32,7 @@ import {
   PhoneForwarded,
 } from "lucide-react";
 import { QuickCallOutcome } from "@/types";
+import { eventConfig } from "@/lib/eventConfig";
 
 export function VolunteerDashboardView() {
   const { profile, user } = useAuthUser();
@@ -206,10 +207,13 @@ export function VolunteerDashboardView() {
                 <Sparkles className="h-5 w-5" />
               </div>
               <p className="text-xs font-bold text-text-primary">
-                PRAROHA'26 Outreach Cockpit
+                {eventConfig.name} • {eventConfig.datesCompact}
               </p>
               <p className="text-[10px] text-text-secondary">
-                Department of Civil Engineering • SOE CUSAT Kochi
+                {eventConfig.organizer}
+              </p>
+              <p className="text-[9px] text-text-muted">
+                {eventConfig.institution} • {eventConfig.venue}
               </p>
             </div>
             <div className="absolute -top-6 -right-6 h-24 w-24 rounded-full bg-primary/5 pointer-events-none" />

@@ -47,42 +47,45 @@ export function getFallbackCompanyAnalysis(company: any): CompanyAnalysisResult 
 
   let civilRelevance = "General engineering audience alignment at CUSAT.";
   if (isCivil) {
-    civilRelevance = "Direct core synergy with Civil Engineering Dept; ideal for Bridge Design and Site Innovation showcases.";
+    civilRelevance = "Direct core synergy with Division of Civil Engineering; ideal for Sustainable Construction, Waste-To-Art, and Project Expo showcases.";
   } else if (isTech) {
-    civilRelevance = "Synergy with digital engineering tools (BIM, CAD, Project Management Software) used by civil students.";
+    civilRelevance = "Synergy with digital engineering tools (BIM, CAD, AI, GIS, Project Management Software) used by civil students.";
   }
 
   const whyCompany: string[] = [
     `Established brand in ${company.industry || "engineering and technology sector"}.`,
-    company.whyGoodLead || "High alignment with 5,000+ collegiate engineers across South India.",
+    company.whyGoodLead || "High alignment with 1000+ collegiate engineers across Kerala.",
   ];
   if (hasKerala) whyCompany.push("Demonstrated regional operational footprint in Kerala.");
 
   const benefits: string[] = [
-    company.whyCompanyBenefits || "Direct brand visibility across campus delegates, competition banners, and festival media.",
-    "Targeted recruitment & brand equity among graduating CUSAT engineering cohorts.",
-    "Exclusive on-stage and social media acknowledgments during PRAROHA'26.",
+    company.whyCompanyBenefits || "Direct brand visibility, product demonstrations, and student interaction at SOE CUSAT.",
+    "Targeted recruitment, internships, & brand equity among graduating CUSAT engineering cohorts.",
+    "Prominent event banners, digital stage backdrops, and official website & brochure branding during PRAROHA'26.",
   ];
 
   const approaches: string[] = [
-    "Pitch PRAROHA'26 as South India's premier civil-tech symposium hosted by CUSAT School of Engineering.",
-    "Propose tailored brand integration tied to their core domain rather than generic display banners.",
-    "Offer post-fest impact report and high-resolution media collateral.",
+    "Pitch PRAROHA'26 as the premier Intercollegiate Civil Engineering Fest hosted by Division of Civil Engineering, SOE CUSAT.",
+    "Propose tailored brand integration tied to their core domain (stalls, product demos, technical workshops) rather than generic banners.",
+    "Offer post-event attendee engagement report and brand visibility insights.",
   ];
 
-  const minAmt = company.recommendedAskMin || 50000;
-  const maxAmt = company.recommendedAskMax || 150000;
+  const minAmt = company.recommendedAskMin || 25000;
+  const maxAmt = company.recommendedAskMax || 100000;
   let tier: SponsorshipTier = "Associate";
-  if (minAmt >= 300000) tier = "Title";
-  else if (minAmt >= 150000) tier = "Powered By";
-  else if (minAmt < 50000) tier = "Custom";
+  if (minAmt >= 400000) tier = "Title";
+  else if (minAmt >= 200000) tier = "Co-Sponsor";
+  else if (minAmt >= 100000) tier = "Associate";
+  else if (minAmt >= 50000) tier = "Supporting";
+  else if (minAmt >= 25000) tier = "Community";
+  else tier = "Event Sponsor";
 
   return {
     companyFitScore: fitScore,
     priority,
     industryRelevance: `Strong alignment with the ${company.industry || "corporate"} market and campus demographic.`,
     keralaRelevance: hasKerala ? "Verified Kerala operations, facilitating regional brand decisions." : "National footprint; potential for Kerala campus penetration.",
-    studentAudienceFit: "5,000+ engineering and technology students with high disposable engagement and tech-savviness.",
+    studentAudienceFit: "1000+ students from colleges across Kerala, along with faculty members, researchers, and industry professionals.",
     civilEngineeringRelevance: civilRelevance,
     sponsorshipPotential: `High potential for ₹${minAmt.toLocaleString("en-IN")} - ₹${maxAmt.toLocaleString("en-IN")} package tier.`,
     whyThisCompany: whyCompany,
@@ -97,8 +100,8 @@ export function getFallbackCompanyAnalysis(company: any): CompanyAnalysisResult 
     },
     alternativeAsks: [
       "Technical workshop or masterclass for competition participants",
-      "Hackathon challenge prize partner with corporate branding",
-      "Official merchandise/kit co-branding",
+      "Innovation Challenge (Ideathon & Hackathon) partner with corporate branding",
+      "Exhibition stall and product demonstration setup",
     ],
     likelyObjections: [
       "Annual marketing budgets already locked for this quarter",
@@ -116,32 +119,32 @@ export function getFallbackCallPreparation(company: any): CallPreparationResult 
   return {
     callObjective: [
       `Introduce PRAROHA'26 to ${contactName} or obtain direct regional marketing lead.`,
-      "Establish CUSAT School of Engineering flagship stature and 5,000+ delegate reach.",
+      "Establish CUSAT Division of Civil Engineering flagship stature and 1000+ delegate reach.",
       "Secure interest to dispatch official formal sponsorship proposal deck.",
     ],
     openingAngle: [
-      `"Good morning ${contactName}, I am reaching out from PRAROHA'26 at CUSAT School of Engineering."`,
-      `"We are curating select industry partners in ${company.industry || "engineering"} for our flagship symposium this February."`,
-      "Highlight campus footfall: 5,000+ high-caliber student engineers across South India.",
+      `"Good morning ${contactName}, I am reaching out from PRAROHA'26, the Intercollegiate Civil Engineering Fest at SOE CUSAT."`,
+      `"We are curating select industry partners in ${company.industry || "engineering"} for PRAROHA'26 this December 04–05."`,
+      "Highlight campus footfall: 1000+ students from colleges across Kerala.",
     ],
     whyThisCompany: [
       `${company.companyName} is recognized as an industry standard in ${company.niche || company.industry}.`,
       "Students actively seek exposure to their products, methodologies, and leadership.",
     ],
     keyTalkingPoints: [
-      "3-day national symposium hosted by Civil Engineering Department, SOE CUSAT.",
-      "Event includes National Civil Hackathon, Bridge Design, and 20+ specialized technical tracks.",
-      "Custom branding: workshop naming rights, exhibition stalls, and student hackathon problem statements.",
+      "Intercollegiate Civil Engineering Fest (Dec 04–05) organized by Division of Civil Engineering, SOE CUSAT.",
+      "Event includes Innovation Challenge (Ideathon & Hackathon), Sustainable Construction Workshops, and Industry Expert Panels.",
+      "Custom branding: exhibition stalls, product demos, workshop sponsorships, and recruitment access.",
     ],
     valueToCompany: [
-      "Direct brand impressions across 5,000+ high-intent future engineers and technical leaders.",
-      "Recruitment branding and resume collection pipeline opportunities.",
-      "Social media and campus flex presence across Cochin University campus.",
+      "Direct brand impressions across 1000+ motivated future engineers, innovators, and faculty members.",
+      "Recruitment branding, product demonstrations, and student talent pipeline access.",
+      "Social media, campus flex banners, and stage backdrops across Cochin University campus.",
     ],
     whatToAsk: [
-      `"Are you currently allocating sponsorship or campus outreach funds for Q1 2026?"`,
-      `"May we send our 2-page executive festival deck directly to your marketing inbox?"`,
-      `"Who would be the ideal executive to review our specific partnership deliverable proposal?"`,
+      `"Are you currently allocating sponsorship, brand engagement, or campus outreach funds for December?"`,
+      `"May we send our official PRAROHA'26 sponsorship brochure directly to your email?"`,
+      `"Who would be the ideal executive in your team to review our sponsorship proposal?"`,
     ],
     likelyObjections: [
       {
@@ -242,10 +245,10 @@ export function getFallbackAlternativeAsk(company: any): AlternativeAskResult {
       {
         category: "PRODUCT",
         title: "Official Hydration / Refreshment Partner",
-        description: "Supply beverages, energy drinks, or snack hampers for 5,000+ festival attendees and VIP guests.",
+        description: "Supply beverages, energy drinks, or snack hampers for 1000+ festival attendees and VIP guests.",
         estimatedValueINR: 60000,
         valueToPraroha: "Eliminates major recurring festival hospitality and volunteer refreshment expenses.",
-        companyFeasibility: "Direct sampling opportunity targeting 18-24 youth demographic at wholesale production cost.",
+        companyFeasibility: "Direct sampling opportunity targeting future civil engineering youth demographic at wholesale production cost.",
       },
       {
         category: "MERCHANDISE",
@@ -263,8 +266,8 @@ export function getFallbackAlternativeAsk(company: any): AlternativeAskResult {
         title: "Official Volunteer & Delegate T-Shirt Partner",
         description: "Sponsor branded apparel featuring prominent corporate logo alongside PRAROHA'26 iconography.",
         estimatedValueINR: 50000,
-        valueToPraroha: "Offsets major uniform printing overhead for 200+ student organizers and staff.",
-        companyFeasibility: "High-visibility walking billboards worn throughout the 3-day event and across campus for months.",
+        valueToPraroha: "Offsets major uniform printing overhead for student organizers and staff.",
+        companyFeasibility: "High-visibility walking billboards worn throughout the festival and across campus for months.",
       },
       {
         category: "PRINTING",

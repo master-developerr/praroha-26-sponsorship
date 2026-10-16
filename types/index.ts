@@ -220,8 +220,12 @@ export interface FollowUpItem {
 
 export type SponsorshipTier =
   | "Title"
-  | "Powered By"
+  | "Co-Sponsor"
   | "Associate"
+  | "Supporting"
+  | "Community"
+  | "Event Sponsor"
+  | "Powered By"
   | "Custom"
   | "In-Kind";
 

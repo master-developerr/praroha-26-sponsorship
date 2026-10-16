@@ -13,7 +13,7 @@ export interface DebriefAnalysisInput {
 }
 
 export function buildCallDebriefPrompt(input: DebriefAnalysisInput): string {
-  return `You are a sponsorship outreach auditor and deal coach for PRAROHA'26 (Civil Engineering Dept, School of Engineering, CUSAT, Kochi).
+  return `You are a sponsorship outreach auditor and deal coach for PRAROHA'26 (Division of Civil Engineering, SOE CUSAT, Cochin University of Science and Technology, Kochi).
 
 Analyze the debrief report submitted by a student volunteer after a live outreach call.
 

@@ -186,7 +186,7 @@ export default function PendingVerificationPage() {
 
       {/* Footer */}
       <footer className="max-w-2xl w-full mx-auto text-center pt-4 border-t border-border-subtle text-[11px] text-text-muted">
-        PRAROHA'26 • Civil Engineering Department • SOE CUSAT
+        PRAROHA'26 • Division of Civil Engineering • SOE CUSAT
       </footer>
     </div>
   );

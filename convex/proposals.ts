@@ -7,8 +7,12 @@ export const createProposal = mutation({
     clerkId: v.string(),
     packageTier: v.union(
       v.literal("Title"),
-      v.literal("Powered By"),
+      v.literal("Co-Sponsor"),
       v.literal("Associate"),
+      v.literal("Supporting"),
+      v.literal("Community"),
+      v.literal("Event Sponsor"),
+      v.literal("Powered By"),
       v.literal("Custom"),
       v.literal("In-Kind")
     ),

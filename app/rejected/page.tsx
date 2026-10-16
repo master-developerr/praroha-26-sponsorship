@@ -117,7 +117,7 @@ export default function RejectedVerificationPage() {
 
       {/* Footer */}
       <footer className="max-w-xl w-full mx-auto text-center pt-4 border-t border-border-subtle text-[11px] text-text-muted">
-        PRAROHA'26 • School of Engineering, Cochin University of Science and Technology
+        PRAROHA'26 • Division of Civil Engineering • SOE CUSAT
       </footer>
     </div>
   );

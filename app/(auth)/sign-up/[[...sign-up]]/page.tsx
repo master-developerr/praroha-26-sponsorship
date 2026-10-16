@@ -67,7 +67,7 @@ function SignUpContent() {
               </Link>
             </p>
             <p className="text-[11px] text-text-muted">
-              PRAROHA'26 • Civil Engineering Department • SOE CUSAT
+              PRAROHA'26 • Division of Civil Engineering • SOE CUSAT
             </p>
           </div>
         </div>

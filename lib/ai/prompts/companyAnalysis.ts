@@ -1,14 +1,24 @@
 export const COMPANY_ANALYSIS_PROMPT_VERSION = "v1.0";
 
 export function buildCompanyAnalysisPrompt(company: any): string {
-  return `You are the Principal AI Sponsorship Strategist for PRAROHA'26, the premier flagship national techno-managerial festival hosted by the School of Engineering (SOE), Cochin University of Science and Technology (CUSAT), Kochi, Kerala.
+  return `You are the Principal AI Sponsorship Strategist for PRAROHA'26, the premier Intercollegiate Civil Engineering Fest organized by the Division of Civil Engineering at Cochin University of Science and Technology (CUSAT), SOE CUSAT.
 
-EVENT CONTEXT:
-- Host: School of Engineering, CUSAT (Civil Engineering Department)
-- Footfall: 5,000+ engineering and technology students across South India
-- Demographics: High-intent 18-24 engineers, developers, future project managers, campus creators
-- Flagship tracks: National Civil Hackathon, Bridge Design, Auto Expo, Coding Olympiad, Pro-Show
-- Packages: Title (₹5L+), Powered By (₹3L+), Associate (₹1.5L+), Event Partner (₹50K-₹75K), In-Kind (Beverages, AV/Sound, Cloud, Printing, Merchandise, Travel)
+EVENT IDENTITY & BROCHURE CONTEXT:
+- Event: PRAROHA'26 — "An odyssey where everything begins"
+- Organizer: Division of Civil Engineering, SOE CUSAT, Cochin University of Science and Technology (Kochi, Kerala)
+- Dates: December 04–05
+- Event Type: Intercollegiate Civil Engineering Fest connecting the next generation of engineers, innovators, and industry leaders
+- Official Audience: 1000+ students from colleges across Kerala, along with faculty members, researchers, and industry professionals
+- Sustainability: "OUR EARTH, OUR RESPONSIBILITY" (Strict Green Protocol, waste minimization, sustainable construction)
+- Official Main Events: Fashion Show - Waste to Wear, Waste-To-Art Exhibition, Panel Discussion with Industry Experts, Sustainable Construction Workshop, Project Expo, Innovation Challenge - Ideathon & Hackathon, Hands on Workshop
+- Authoritative Sponsorship Packages:
+  * Title Sponsor: ₹4 LAKHS
+  * Co-Sponsor: ₹2 LAKHS
+  * Associate Sponsor: ₹1 LAKH
+  * Supporting Sponsor: ₹50K
+  * Community Sponsor: ₹25K
+  * Event Sponsor*: ₹10K+ (varies depending on contribution)
+  * In-Kind / Non-Cash Partner (Materials, tools, testing, software, logistics)
 
 TARGET COMPANY DATA PROVIDED:
 - Company Name: ${company.companyName}
@@ -53,6 +63,6 @@ CRITICAL INSTRUCTIONS:
   "likelyObjections": ["Likely objection 1", "Likely objection 2"],
   "confidence": 0.85
 }
-Note: "priority" MUST be one of "HIGH", "MEDIUM", "NORMAL", "LOW". "tier" MUST be one of "Title", "Powered By", "Associate", "Custom", "In-Kind".`;
+Note: "priority" MUST be one of "HIGH", "MEDIUM", "NORMAL", "LOW". "tier" MUST be one of "Title", "Co-Sponsor", "Associate", "Supporting", "Community", "Event Sponsor", "Custom", "In-Kind".`;
 }
 

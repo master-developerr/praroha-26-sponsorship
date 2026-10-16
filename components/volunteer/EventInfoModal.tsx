@@ -19,7 +19,23 @@ import {
   Target,
   Megaphone,
   Briefcase,
+  Phone,
+  Leaf,
+  Layers,
+  Wrench,
+  Radio,
+  BookOpen,
 } from "lucide-react";
+import {
+  eventConfig,
+  mainEvents,
+  panelDiscussions,
+  workshops,
+  preEvents,
+  sponsorshipPackages,
+  officialContacts,
+  quickPitchGuidelines,
+} from "@/lib/eventConfig";
 
 interface EventInfoModalProps {
   isOpen: boolean;
@@ -27,216 +43,196 @@ interface EventInfoModalProps {
 }
 
 export function EventInfoModal({ isOpen, onClose }: EventInfoModalProps) {
-  const [activeTab, setActiveTab] = useState<"tiers" | "demographics" | "inkind" | "brochure">(
-    "tiers"
-  );
+  const [activeTab, setActiveTab] = useState<
+    "overview" | "events" | "workshops" | "tiers" | "sustainability" | "contacts" | "brochure"
+  >("tiers");
   const [isCopied, setIsCopied] = useState(false);
 
   const handleCopyPitchLink = () => {
     if (typeof window !== "undefined") {
-      navigator.clipboard.writeText("https://praroha26.cusat.ac.in/sponsorship-brochure.pdf");
+      navigator.clipboard.writeText(
+        window.location.origin + "/brochure/praroha-2026-sponsorship-brochure.pdf"
+      );
       setIsCopied(true);
       setTimeout(() => setIsCopied(false), 2000);
     }
   };
-
-  const tiers = [
-    {
-      name: "Title Sponsor",
-      ask: "₹5,00,000",
-      tag: "1 Available (Exclusive)",
-      color: "border-emerald-300 bg-emerald-50/50 text-emerald-950",
-      badgeColor: "bg-emerald-600 text-white",
-      highlights: [
-        "Naming rights: 'PRAROHA'26 presented by [Brand]'",
-        "Prime 20x20 ft central exhibition stall in Main Atrium",
-        "15-minute inaugural keynote address to 3,000+ delegates",
-        "Prominent logo on main stage backdrop & festival badges",
-        "Exclusive social media spotlight series (100K+ reach)",
-        "VIP banquet passes and student SDR recruitment desk",
-      ],
-    },
-    {
-      name: "Powered By Sponsor",
-      ask: "₹3,00,000",
-      tag: "2 Available",
-      color: "border-sky-300 bg-sky-50/50 text-sky-950",
-      badgeColor: "bg-sky-600 text-white",
-      highlights: [
-        "Co-branding: 'PRAROHA'26 Powered by [Brand]'",
-        "15x15 ft outdoor display stall on campus promenade",
-        "Technical masterclass / workshop slot for engineers",
-        "Logo on official delegate kits & festival website",
-        "Promotional flyer insertion in 2,500+ welcome kits",
-      ],
-    },
-    {
-      name: "Associate / Category Partner",
-      ask: "₹1,50,000",
-      tag: "4 Available",
-      color: "border-indigo-300 bg-indigo-50/50 text-indigo-950",
-      badgeColor: "bg-indigo-600 text-white",
-      highlights: [
-        "Exclusive category title (e.g., 'Official Concrete Partner' or 'Official Cloud Partner')",
-        "10x10 ft exhibition stall during all 3 days",
-        "Logo on banner stands across technical event tracks",
-        "Company promotional video played between sessions",
-      ],
-    },
-    {
-      name: "Event / Competition Partner",
-      ask: "₹50,000 – ₹75,000",
-      tag: "Multiple",
-      color: "border-amber-300 bg-amber-50/50 text-amber-950",
-      badgeColor: "bg-amber-600 text-white",
-      highlights: [
-        "Naming rights to flagship competition (Hackathon, Bridge Design, CAD)",
-        "Representative on the competition judge panel",
-        "Trophy branding & prize presentation opportunity",
-      ],
-    },
-  ];
-
-  const inKindWishlist = [
-    {
-      category: "PRODUCT / BEVERAGES",
-      examples: "Bottled water (5000 units), juices, energy drinks, snacks for volunteers and delegates.",
-      estValuation: "₹50,000 – ₹1,50,000",
-      deliverable: "Prominent sampling counter and logo on refreshment coupon.",
-    },
-    {
-      category: "TECHNICAL / HARDWARE",
-      examples: "LED stage walls (20x10 ft), line array sound system, stage trussing, streaming equipment.",
-      estValuation: "₹1,00,000 – ₹2,50,000",
-      deliverable: "Co-branding on cultural pro-show backdrop and livestream watermark.",
-    },
-    {
-      category: "PRINTING & SIGNAGE",
-      examples: "250+ outdoor flex banners, stage backdrop, 3,000 certificate printouts, 2,000 lanyards.",
-      estValuation: "₹80,000 – ₹1,50,000",
-      deliverable: "Backside logo on all badges and certificates.",
-    },
-    {
-      category: "MERCHANDISE & T-SHIRTS",
-      examples: "300 volunteer polo shirts, 2,000 participant tote bags, caps, keychains.",
-      estValuation: "₹1,00,000 – ₹2,00,000",
-      deliverable: "Sleeve or chest logo placement on all volunteer attire.",
-    },
-    {
-      category: "SOFTWARE & CLOUD",
-      examples: "Cloud compute credits (AWS, Azure, GCP), developer licenses, AI platform trial tokens.",
-      estValuation: "₹1,50,000 – ₹3,00,000",
-      deliverable: "Official Tech Infrastructure Partner title and workshop slot.",
-    },
-    {
-      category: "TRANSPORTATION / TRAVEL",
-      examples: "Shuttle bus charters between Ernakulam Junction/Airport and CUSAT campus for delegates.",
-      estValuation: "₹60,000 – ₹1,20,000",
-      deliverable: "Bus banner wrapping and travel partner announcements.",
-    },
-  ];
 
   return (
     <Dialog
       isOpen={isOpen}
       onClose={onClose}
       maxWidth="xl"
-      title="PRAROHA'26 — Event Deck, Tiers & In-Kind Guide"
-      description="Internal volunteer outreach cheat sheet for School of Engineering, CUSAT flagship festival"
     >
-      <div className="space-y-4 pt-2 max-h-[75vh] overflow-y-auto pr-1">
-        {/* Navigation Tabs */}
-        <div className="flex border-b border-border text-xs font-medium">
-          <button
-            onClick={() => setActiveTab("tiers")}
-            className={`flex items-center gap-1.5 px-4 py-2.5 border-b-2 transition-colors ${
-              activeTab === "tiers"
-                ? "border-primary text-primary font-bold"
-                : "border-transparent text-text-secondary hover:text-text-primary"
-            }`}
-          >
-            <Trophy className="h-4 w-4" />
-            Sponsorship Tiers & Pricing
-          </button>
-          <button
-            onClick={() => setActiveTab("inkind")}
-            className={`flex items-center gap-1.5 px-4 py-2.5 border-b-2 transition-colors ${
-              activeTab === "inkind"
-                ? "border-primary text-primary font-bold"
-                : "border-transparent text-text-secondary hover:text-text-primary"
-            }`}
-          >
-            <Gift className="h-4 w-4" />
-            13 In-Kind Wishlist & Valuation
-          </button>
-          <button
-            onClick={() => setActiveTab("demographics")}
-            className={`flex items-center gap-1.5 px-4 py-2.5 border-b-2 transition-colors ${
-              activeTab === "demographics"
-                ? "border-primary text-primary font-bold"
-                : "border-transparent text-text-secondary hover:text-text-primary"
-            }`}
-          >
-            <Users className="h-4 w-4" />
-            Audience & Demographics
-          </button>
-          <button
-            onClick={() => setActiveTab("brochure")}
-            className={`flex items-center gap-1.5 px-4 py-2.5 border-b-2 transition-colors ${
-              activeTab === "brochure"
-                ? "border-primary text-primary font-bold"
-                : "border-transparent text-text-secondary hover:text-text-primary"
-            }`}
-          >
-            <FileText className="h-4 w-4" />
-            Brochure & Pitch Links
-          </button>
+      <div className="space-y-4 max-h-[85vh] overflow-y-auto pr-1">
+        {/* Header Banner */}
+        <div className="border-b border-border-subtle pb-3">
+          <div className="flex items-start justify-between">
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-2.5 py-0.5 text-[11px] font-semibold text-primary">
+                  <Calendar className="h-3 w-3" />
+                  {eventConfig.datesCompact}
+                </span>
+                <span className="text-[11px] text-text-muted">•</span>
+                <span className="text-[11px] font-medium text-text-secondary">
+                  {eventConfig.venue}
+                </span>
+              </div>
+              <h3 className="text-xl font-bold text-text-primary tracking-tight mt-1">
+                {eventConfig.name}
+              </h3>
+              <p className="text-xs text-text-secondary italic">
+                "{eventConfig.tagline}"
+              </p>
+              <p className="text-[11px] text-text-muted mt-0.5">
+                {eventConfig.organizer} • {eventConfig.institution}
+              </p>
+            </div>
+            <div className="text-right">
+              <span className="inline-block rounded-lg bg-surface-subtle border border-border px-2.5 py-1 text-[11px] font-medium text-text-secondary">
+                {eventConfig.eventType}
+              </span>
+            </div>
+          </div>
+
+          {/* Navigation Tabs */}
+          <div className="flex items-center gap-1.5 overflow-x-auto pt-3 text-xs scrollbar-none">
+            <button
+              type="button"
+              onClick={() => setActiveTab("tiers")}
+              className={`rounded-lg px-2.5 py-1.5 font-medium transition-colors cursor-pointer shrink-0 ${
+                activeTab === "tiers"
+                  ? "bg-primary text-white font-semibold"
+                  : "bg-surface-subtle text-text-secondary hover:bg-surface hover:text-text-primary"
+              }`}
+            >
+              Sponsorship Packages
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab("overview")}
+              className={`rounded-lg px-2.5 py-1.5 font-medium transition-colors cursor-pointer shrink-0 ${
+                activeTab === "overview"
+                  ? "bg-primary text-white font-semibold"
+                  : "bg-surface-subtle text-text-secondary hover:bg-surface hover:text-text-primary"
+              }`}
+            >
+              Why Sponsor & Value
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab("events")}
+              className={`rounded-lg px-2.5 py-1.5 font-medium transition-colors cursor-pointer shrink-0 ${
+                activeTab === "events"
+                  ? "bg-primary text-white font-semibold"
+                  : "bg-surface-subtle text-text-secondary hover:bg-surface hover:text-text-primary"
+              }`}
+            >
+              Main & Pre-Events
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab("workshops")}
+              className={`rounded-lg px-2.5 py-1.5 font-medium transition-colors cursor-pointer shrink-0 ${
+                activeTab === "workshops"
+                  ? "bg-primary text-white font-semibold"
+                  : "bg-surface-subtle text-text-secondary hover:bg-surface hover:text-text-primary"
+              }`}
+            >
+              Workshops & Panels
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab("sustainability")}
+              className={`rounded-lg px-2.5 py-1.5 font-medium transition-colors cursor-pointer shrink-0 ${
+                activeTab === "sustainability"
+                  ? "bg-primary text-white font-semibold"
+                  : "bg-surface-subtle text-text-secondary hover:bg-surface hover:text-text-primary"
+              }`}
+            >
+              Sustainability
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab("contacts")}
+              className={`rounded-lg px-2.5 py-1.5 font-medium transition-colors cursor-pointer shrink-0 ${
+                activeTab === "contacts"
+                  ? "bg-primary text-white font-semibold"
+                  : "bg-surface-subtle text-text-secondary hover:bg-surface hover:text-text-primary"
+              }`}
+            >
+              Official Contacts
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab("brochure")}
+              className={`rounded-lg px-2.5 py-1.5 font-medium transition-colors cursor-pointer shrink-0 ${
+                activeTab === "brochure"
+                  ? "bg-primary text-white font-semibold"
+                  : "bg-surface-subtle text-text-secondary hover:bg-surface hover:text-text-primary"
+              }`}
+            >
+              Pitch Deck & SDR Pitch
+            </button>
+          </div>
         </div>
 
-        {/* Tab 1: Sponsorship Tiers */}
+        {/* Tab 1: Sponsorship Packages (Authoritative Hierarchy) */}
         {activeTab === "tiers" && (
           <div className="space-y-4">
-            <div className="rounded-xl bg-accent-mint/30 border border-primary/20 p-3.5 flex items-center justify-between text-xs">
-              <div>
-                <span className="font-bold text-text-primary block">
-                  Target Festival Sponsorship Budget: ₹25,00,000
-                </span>
-                <span className="text-text-secondary text-[11px]">
-                  All sponsorship packages include GST exemption under educational institution status.
-                </span>
-              </div>
-              <span className="rounded-full bg-primary text-white text-[10px] font-bold px-2.5 py-1">
-                PRAROHA'26 OFFICIAL
+            <div className="flex items-center justify-between text-xs text-text-secondary bg-surface-subtle p-2.5 rounded-lg border border-border">
+              <span>
+                Official PRAROHA'26 Sponsorship Hierarchy Sourced from Brochure:
+              </span>
+              <span className="font-semibold text-primary">
+                ₹4 LAKHS • ₹2 LAKHS • ₹1 LAKH • ₹50K • ₹25K • ₹10K+
               </span>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
-              {tiers.map((tier) => (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {sponsorshipPackages.map((tier) => (
                 <div
-                  key={tier.name}
-                  className={`rounded-xl border p-4 flex flex-col justify-between ${tier.color}`}
+                  key={tier.tier}
+                  className={`rounded-xl border p-4 space-y-3 shadow-xs ${
+                    tier.color?.border || "border-border"
+                  } ${tier.color?.bg || "bg-surface"}`}
                 >
-                  <div>
-                    <div className="flex items-center justify-between">
-                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${tier.badgeColor}`}>
-                        {tier.tag}
-                      </span>
-                      <span className="text-base font-extrabold text-text-primary tracking-tight">
-                        {tier.ask}
-                      </span>
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <h4
+                        className={`text-sm font-bold tracking-tight ${
+                          tier.color?.text || "text-text-primary"
+                        }`}
+                      >
+                        {tier.name}
+                      </h4>
+                      <p className="text-xl font-extrabold tracking-tight text-text-primary mt-0.5">
+                        {tier.formattedAmount}
+                      </p>
                     </div>
-                    <h4 className="mt-2 text-sm font-bold text-text-primary">
-                      {tier.name}
-                    </h4>
+                    <span
+                      className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full ${
+                        tier.color?.badge || "bg-primary text-white"
+                      }`}
+                    >
+                      {tier.badge}
+                    </span>
+                  </div>
 
-                    <ul className="mt-3 space-y-1.5 text-xs text-text-secondary">
-                      {tier.highlights.map((h, i) => (
-                        <li key={i} className="flex items-start gap-1.5">
-                          <Check className="h-3.5 w-3.5 text-primary shrink-0 mt-0.5" />
-                          <span>{h}</span>
-                        </li>
-                      ))}
-                    </ul>
+                  {tier.footnote && (
+                    <p className="text-[10px] text-text-muted italic">
+                      {tier.footnote}
+                    </p>
+                  )}
+
+                  <div className="space-y-1.5 text-xs text-text-secondary pt-1 border-t border-border-subtle">
+                    {tier.benefits.map((benefit, i) => (
+                      <div key={i} className="flex items-start gap-1.5">
+                        <Check className="h-3.5 w-3.5 text-primary shrink-0 mt-0.5" />
+                        <span className="leading-snug text-[11px]">{benefit}</span>
+                      </div>
+                    ))}
                   </div>
                 </div>
               ))}
@@ -244,94 +240,277 @@ export function EventInfoModal({ isOpen, onClose }: EventInfoModalProps) {
           </div>
         )}
 
-        {/* Tab 2: In-Kind Wishlist */}
-        {activeTab === "inkind" && (
-          <div className="space-y-3">
-            <div className="rounded-xl bg-amber-50/60 border border-amber-200 p-3 text-xs text-amber-900">
-              <span className="font-semibold block mb-0.5">
-                Valuation Rule for Non-Cash Partnerships:
-              </span>
-              Always capture both the physical deliverable item description and its fair-market INR valuation. In-kind deals count directly towards SDR points and festival operational savings.
-            </div>
-
-            <div className="space-y-2.5">
-              {inKindWishlist.map((item, idx) => (
-                <div
-                  key={idx}
-                  className="rounded-xl border border-border bg-surface p-3 text-xs space-y-1.5"
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="font-bold text-text-primary flex items-center gap-1.5">
-                      <Gift className="h-3.5 w-3.5 text-primary" />
-                      {item.category}
-                    </span>
-                    <span className="font-semibold text-primary">
-                      Est. Value: {item.estValuation}
-                    </span>
-                  </div>
-                  <p className="text-text-secondary">{item.examples}</p>
-                  <div className="text-[11px] text-text-muted bg-surface-subtle px-2.5 py-1 rounded-md">
-                    <strong className="text-text-secondary">Festival Deliverable:</strong> {item.deliverable}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Tab 3: Demographics */}
-        {activeTab === "demographics" && (
+        {/* Tab 2: Why Sponsor & Value Proposition */}
+        {activeTab === "overview" && (
           <div className="space-y-4 text-xs">
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              <div className="rounded-xl border border-border bg-surface-subtle p-3 text-center">
-                <span className="text-lg font-bold text-primary block">5,000+</span>
-                <span className="text-[11px] text-text-secondary">Expected Footfall</span>
-              </div>
-              <div className="rounded-xl border border-border bg-surface-subtle p-3 text-center">
-                <span className="text-lg font-bold text-primary block">45+</span>
-                <span className="text-[11px] text-text-secondary">Engineering Colleges</span>
-              </div>
-              <div className="rounded-xl border border-border bg-surface-subtle p-3 text-center">
-                <span className="text-lg font-bold text-primary block">3 Days</span>
-                <span className="text-[11px] text-text-secondary">Flagship Event</span>
-              </div>
-              <div className="rounded-xl border border-border bg-surface-subtle p-3 text-center">
-                <span className="text-lg font-bold text-primary block">₹3,00,000+</span>
-                <span className="text-[11px] text-text-secondary">Cash Prize Pool</span>
+            {/* Core Audience Claim */}
+            <div className="rounded-xl border border-primary/20 bg-primary/5 p-4 space-y-2">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-primary">
+                Official Brochure Audience Metric
+              </span>
+              <h4 className="text-base font-bold text-text-primary">
+                "{eventConfig.attendanceClaim}"
+              </h4>
+              <p className="text-text-secondary leading-relaxed text-[11px]">
+                {eventConfig.valueProposition.audienceReach}
+              </p>
+            </div>
+
+            {/* What Sponsors Can Do */}
+            <div className="rounded-xl border border-border bg-surface p-4 space-y-3">
+              <h4 className="text-xs font-bold text-text-primary uppercase tracking-wider flex items-center gap-1.5">
+                <Target className="h-4 w-4 text-primary" />
+                Sponsorship Value Proposition
+              </h4>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-text-secondary">
+                {eventConfig.valueProposition.coreOpportunities.map((opp, idx) => (
+                  <div key={idx} className="flex items-start gap-2 bg-surface-subtle p-2 rounded-lg">
+                    <div className="h-1.5 w-1.5 rounded-full bg-primary mt-1.5 shrink-0" />
+                    <span className="text-[11px] leading-snug">{opp}</span>
+                  </div>
+                ))}
               </div>
             </div>
 
-            <div className="rounded-xl border border-border bg-surface p-4 space-y-2">
+            {/* Brand Visibility Benefits */}
+            <div className="rounded-xl border border-border bg-surface p-4 space-y-3">
               <h4 className="text-xs font-bold text-text-primary uppercase tracking-wider flex items-center gap-1.5">
-                <MapPin className="h-4 w-4 text-primary" />
-                Venue & Audience Profile
+                <Megaphone className="h-4 w-4 text-primary" />
+                Official Brand Visibility Benefits
               </h4>
-              <p className="text-text-secondary leading-relaxed">
-                School of Engineering (SOE), Cochin University of Science and Technology (CUSAT), South Kalamassery, Kochi. One of South India's premier public technological institutions.
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-text-secondary">
+                {eventConfig.brandVisibilityBenefits.map((item, idx) => (
+                  <div key={idx} className="flex items-start gap-2 text-[11px]">
+                    <Check className="h-3.5 w-3.5 text-primary shrink-0 mt-0.5" />
+                    <span>{item}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Target Stakeholders */}
+            <div className="rounded-xl border border-border bg-surface p-3.5 text-[11px] text-text-secondary">
+              <span className="font-semibold text-text-primary block mb-1">
+                Audience Composition:
+              </span>
+              <span>
+                Students, faculty members, researchers, and industry professionals from institutions across Kerala.
+              </span>
+            </div>
+          </div>
+        )}
+
+        {/* Tab 3: Main Events & Pre-Events */}
+        {activeTab === "events" && (
+          <div className="space-y-4 text-xs">
+            {/* Main Events */}
+            <div className="rounded-xl border border-border bg-surface p-4 space-y-3">
+              <div className="flex items-center justify-between">
+                <h4 className="text-xs font-bold text-text-primary uppercase tracking-wider flex items-center gap-1.5">
+                  <Trophy className="h-4 w-4 text-primary" />
+                  Official Main Events (7 Flagship Tracks)
+                </h4>
+                <span className="text-[10px] text-text-muted">Direct from brochure</span>
+              </div>
+
+              <div className="space-y-2">
+                {mainEvents.map((evt, idx) => (
+                  <div
+                    key={evt.id}
+                    className="flex items-start gap-3 rounded-lg border border-border-subtle bg-surface-subtle/50 p-2.5"
+                  >
+                    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-[10px] font-bold text-primary">
+                      {idx + 1}
+                    </span>
+                    <div>
+                      <h5 className="font-bold text-text-primary text-xs">
+                        {evt.title}
+                      </h5>
+                      <p className="text-[11px] text-text-secondary leading-snug mt-0.5">
+                        {evt.description}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Pre-Events */}
+            <div className="rounded-xl border border-border bg-surface p-4 space-y-3">
+              <h4 className="text-xs font-bold text-text-primary uppercase tracking-wider flex items-center gap-1.5">
+                <Radio className="h-4 w-4 text-primary" />
+                Official Pre-Events (8 Contests & Campus Hype)
+              </h4>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {preEvents.map((pe, idx) => (
+                  <div
+                    key={pe.id}
+                    className="rounded-lg border border-border-subtle bg-surface-subtle/50 p-2.5 space-y-0.5"
+                  >
+                    <span className="font-bold text-text-primary text-[11px] block">
+                      {idx + 1}. {pe.title}
+                    </span>
+                    <p className="text-[10px] text-text-secondary leading-snug">
+                      {pe.description}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Tab 4: Workshops & Panel Discussions */}
+        {activeTab === "workshops" && (
+          <div className="space-y-4 text-xs">
+            {/* Workshops */}
+            <div className="rounded-xl border border-border bg-surface p-4 space-y-3">
+              <h4 className="text-xs font-bold text-text-primary uppercase tracking-wider flex items-center gap-1.5">
+                <Wrench className="h-4 w-4 text-primary" />
+                Official Workshops (6 Intensive Technical Tracks)
+              </h4>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                {workshops.map((ws, idx) => (
+                  <div
+                    key={ws.id}
+                    className="rounded-lg border border-border-subtle bg-surface-subtle/50 p-3 space-y-1"
+                  >
+                    <div className="flex items-center gap-1.5">
+                      <span className="flex h-4 w-4 items-center justify-center rounded-full bg-primary/10 text-[9px] font-bold text-primary">
+                        {idx + 1}
+                      </span>
+                      <h5 className="font-bold text-text-primary text-xs leading-snug">
+                        {ws.title}
+                      </h5>
+                    </div>
+                    <p className="text-[11px] text-text-secondary leading-snug pl-5.5">
+                      {ws.description}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Panel Discussions */}
+            <div className="rounded-xl border border-border bg-surface p-4 space-y-3">
+              <h4 className="text-xs font-bold text-text-primary uppercase tracking-wider flex items-center gap-1.5">
+                <Layers className="h-4 w-4 text-primary" />
+                Official Panel Discussions (4 Industry Dialogues)
+              </h4>
+              <div className="space-y-2">
+                {panelDiscussions.map((pd, idx) => (
+                  <div
+                    key={pd.id}
+                    className="flex items-start gap-2.5 rounded-lg border border-border-subtle bg-surface-subtle/50 p-2.5"
+                  >
+                    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-[10px] font-bold text-primary">
+                      {idx + 1}
+                    </span>
+                    <div>
+                      <h5 className="font-bold text-text-primary text-xs">
+                        {pd.title}
+                      </h5>
+                      <p className="text-[11px] text-text-secondary leading-snug mt-0.5">
+                        {pd.description}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Tab 5: Sustainability */}
+        {activeTab === "sustainability" && (
+          <div className="space-y-4 text-xs">
+            <div className="rounded-xl border border-emerald-300 bg-emerald-50/70 p-5 space-y-3 text-emerald-950">
+              <div className="flex items-center gap-2">
+                <Leaf className="h-5 w-5 text-emerald-700" />
+                <span className="text-xs font-extrabold uppercase tracking-widest text-emerald-800">
+                  {eventConfig.sustainability.motto}
+                </span>
+              </div>
+              <h4 className="text-base font-bold tracking-tight text-emerald-950">
+                Green Protocol & Sustainable Engineering Commitment
+              </h4>
+              <p className="text-xs text-emerald-900 leading-relaxed">
+                {eventConfig.sustainability.description}
               </p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-2 text-[11px] text-text-secondary">
-                <div className="flex items-center gap-1.5">
-                  <div className="h-1.5 w-1.5 rounded-full bg-primary" />
-                  <span><strong>Demographics:</strong> 18–24 undergraduate & postgraduate engineers</span>
+              <div className="space-y-2 pt-2 border-t border-emerald-200">
+                {eventConfig.sustainability.principles.map((pr, idx) => (
+                  <div key={idx} className="flex items-start gap-2 text-xs">
+                    <Check className="h-3.5 w-3.5 text-emerald-700 shrink-0 mt-0.5" />
+                    <span>{pr}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Tab 6: Official Contacts */}
+        {activeTab === "contacts" && (
+          <div className="space-y-4 text-xs">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {/* Convenors */}
+              <div className="rounded-xl border border-border bg-surface p-4 space-y-3">
+                <h4 className="text-xs font-bold text-text-primary uppercase tracking-wider flex items-center gap-1.5">
+                  <Users className="h-4 w-4 text-primary" />
+                  Convenors
+                </h4>
+                <div className="space-y-2">
+                  {officialContacts.convenors.map((c) => (
+                    <div
+                      key={c.name}
+                      className="flex items-center justify-between p-2 rounded-lg bg-surface-subtle border border-border-subtle"
+                    >
+                      <span className="font-semibold text-text-primary text-xs">
+                        {c.name}
+                      </span>
+                      <a
+                        href={`tel:${c.phone}`}
+                        className="inline-flex items-center gap-1 text-primary font-mono text-xs hover:underline font-semibold"
+                      >
+                        <Phone className="h-3 w-3" />
+                        {c.phone}
+                      </a>
+                    </div>
+                  ))}
                 </div>
-                <div className="flex items-center gap-1.5">
-                  <div className="h-1.5 w-1.5 rounded-full bg-primary" />
-                  <span><strong>Geographic Reach:</strong> Kerala, Tamil Nadu, Karnataka, Andhra</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <div className="h-1.5 w-1.5 rounded-full bg-primary" />
-                  <span><strong>Flagship Streams:</strong> Civil, Tech, Auto, Management, Robotics</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <div className="h-1.5 w-1.5 rounded-full bg-primary" />
-                  <span><strong>Digital Impressions:</strong> 250,000+ across Instagram, LinkedIn</span>
+              </div>
+
+              {/* Sponsorship Heads */}
+              <div className="rounded-xl border border-border bg-surface p-4 space-y-3">
+                <h4 className="text-xs font-bold text-text-primary uppercase tracking-wider flex items-center gap-1.5">
+                  <Briefcase className="h-4 w-4 text-primary" />
+                  Sponsorship Heads
+                </h4>
+                <div className="space-y-2">
+                  {officialContacts.sponsorshipHeads.map((s) => (
+                    <div
+                      key={s.name}
+                      className="flex items-center justify-between p-2 rounded-lg bg-surface-subtle border border-border-subtle"
+                    >
+                      <span className="font-semibold text-text-primary text-xs">
+                        {s.name}
+                      </span>
+                      <a
+                        href={`tel:${s.phone}`}
+                        className="inline-flex items-center gap-1 text-primary font-mono text-xs hover:underline font-semibold"
+                      >
+                        <Phone className="h-3 w-3" />
+                        {s.phone}
+                      </a>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
           </div>
         )}
 
-        {/* Tab 4: Brochure & Pitch Links */}
+        {/* Tab 7: Brochure & SDR Pitch */}
         {activeTab === "brochure" && (
           <div className="space-y-4 text-xs">
             <div className="rounded-xl border border-border bg-surface p-4 space-y-3">
@@ -341,7 +520,7 @@ export function EventInfoModal({ isOpen, onClose }: EventInfoModalProps) {
                     PRAROHA'26 Official Sponsorship Brochure (PDF)
                   </h4>
                   <p className="text-text-secondary text-[11px] mt-0.5">
-                    12-page high-resolution festival prospectus with deliverables, past sponsors, and organizing committee credentials.
+                    Official festival brochure with event structure, technical workshops, panel discussions, and sponsorship packages.
                   </p>
                 </div>
                 <Button
@@ -375,24 +554,40 @@ export function EventInfoModal({ isOpen, onClose }: EventInfoModalProps) {
                   Download Pitch Deck (PDF)
                 </a>
                 <span className="text-[11px] text-text-muted">
-                  Size: 4.2 MB • Updated October 2026
+                  Official Brochure • SOE CUSAT
                 </span>
               </div>
             </div>
 
-            <div className="rounded-xl border border-border bg-surface-subtle p-3.5 space-y-1.5">
+            {/* Quick Phone Pitch Box */}
+            <div className="rounded-xl border border-border bg-surface-subtle p-3.5 space-y-2">
               <span className="font-semibold text-text-primary text-xs flex items-center gap-1.5">
                 <Megaphone className="h-3.5 w-3.5 text-primary" />
-                Quick 20-Second Phone Pitch for SDRs:
+                Authoritative Call Pitch for Student SDRs:
               </span>
-              <p className="text-text-secondary leading-relaxed italic bg-surface p-2.5 rounded-lg border border-border text-[11px]">
-                "PRAROHA'26 is CUSAT's flagship annual national techno-managerial festival uniting over 5,000 engineering students across South India. We're connecting industry leaders directly with next-generation engineers through on-campus experiential stalls, branded hackathons, and direct talent recruitment."
+              <p className="text-text-secondary leading-relaxed italic bg-surface p-3 rounded-lg border border-border text-[11px]">
+                "{quickPitchGuidelines.conciseHook}"
               </p>
+              <div className="grid grid-cols-2 gap-2 text-[10px] text-text-secondary pt-1">
+                <div>
+                  <strong className="text-text-primary">WHO:</strong> {quickPitchGuidelines.who}
+                </div>
+                <div>
+                  <strong className="text-text-primary">WHAT:</strong> {quickPitchGuidelines.what}
+                </div>
+                <div>
+                  <strong className="text-text-primary">WHEN:</strong> {quickPitchGuidelines.when}
+                </div>
+                <div>
+                  <strong className="text-text-primary">WHERE:</strong> {quickPitchGuidelines.where}
+                </div>
+              </div>
             </div>
           </div>
         )}
 
-        <div className="flex justify-end pt-3 border-t border-border-subtle">
+        <div className="flex justify-between items-center pt-3 border-t border-border-subtle text-[11px] text-text-muted">
+          <span>{eventConfig.name} • {eventConfig.organizer} • {eventConfig.datesCompact}</span>
           <Button variant="outline" onClick={onClose} size="sm">
             Close Panel
           </Button>
