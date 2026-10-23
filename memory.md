@@ -1,65 +1,61 @@
-# Memory — PRAROHA'26 Dual-Theme Hardening, Reference Evaluation & Clean State Restoration
+# Memory — Complete Admin Panel Enterprise Redesign & Public Landing + Auth Suite
 
-Last updated: October 16, 2026 (19:02 IST)
+Last updated: October 17, 2026 (13:32 IST)
 
 ## What was built
 
-- **Full Dual-Theme Colorization & Contrast Hardening Pass:**
-  - Audited and updated 28 files across the volunteer workstation (`/workspace`), navigation shell, and executive cockpit to guarantee WCAG AA contrast compliance (>= 4.5:1 text, >= 3:1 UI) in both Light (`#F6F7F5` / `#FFFFFF`) and Dark (`#0B131E` / `#121D2C`) modes.
-  - **Sponsorship Tier Definitions ([lib/eventConfig.ts](file:///d:/everything%20for%20coding/sponsorship%20management%20system/lib/eventConfig.ts)):** Added dark-mode companion tokens to all 6 package tiers (`Title`, `Co-Sponsor`, `Associate`, `Supporting`, `Community`, `Event Sponsor`), eliminating glaring white container washouts in dark mode.
-  - **Volunteer Workstation & Call Preparation:**
-    - [components/volunteer/EventInfoModal.tsx](file:///d:/everything%20for%20coding/sponsorship%20management%20system/components/volunteer/EventInfoModal.tsx): Hardened Green Protocol sustainability card dark styling.
-    - [components/volunteer/CallReportModal.tsx](file:///d:/everything%20for%20coding/sponsorship%20management%20system/components/volunteer/CallReportModal.tsx): Replaced un-themed error messages and callback queued badges with dark mode tokens.
-    - [components/volunteer/FollowUpList.tsx](file:///d:/everything%20for%20coding/sponsorship%20management%20system/components/volunteer/FollowUpList.tsx): Added dark mode borders, backgrounds, and badges to Due Today callbacks.
-    - [components/volunteer/ConciseTalkingPoints.tsx](file:///d:/everything%20for%20coding/sponsorship%20management%20system/components/volunteer/ConciseTalkingPoints.tsx): Tuned Natural Opening Hook badge, Collegiate Objection Battlecard, and Non-Cash alternatives with dark tokens.
-    - [components/volunteer/VerificationPendingScreen.tsx](file:///d:/everything%20for%20coding/sponsorship%20management%20system/components/volunteer/VerificationPendingScreen.tsx) & [components/volunteer/VerificationRejectedScreen.tsx](file:///d:/everything%20for%20coding/sponsorship%20management%20system/components/volunteer/VerificationRejectedScreen.tsx): Dual-theme status badges, feedback boxes, and suspended account cards.
-    - [components/volunteer/VolunteerDashboardView.tsx](file:///d:/everything%20for%20coding/sponsorship%20management%20system/components/volunteer/VolunteerDashboardView.tsx) & [components/ui/stat-card.tsx](file:///d:/everything%20for%20coding/sponsorship%20management%20system/components/ui/stat-card.tsx): StatCard icon containers and percentage/delta badges updated with explicit dark backgrounds and borders.
-  - **App Shell & Real-Time Alerts:**
-    - [components/layout/Navbar.tsx](file:///d:/everything%20for%20coding/sponsorship%20management%20system/components/layout/Navbar.tsx), [components/layout/Sidebar.tsx](file:///d:/everything%20for%20coding/sponsorship%20management%20system/components/layout/Sidebar.tsx), [components/layout/AdminSidebar.tsx](file:///d:/everything%20for%20coding/sponsorship%20management%20system/components/layout/AdminSidebar.tsx): Role pills, "Sponsorship Head" label, and sign out hover actions given high-contrast dark classes.
-    - [components/layout/NotificationPopover.tsx](file:///d:/everything%20for%20coding/sponsorship%20management%20system/components/layout/NotificationPopover.tsx): Removed artificial `border-l-2` colored side tabs (AI UI slop tell); modernized alert items (overdue, due today, verification queue, point awards) with dual-theme backgrounds and badges.
-  - **Admin Operations & Cockpit:**
-    - [components/admin/CompanyDossierDrawer.tsx](file:///d:/everything%20for%20coding/sponsorship%20management%20system/components/admin/CompanyDossierDrawer.tsx): Added dark styling for "Why This Lead Matters", "Value for the Sponsor", internal notes, proposal status badges, and non-cash in-kind cards.
-    - [components/admin/ExecutiveDashboardView.tsx](file:///d:/everything%20for%20coding/sponsorship%20management%20system/components/admin/ExecutiveDashboardView.tsx): Dual-theme styling for all volunteer status cards (Approved, Pending, Rejected, Suspended) and lead lifecycle cards (Unassigned, In Outreach, Won, Lost).
-    - [components/admin/MasterLeadDirectoryView.tsx](file:///d:/everything%20for%20coding/sponsorship%20management%20system/components/admin/MasterLeadDirectoryView.tsx) & [components/admin/AdminVerificationView.tsx](file:///d:/everything%20for%20coding/sponsorship%20management%20system/components/admin/AdminVerificationView.tsx): Clear filters, archive, restore, suspend, and delete action buttons given dark mode styles.
-    - [components/admin/DataManagementView.tsx](file:///d:/everything%20for%20coding/sponsorship%20management%20system/components/admin/DataManagementView.tsx): Feedback toast, purge cards, and Danger Zone reset panels tuned for dark mode.
-    - [components/admin/OpportunityApprovalModal.tsx](file:///d:/everything%20for%20coding/sponsorship%20management%20system/components/admin/OpportunityApprovalModal.tsx): Administrative signing authority banner, total commitment value ticker, revenue recognition badge, and in-kind valuation text given dark contrast tokens.
-    - Form alert containers, error banners, and status buttons updated across `PointConfigDrawer.tsx`, `ReassignLeadModal.tsx`, `AdjustPointsModal.tsx`, `DestructiveConfirmationModal.tsx`, `AuditLogConsole.tsx`, `CreateProposalModal.tsx`, `CreateCommitmentModal.tsx`, `EditCommitmentModal.tsx`, and `LeadImportModal.tsx`.
-- **System-Wide Impeccable Design Enhancements:**
-  - Typography (`/impeccable typeset`): `tabular-nums` throughout live tickers, badge dark contrast in `badge.tsx`, removal of costume monospace on phone types.
-  - Layout (`/impeccable layout`): Balanced 3x3 grid for 9 call outcomes with >= 44px touch targets; responsive `grid-cols-2 lg:grid-cols-5` eliminating orphan cards in `TodayWorkBar.tsx`.
-  - Motion (`/impeccable animate`): System-wide `@media (prefers-reduced-motion: reduce)` in `app/globals.css`, tactile `active:scale-[0.98]` feedback on outcome buttons.
-  - Delight (`/impeccable delight`): Earned quota completion state (`Target Crushed!`), empty states in `LeadsTable.tsx`, podium/deal closer badges in `PersonalPerformanceCard.tsx`.
-- **Reference Flow Recovery (`/recover`):**
-  - Evaluated and tested Cal.com team scheduler and Notion doc reference adaptations.
-  - Following review, executed a clean git revert (`git revert 0f4935d`, `commit bfd37c9`) to eliminate the unwanted Cal.com scheduler and restore the clean, high-density single-page workstation.
+- **Complete Admin Panel Enterprise Redesign:**
+  - **Shared Design Primitives:**
+    - `components/admin/AdminPageHeader.tsx`: Reusable editorial page header (`category`, `title`, `description`, `meta` with festival dates/location, and `actions`).
+    - `components/admin/AdminKpiStrip.tsx`: Horizontal enterprise KPI strip with `border-l-2` colored indicator accents (`primary`, `success`, `warning`, `error`, `info`, `neutral`).
+    - `components/layout/AdminSidebar.tsx`: Persistent left navigation with mint/teal highlight active state and admin profile menu.
+  - **Admin Route Pages:**
+    - `/admin` (`components/admin/ExecutiveDashboardView.tsx`): Executive overview reference design with portfolio at a glance and velocity telemetry.
+    - `/admin/verifications` (`components/admin/AdminVerificationView.tsx`): Volunteer verification queue with 4-metric KPI strip, tab badges, and inspection/rejection modals.
+    - `/admin/leads` (`components/admin/MasterLeadDirectoryView.tsx`): Enterprise CRM data table with 29 canonical fields, toolbar actions, and filter controls.
+    - `/admin/assignments` (`components/admin/LeadAssignmentMatrixView.tsx`): Workload allocation matrix with dual panels (`Unassigned Leads Pool` and `Target Assignee Roster`), with **Admins explicitly featured as selectable allocation targets** alongside student SDRs.
+    - `/admin/commitments` (`app/admin/commitments/page.tsx`): Ratified commitments table, 6-metric financial KPI strip, and pipeline view.
+    - `/admin/analytics` (`app/admin/analytics/page.tsx`, `components/admin/DataExportHub.tsx`, `components/admin/AuditLogConsole.tsx`): Audit log console with diff drawers and RFC-4180 CSV exports.
+    - `/admin/leaderboard` (`app/admin/leaderboard/page.tsx`): Executive honors leaderboard with top-3 cards, timeframe filter, point rules drawer, and point adjustment dialog.
+    - `/admin/data-management` (`components/admin/DataManagementView.tsx`): Administrative control center with storage volume KPIs, certified CSV archives, selective collection purge controls, and Danger Zone system resets with strict phrase confirmation modals.
+
+- **Complete Public Landing & Auth Experience Redesign:**
+  - `components/landing/LandingNavbar.tsx`: Sticky backdrop-blur navigation with event pill (`SOE CUSAT · DEC 04–05`), section anchors, ThemeToggle, and session-aware CTA routing.
+  - `components/landing/HeroSection.tsx`: Product-first hero with architectural headline, live lead terminal preview with view toggles (`Lead Queue`, `Contact Dossier`, `Call Mode`).
+  - `components/landing/InteractiveRelaySimulator.tsx`: 5-step automated and scrubbable relay simulation (`SIGNAL` → `ALLOCATION` → `CALL MODE` → `DEBRIEF` → `COMMITMENT`) with real corporate dossier data.
+  - `components/landing/DualWorkspaceShowcase.tsx`: Interactive role-aware showcase contrasting the Student SDR Cockpit (`/workspace`) with the Admin Control Room (`/admin`).
+  - `components/landing/LifecycleWorkflowGrid.tsx`: 6 operational pillars detailing technical architecture (29-field parser, contact verification, single-page cockpit, voice debrief, dual cash/in-kind valuation, signing authority).
+  - `components/landing/EventIdentitySection.tsx`: Institutional symposium credentials (SOE CUSAT, Civil Engineering Division, 3,500+ delegates) and official sponsorship tiers.
+  - `components/landing/LandingFooter.tsx`: Enterprise footer with status beacon, campus location, quick routes, and copyright.
+  - `components/auth/AuthFrame.tsx`: Reusable 2-column authentication shell featuring system telemetry, zero-trust notices, and semantic Clerk styling.
+  - `app/(auth)/sign-in/[[...sign-in]]/page.tsx` & `app/(auth)/sign-up/[[...sign-up]]/page.tsx`: Embedded Clerk components with safe return path handling (`sanitizeReturnPath`).
+  - `app/register/profile/page.tsx`: 3-step progressive onboarding form (`Identity & Credentials` → `Academic Standing` → `Contact Clearance`) with client validation.
+  - `app/pending/page.tsx`: Live-listening verification holding lounge with downloadable brochure and pitch battlecards.
 
 ## Decisions made
 
-- **Preserved Single-Page Volunteer Cockpit:** Rejected complex multi-step external schedulers in `/workspace` to maintain the core operational ethos in `AGENTS.md`: high-velocity calling, fast outcome logging, and zero-distraction lead handling without unnecessary sub-tabs.
-- **No Mechanical Inversion:** Dark mode is explicitly calibrated with deep tinted backgrounds (`dark:bg-*-950/*`), translucent borders (`dark:border-*-800/*` or `dark:border-*-900/*`), and elevated foregrounds (`dark:text-*-300` / `dark:text-*-200`), rather than relying on generic CSS invert filters.
-- **Eliminated AI Slop Side-Tabs:** Replaced colored vertical border accents on notification and card elements with contextual icon containers, badge chips, and subtle surface highlights.
-- **Brand Fidelity:** Retained PRAROHA'26 brand colors (`#0D7A68` / `#14B89A`, Ivory `#F6F7F5`, Charcoal `#0B131E`, Surfaces `#FFFFFF` / `#121D2C`).
+- **Unified Admin Design Language:** Eliminated fragmented floating cards, neon AI styling, and purple gradients across all admin routes. Standardized on a white/warm off-white canvas, ink/navy text, subtle 1px borders, and PRAROHA teal/green accents.
+- **Product-First Marketing Storytelling:** The landing page features real application interfaces and interactive lifecycle simulators instead of generic SaaS illustrations or stock marketing copy.
+- **Role Clearance & Auth Routing:** Preserved all Clerk authentication, Convex authorization, role-based guards, and redirect safety (`sanitizeReturnPath`) to prevent redirect loops.
+- **Full Semantic Theme Support:** Every admin and public component consumes semantic tokens (`bg-background`, `bg-surface`, `border-border`, `text-text-primary`, `var(--brand-primary)`), looking intentional in both light and dark modes.
 
 ## Problems solved
 
-- **Fast Reversion of Unwanted Exploration:** Used the `recover` skill to diagnose the failure mode and cleanly revert all changes (`commit bfd37c9`) without breaking any existing component connections or leaving orphaned imports.
-- **Dark Mode Blinding Washouts:** Hardcoded light pastel styles (`bg-emerald-50`, `bg-rose-50`, `bg-amber-50`) were causing glaring white boxes with dark text in dark mode across tier packages, modals, and status breakdowns. Resolved by pairing every light color utility with explicit `dark:` classes.
-- **Low Contrast Danger & Overdue Elements:** Replaced low-contrast `#F18A70` with WCAG AA compliant rose tokens (`text-rose-700` light / `text-rose-400` dark / `bg-rose-600` buttons).
+- **Duplicate Divs & Syntax Errors in Admin Views:** Resolved syntax errors in `app/admin/commitments/page.tsx`, `app/admin/leaderboard/page.tsx`, and `components/admin/MasterLeadDirectoryView.tsx` where duplicate header blocks and extra `return (` statements caused TypeScript errors.
+- **Sponsorship Package Types:** Fixed property accesses in `components/landing/EventIdentitySection.tsx` to strictly match `SponsorshipPackageConfig` (`tier`, `formattedAmount`, `benefits`, `displayBadge`).
+- **Redirect Loop Prevention:** Confirmed unauthenticated requests to `/register/profile` and `/pending` safely redirect to `/sign-in` without cyclical navigation.
 
 ## Current state
 
-- **TypeScript Compilation:** Passed with 0 errors (`npx tsc --noEmit`).
-- **Working Tree:** Completely clean on branch `main`.
-- **Git Synchronization:** Origin is up to date (`commit bfd37c9`).
-- **Development Server:** Active at `http://localhost:3000`.
+- **TypeScript Compilation:** Strict check passes with 0 errors (`npx tsc --noEmit`).
+- **Development Server:** Active and running smoothly on port 3000.
+- **Visual Auditing:** All admin routes (`/admin`, `/admin/verifications`, `/admin/leads`, `/admin/assignments`, `/admin/commitments`, `/admin/analytics`, `/admin/leaderboard`, `/admin/data-management`) and public routes (`/`, `/sign-in`, `/sign-up`, `/register/profile`, `/pending`) verified via browser subagent in light and dark mode.
 
 ## Next session starts with
 
-1. **Verify Current Workstation:**
-   - Open `http://localhost:3000/workspace` to confirm the restored, contrast-hardened workstation.
-2. **Next Feature / Design Task:**
-   - Determine whether to integrate inspiration from `inspo-mcp` or proceed with targeted enhancements (e.g., CSV duplicate engine, voice debrief transcription audio player polish, or proposal generation workflow).
+1. **Test End-to-End Auth & Onboarding Flow:** Complete a live signup with a test student account, submit the 3-step profile, verify in `/admin/verifications`, and confirm instant unlock to `/workspace`.
+2. **P2 Audio Debrief & Whisper STT Pipeline:** Test in-browser voice debrief recording and server-side Whisper transcription action in Convex.
 
 ## Open questions
 
-- Does the user want an isolated, minimalist Notion-styled document viewer inside `CompanyDossierDrawer.tsx`, or keep the drawer in its current multi-tab layout?
+- For the voice debrief audio upload to Convex File Storage, what is the maximum recording duration limit (e.g., 60 seconds vs 120 seconds)?

@@ -12,7 +12,6 @@ import {
   Building2,
   AlertCircle,
   Phone,
-  HelpCircle,
 } from "lucide-react";
 
 export interface BadgeProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -36,10 +35,10 @@ export function Badge({
     default: "bg-surface-subtle text-text-secondary border-border",
     secondary: "bg-surface text-text-primary border-border",
     outline: "border-border text-text-secondary bg-transparent",
-    success: "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800/50",
-    warning: "bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 border-amber-200 dark:border-amber-800/50",
-    danger: "bg-rose-50 dark:bg-rose-950/40 text-rose-800 dark:text-rose-300 border-rose-200 dark:border-rose-800/50",
-    info: "bg-sky-50 dark:bg-sky-950/40 text-sky-800 dark:text-sky-300 border-sky-200 dark:border-sky-800/50",
+    success: "bg-accent-mint text-success border-primary/20",
+    warning: "bg-accent-yellow text-accent-yellow-text border-amber-500/25",
+    danger: "bg-accent-coral text-accent-coral-text border-red-500/25",
+    info: "bg-accent-blue text-accent-blue-text border-sky-500/25",
     mint: "bg-accent-mint text-accent-mint-text border-primary/20",
   };
 
@@ -152,8 +151,7 @@ export function LeadStatusBadge({ status }: { status: LeadStage }) {
   return (
     <span
       className={cn(
-        "inline-flex items-center rounded-full border px-2.5 py-0.5 text-[11px] font-semibold tracking-normal",
-        current.bg,
+        "inline-flex items-center border-l-2 pl-2 text-[11px] font-semibold tracking-normal",
         current.text,
         current.border
       )}
@@ -171,21 +169,21 @@ export function ContactVerificationBadge({
   switch (level) {
     case "VERIFIED_DECISION_MAKER":
       return (
-        <span className="inline-flex items-center gap-1 rounded-md border border-emerald-200 dark:border-emerald-800/50 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 text-[10px] font-semibold text-emerald-800 dark:text-emerald-300">
+        <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-700 dark:text-emerald-300">
           <CheckCheck className="h-3 w-3 text-emerald-600 dark:text-emerald-400" />
           Verified Decision-Maker
         </span>
       );
     case "VERIFIED_COMPANY_REPRESENTATIVE":
       return (
-        <span className="inline-flex items-center gap-1 rounded-md border border-teal-200 dark:border-teal-800/50 bg-teal-50 dark:bg-teal-950/40 px-2 py-0.5 text-[10px] font-semibold text-teal-800 dark:text-teal-300">
+        <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-teal-700 dark:text-teal-300">
           <Check className="h-3 w-3 text-teal-600 dark:text-teal-400" />
           Company Representative
         </span>
       );
     case "OFFICIAL_COMPANY_CONTACT":
       return (
-        <span className="inline-flex items-center gap-1 rounded-md border border-sky-200 dark:border-sky-800/50 bg-sky-50 dark:bg-sky-950/40 px-2 py-0.5 text-[10px] font-semibold text-sky-800 dark:text-sky-300">
+        <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-sky-700 dark:text-sky-300">
           <Building2 className="h-3 w-3 text-sky-600 dark:text-sky-400" />
           Official Desk Line
         </span>
@@ -193,7 +191,7 @@ export function ContactVerificationBadge({
     case "UNVERIFIED":
     default:
       return (
-        <span className="inline-flex items-center gap-1 rounded-md border border-amber-200 dark:border-amber-800/50 bg-amber-50 dark:bg-amber-950/40 px-2 py-0.5 text-[10px] font-semibold text-amber-800 dark:text-amber-300">
+        <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-amber-700 dark:text-amber-300">
           <AlertCircle className="h-3 w-3 text-amber-600 dark:text-amber-400" />
           Unverified Contact
         </span>
@@ -205,26 +203,26 @@ export function PriorityBadge({ priority }: { priority: PriorityLevel }) {
   switch (priority) {
     case "High":
       return (
-        <span className="inline-flex items-center rounded-md border border-rose-200 dark:border-rose-800/50 bg-rose-50 dark:bg-rose-950/40 px-2 py-0.5 text-[10px] font-bold text-rose-800 dark:text-rose-300">
+        <span className="inline-flex items-center border-l-2 border-rose-500 pl-2 text-[10px] font-bold text-rose-700 dark:text-rose-300">
           High
         </span>
       );
     case "Medium":
       return (
-        <span className="inline-flex items-center rounded-md border border-amber-200 dark:border-amber-800/50 bg-amber-50 dark:bg-amber-950/40 px-2 py-0.5 text-[10px] font-semibold text-amber-800 dark:text-amber-300">
+        <span className="inline-flex items-center border-l-2 border-amber-500 pl-2 text-[10px] font-semibold text-amber-700 dark:text-amber-300">
           Medium
         </span>
       );
     case "Normal":
       return (
-        <span className="inline-flex items-center rounded-md border border-blue-200 dark:border-blue-800/50 bg-blue-50 dark:bg-blue-950/40 px-2 py-0.5 text-[10px] font-semibold text-blue-800 dark:text-blue-300">
+        <span className="inline-flex items-center border-l-2 border-blue-500 pl-2 text-[10px] font-semibold text-blue-700 dark:text-blue-300">
           Normal
         </span>
       );
     case "Low":
     default:
       return (
-        <span className="inline-flex items-center rounded-md border border-zinc-200 dark:border-zinc-700 bg-zinc-100 dark:bg-zinc-800/40 px-2 py-0.5 text-[10px] font-medium text-zinc-700 dark:text-zinc-300">
+        <span className="inline-flex items-center border-l-2 border-zinc-400 pl-2 text-[10px] font-medium text-zinc-700 dark:text-zinc-300">
           Low
         </span>
       );
@@ -242,7 +240,7 @@ export function PhoneTypeBadge({ type }: { type: PhoneType }) {
   };
 
   return (
-    <span className="inline-flex items-center gap-1 rounded border border-border bg-surface-subtle px-1.5 py-0.2 text-[10px] font-medium text-text-secondary">
+    <span className="inline-flex items-center gap-1 text-[10px] font-medium text-text-muted">
       <Phone className="h-2.5 w-2.5 text-text-muted" />
       {labels[type] || type}
     </span>

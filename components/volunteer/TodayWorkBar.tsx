@@ -4,13 +4,11 @@ import React from "react";
 import {
   PhoneCall,
   Target,
-  AlertCircle,
+  AlertTriangle,
   Calendar,
   Flame,
   FileText,
   Clock,
-  Sparkles,
-  CheckCircle2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -36,27 +34,20 @@ export function TodayWorkBar({
   onOpenEventDeck,
   onQuickAction,
 }: TodayWorkBarProps) {
-  const percentComplete = Math.min(
-    100,
-    Math.round((metrics.callsCompleted / (metrics.dailyTarget || 15)) * 100)
-  );
-
   return (
-    <div className="rounded-2xl border border-border bg-surface p-5 shadow-xs">
-      {/* Top row: Section title & quick utility buttons */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-border-subtle pb-4">
-        <div className="flex items-center gap-2.5">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
-            <Target className="h-4 w-4" />
-          </div>
-          <div>
-            <h2 className="text-sm font-bold text-text-primary tracking-tight">
-              Today's Outreach Command
-            </h2>
-            <p className="text-[11px] text-text-secondary">
-              Real-time daily quota pacing and active deal status
-            </p>
-          </div>
+    <section aria-labelledby="today-outreach-heading" className="space-y-4">
+      {/* Section Header */}
+      <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+        <div>
+          <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-text-muted">
+            Daily Execution
+          </p>
+          <h2 id="today-outreach-heading" className="mt-1 text-base font-bold text-text-primary">
+            Today&apos;s Outreach Command
+          </h2>
+          <p className="mt-0.5 text-xs text-text-secondary">
+            Real-time daily quota pacing and active deal status
+          </p>
         </div>
 
         <div className="flex items-center gap-2">
@@ -65,206 +56,100 @@ export function TodayWorkBar({
               variant="outline"
               size="sm"
               onClick={onOpenEventDeck}
-              className="text-xs text-text-secondary hover:text-text-primary border-border"
+              className="text-xs border-border text-text-secondary hover:text-text-primary"
             >
               <FileText className="h-3.5 w-3.5 mr-1.5 text-primary" />
               Event Deck & Tiers
             </Button>
           )}
-          <div className="hidden sm:inline-flex items-center gap-1.5 rounded-full bg-accent-mint/30 px-3 py-1 text-[11px] font-semibold text-primary border border-primary/20">
-            <Sparkles className="h-3 w-3" />
-            Active Shift
-          </div>
+          {onQuickAction && (
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={onQuickAction}
+              className="text-xs bg-primary hover:bg-primary-hover text-white font-semibold"
+            >
+              <PhoneCall className="h-3.5 w-3.5 mr-1.5" />
+              Start next call
+            </Button>
+          )}
         </div>
       </div>
 
-      {/* Metric Cards Grid: 2-col on mobile/tablet (with wide quota bar), 5-col on desktop */}
-      <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 pt-4">
-        {/* 1. Daily Quota Progress */}
-        <div
-          className={`col-span-2 lg:col-span-1 rounded-xl border p-3 flex flex-col justify-between transition-colors ${
-            percentComplete >= 100
-              ? "border-emerald-300 dark:border-emerald-800/60 bg-emerald-50/40 dark:bg-emerald-950/15"
-              : "border-border-subtle bg-surface-subtle/60"
-          }`}
-        >
-          <div className="flex items-center justify-between text-xs text-text-secondary">
-            <span
-              className={`font-semibold flex items-center gap-1.5 ${
-                percentComplete >= 100
-                  ? "text-emerald-800 dark:text-emerald-300 font-bold"
-                  : "text-text-primary"
-              }`}
-            >
-              {percentComplete >= 100 ? (
-                <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
-              ) : (
-                <PhoneCall className="h-3.5 w-3.5 text-primary" />
-              )}
-              Daily Quota
-            </span>
-            <span
-              className={`text-[11px] font-bold tabular-nums ${
-                percentComplete >= 100
-                  ? "text-emerald-700 dark:text-emerald-400"
-                  : "text-primary"
-              }`}
-            >
-              {metrics.callsCompleted} / {metrics.dailyTarget}
-            </span>
+      {/* Operational KPI Strip with thin dividers matching Admin Portfolio at a glance */}
+      <div className="grid gap-6 border-y border-border py-5 sm:grid-cols-2 lg:grid-cols-5 bg-surface">
+        {/* 1. Daily Quota */}
+        <div className="border-l-2 border-primary pl-4">
+          <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.14em] text-text-muted">
+            <Target className="h-3.5 w-3.5 text-primary" />
+            Daily Quota
           </div>
-
-          <div className="mt-2.5 space-y-1.5">
-            <div className="h-2 w-full rounded-full bg-border overflow-hidden">
-              <div
-                className={`h-full rounded-full transition-all duration-500 ease-out ${
-                  percentComplete >= 100
-                    ? "bg-emerald-600 dark:bg-emerald-500"
-                    : "bg-primary"
-                }`}
-                style={{ width: `${percentComplete}%` }}
-              />
-            </div>
-            <div className="flex justify-between items-center text-[10px]">
-              {percentComplete >= 100 ? (
-                <>
-                  <span className="font-bold text-emerald-700 dark:text-emerald-400">
-                    Target Crushed! 🎯
-                  </span>
-                  <span className="font-semibold text-emerald-800 dark:text-emerald-300 tabular-nums">
-                    {metrics.callsCompleted - metrics.dailyTarget > 0
-                      ? `+${metrics.callsCompleted - metrics.dailyTarget} bonus`
-                      : "Goal met"}
-                  </span>
-                </>
-              ) : (
-                <>
-                  <span className="text-text-muted tabular-nums">
-                    {percentComplete}% of daily goal
-                  </span>
-                  <span className="font-semibold text-text-secondary tabular-nums">
-                    {metrics.callsRemaining} remaining
-                  </span>
-                </>
-              )}
-            </div>
-          </div>
+          <p className="mt-3 text-2xl font-bold tabular-nums text-text-primary">
+            {metrics.callsCompleted} <span className="text-sm font-normal text-text-muted">/ {metrics.dailyTarget || 15}</span>
+          </p>
+          <p className="mt-1 text-[11px] text-text-secondary">
+            {metrics.totalAssigned === 0
+              ? "Awaiting lead allocation"
+              : `${metrics.callsRemaining} calls remaining`}
+          </p>
         </div>
 
-        {/* 2. High-Priority Leads Badge */}
-        <div className="rounded-xl border border-border-subtle bg-surface-subtle/60 p-3 flex flex-col justify-between">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-text-secondary flex items-center gap-1.5">
-              <Flame className="h-3.5 w-3.5 text-rose-600" />
-              High Priority
-            </span>
-            <span
-              className={`rounded-full px-2 py-0.5 text-[10px] font-bold tabular-nums ${
-                metrics.highPriority > 0
-                  ? "bg-rose-100 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800/50"
-                  : "bg-surface text-text-muted border border-border"
-              }`}
-            >
-              {metrics.highPriority}
-            </span>
+        {/* 2. High Priority */}
+        <div className={`border-l-2 pl-4 ${metrics.highPriority > 0 ? "border-error" : "border-border-strong"}`}>
+          <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.14em] text-text-muted">
+            <Flame className={`h-3.5 w-3.5 ${metrics.highPriority > 0 ? "text-error" : "text-text-muted"}`} />
+            High Priority
           </div>
-          <div className="mt-2">
-            <p className="text-xl font-bold text-text-primary tabular-nums">
-              {metrics.highPriority}
-            </p>
-            <p className="text-[10px] text-text-muted">
-              P0 Critical sponsorship leads
-            </p>
-          </div>
+          <p className={`mt-3 text-2xl font-bold tabular-nums ${metrics.highPriority > 0 ? "text-error" : "text-text-primary"}`}>
+            {metrics.highPriority}
+          </p>
+          <p className="mt-1 text-[11px] text-text-secondary">
+            P0 Critical corporate leads
+          </p>
         </div>
 
-        {/* 3. Overdue Follow-ups (Urgent Coral / Rose Alert) */}
-        <div
-          className={`rounded-xl border p-3 flex flex-col justify-between transition-colors ${
-            metrics.overdueFollowUps > 0
-              ? "border-rose-300 dark:border-rose-900/60 bg-rose-50/70 dark:bg-rose-950/20 text-text-primary"
-              : "border-border-subtle bg-surface-subtle/60 text-text-secondary"
-          }`}
-        >
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold flex items-center gap-1.5">
-              <AlertCircle
-                className={`h-3.5 w-3.5 ${
-                  metrics.overdueFollowUps > 0
-                    ? "text-rose-600 dark:text-rose-400"
-                    : "text-text-muted"
-                }`}
-              />
-              Overdue
-            </span>
-            <span
-              className={`rounded-full px-2 py-0.5 text-[10px] font-bold tabular-nums ${
-                metrics.overdueFollowUps > 0
-                  ? "bg-rose-600 text-white shadow-xs"
-                  : "bg-surface text-text-muted border border-border"
-              }`}
-            >
-              {metrics.overdueFollowUps}
-            </span>
+        {/* 3. Overdue */}
+        <div className={`border-l-2 pl-4 ${metrics.overdueFollowUps > 0 ? "border-warning" : "border-border-strong"}`}>
+          <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.14em] text-text-muted">
+            <AlertTriangle className={`h-3.5 w-3.5 ${metrics.overdueFollowUps > 0 ? "text-warning" : "text-text-muted"}`} />
+            Overdue
           </div>
-          <div className="mt-2">
-            <p
-              className={`text-xl font-bold tabular-nums ${
-                metrics.overdueFollowUps > 0
-                  ? "text-rose-700 dark:text-rose-300"
-                  : "text-text-primary"
-              }`}
-            >
-              {metrics.overdueFollowUps}
-            </p>
-            <p className="text-[10px] text-text-muted">Requires urgent callback</p>
-          </div>
+          <p className={`mt-3 text-2xl font-bold tabular-nums ${metrics.overdueFollowUps > 0 ? "text-warning" : "text-text-primary"}`}>
+            {metrics.overdueFollowUps}
+          </p>
+          <p className="mt-1 text-[11px] text-text-secondary">
+            Requires urgent callback
+          </p>
         </div>
 
-        {/* 4. Due Today Callbacks */}
-        <div className="rounded-xl border border-border-subtle bg-surface-subtle/60 p-3 flex flex-col justify-between">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-text-secondary flex items-center gap-1.5">
-              <Calendar className="h-3.5 w-3.5 text-amber-600" />
-              Due Today
-            </span>
-            <span
-              className={`rounded-full px-2 py-0.5 text-[10px] font-bold tabular-nums ${
-                metrics.todayFollowUps > 0
-                  ? "bg-amber-100 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-800/50"
-                  : "bg-surface text-text-muted border border-border"
-              }`}
-            >
-              {metrics.todayFollowUps}
-            </span>
+        {/* 4. Due Today */}
+        <div className={`border-l-2 pl-4 ${metrics.todayFollowUps > 0 ? "border-accent-yellow-text" : "border-border-strong"}`}>
+          <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.14em] text-text-muted">
+            <Calendar className="h-3.5 w-3.5 text-text-muted" />
+            Due Today
           </div>
-          <div className="mt-2">
-            <p className="text-xl font-bold text-text-primary tabular-nums">
-              {metrics.todayFollowUps}
-            </p>
-            <p className="text-[10px] text-text-muted">Scheduled for this shift</p>
-          </div>
+          <p className="mt-3 text-2xl font-bold tabular-nums text-text-primary">
+            {metrics.todayFollowUps}
+          </p>
+          <p className="mt-1 text-[11px] text-text-secondary">
+            Scheduled for this shift
+          </p>
         </div>
 
-        {/* 5. To Contact / Uncontacted Queue */}
-        <div className="rounded-xl border border-border-subtle bg-surface-subtle/60 p-3 flex flex-col justify-between">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-text-secondary flex items-center gap-1.5">
-              <Clock className="h-3.5 w-3.5 text-blue-600" />
-              To Contact
-            </span>
-            <span className="rounded-full bg-blue-100 dark:bg-blue-950/40 px-2 py-0.5 text-[10px] font-bold text-blue-800 dark:text-blue-300 border border-blue-200 dark:border-blue-800/50 tabular-nums">
-              {metrics.toContact}
-            </span>
+        {/* 5. To Contact */}
+        <div className="border-l-2 border-info pl-4">
+          <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.14em] text-text-muted">
+            <Clock className="h-3.5 w-3.5 text-info" />
+            To Contact
           </div>
-          <div className="mt-2">
-            <p className="text-xl font-bold text-text-primary tabular-nums">
-              {metrics.toContact}
-            </p>
-            <p className="text-[10px] text-text-muted">Assigned, not yet called</p>
-          </div>
+          <p className="mt-3 text-2xl font-bold tabular-nums text-text-primary">
+            {metrics.toContact}
+          </p>
+          <p className="mt-1 text-[11px] text-text-secondary">
+            Assigned, not yet dialed
+          </p>
         </div>
       </div>
-    </div>
+    </section>
   );
 }

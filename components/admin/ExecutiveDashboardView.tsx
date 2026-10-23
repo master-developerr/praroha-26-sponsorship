@@ -1,505 +1,283 @@
 "use client";
 
 import React, { useState } from "react";
+import Link from "next/link";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { formatCurrencyINR } from "@/lib/utils";
 import {
-  Coins,
-  TrendingUp,
-  PhoneCall,
-  Award,
-  Users,
   AlertTriangle,
-  Building2,
-  PieChart as PieIcon,
-  BarChart3,
-  ShieldAlert,
   ArrowUpRight,
-  Trophy,
+  BarChart3,
+  Building2,
+  Coins,
+  PhoneCall,
+  ShieldAlert,
+  TrendingUp,
+  Users,
 } from "lucide-react";
 import {
-  ResponsiveContainer,
-  AreaChart,
   Area,
+  AreaChart,
+  CartesianGrid,
+  ResponsiveContainer,
+  Tooltip,
   XAxis,
   YAxis,
-  Tooltip,
-  CartesianGrid,
-  BarChart,
-  Bar,
 } from "recharts";
 import { LeaderboardPodium } from "@/components/volunteer/LeaderboardPodium";
 import { eventConfig } from "@/lib/eventConfig";
+
+function DashboardLoading() {
+  return (
+    <div className="space-y-8 animate-pulse">
+      <div className="border-b border-border pb-6">
+        <div className="h-3 w-32 rounded bg-surface-subtle" />
+        <div className="mt-4 h-9 w-80 max-w-full rounded bg-surface-subtle" />
+        <div className="mt-3 h-4 w-[28rem] max-w-full rounded bg-surface-subtle" />
+      </div>
+      <div className="grid gap-6 md:grid-cols-4">
+        {Array.from({ length: 4 }).map((_, index) => (
+          <div key={index} className="h-28 border-l-2 border-border bg-surface-subtle/60" />
+        ))}
+      </div>
+      <div className="h-72 border border-border bg-surface-subtle/50" />
+    </div>
+  );
+}
 
 export function ExecutiveDashboardView() {
   const dashboard = useQuery(api.analytics.getExecutiveDashboard);
   const [activeTab, setActiveTab] = useState<"overview" | "leaderboard">("overview");
 
-  if (!dashboard) {
-    return (
-      <div className="p-8 space-y-4 animate-pulse">
-        <div className="h-8 bg-border/40 rounded w-1/4"></div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="h-28 bg-border/20 rounded-xl"></div>
-          <div className="h-28 bg-border/20 rounded-xl"></div>
-          <div className="h-28 bg-border/20 rounded-xl"></div>
-          <div className="h-28 bg-border/20 rounded-xl"></div>
-        </div>
-        <div className="h-64 bg-border/20 rounded-xl"></div>
-      </div>
-    );
-  }
+  if (!dashboard) return <DashboardLoading />;
 
-  const { kpis, volunteersBreakdown, leadsBreakdown, velocityTimeSeries, topObjections, sectorBreakdown, recentActivity } = dashboard;
+  const {
+    kpis,
+    volunteersBreakdown,
+    leadsBreakdown,
+    velocityTimeSeries,
+    topObjections,
+    sectorBreakdown,
+    recentActivity,
+  } = dashboard;
 
   return (
-    <div className="space-y-6">
-      {/* Top Header & Tab Controls */}
-      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-border pb-4">
-        <div>
-          <div className="flex items-center gap-2">
-            <span className="text-[10px] font-extrabold uppercase tracking-widest text-teal-700 dark:text-teal-300 bg-teal-500/10 px-2.5 py-0.5 rounded-full border border-teal-500/20">
-              {eventConfig.name} • {eventConfig.datesCompact}
-            </span>
-            <span className="text-[10px] font-semibold text-text-muted hidden sm:inline">
-              {eventConfig.organizer} • {eventConfig.institution}
-            </span>
+    <div className="space-y-8">
+      <header className="border-b border-border pb-6">
+        <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary">
+              Sponsorship control room
+            </p>
+            <h1 className="mt-3 text-3xl font-bold tracking-[-0.035em] text-text-primary sm:text-4xl">
+              The work behind the pipeline.
+            </h1>
+            <p className="mt-3 max-w-2xl text-sm leading-6 text-text-secondary">
+              A live view of outreach velocity, volunteer coverage, follow-up risk, and confirmed value for {eventConfig.name}.
+            </p>
+            <p className="mt-3 text-[11px] font-medium text-text-muted">
+              {eventConfig.datesCompact} · {eventConfig.organizer} · {eventConfig.institution}
+            </p>
           </div>
-          <h2 className="text-xl font-black text-text-primary mt-1">
-            Sponsorship Operations Overview
-          </h2>
-          <p className="text-xs text-text-secondary">
-            Macro pipeline health, outreach velocity, team gamification, and corporate conversion metrics.
-          </p>
-        </div>
 
-        <div className="flex items-center gap-1.5 p-1 rounded-xl bg-surface border border-border text-xs font-semibold">
-          <button
-            onClick={() => setActiveTab("overview")}
-            className={`px-3 py-1.5 rounded-lg transition-colors cursor-pointer ${
-              activeTab === "overview"
-                ? "bg-primary text-white shadow-xs font-bold"
-                : "text-text-secondary hover:text-text-primary"
-            }`}
-          >
-            Executive Metrics & Velocity
-          </button>
-          <button
-            onClick={() => setActiveTab("leaderboard")}
-            className={`px-3 py-1.5 rounded-lg transition-colors cursor-pointer flex items-center gap-1.5 ${
-              activeTab === "leaderboard"
-                ? "bg-primary text-white shadow-xs font-bold"
-                : "text-text-secondary hover:text-text-primary"
-            }`}
-          >
-            <Trophy className="h-3.5 w-3.5 text-amber-300" />
-            Team Leaderboard & Points
-          </button>
-        </div>
-      </div>
-
-      {activeTab === "overview" && (
-        <div className="space-y-6">
-          {/* 1. Macro Financial KPI Bento Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {/* Confirmed Revenue Card */}
-            <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/5 p-4 space-y-2 shadow-2xs">
-              <div className="flex items-center justify-between text-xs text-text-muted">
-                <span className="font-bold uppercase tracking-wider text-[10px] text-emerald-800 dark:text-emerald-300">
-                  Confirmed Sponsorship
-                </span>
-                <Coins className="h-4 w-4 text-emerald-600" />
-              </div>
-              <div>
-                <span className="text-2xl font-black text-emerald-700 dark:text-emerald-300">
-                  {formatCurrencyINR(kpis.confirmedTotal)}
-                </span>
-                <div className="text-[11px] text-text-secondary mt-1 flex items-center justify-between">
-                  <span>Cash: {formatCurrencyINR(kpis.confirmedCash)}</span>
-                  <span>•</span>
-                  <span>In-Kind: {formatCurrencyINR(kpis.confirmedInKind)}</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Total Pipeline Potential */}
-            <div className="rounded-xl border border-border bg-surface p-4 space-y-2 shadow-2xs">
-              <div className="flex items-center justify-between text-xs text-text-muted">
-                <span className="font-bold uppercase tracking-wider text-[10px]">
-                  Pipeline Potential
-                </span>
-                <TrendingUp className="h-4 w-4 text-primary" />
-              </div>
-              <div>
-                <span className="text-2xl font-black text-text-primary">
-                  {formatCurrencyINR(kpis.totalPipelinePotential)}
-                </span>
-                <div className="text-[11px] text-text-secondary mt-1">
-                  Across {kpis.totalSourcedLeads} target corporate leads
-                </div>
-              </div>
-            </div>
-
-            {/* Outreach Velocity & Calls */}
-            <div className="rounded-xl border border-border bg-surface p-4 space-y-2 shadow-2xs">
-              <div className="flex items-center justify-between text-xs text-text-muted">
-                <span className="font-bold uppercase tracking-wider text-[10px]">
-                  Outreach Velocity
-                </span>
-                <PhoneCall className="h-4 w-4 text-teal-600" />
-              </div>
-              <div>
-                <span className="text-2xl font-black text-text-primary">
-                  {kpis.totalCallsLogged} calls
-                </span>
-                <div className="text-[11px] text-text-secondary mt-1 flex items-center justify-between">
-                  <span>{kpis.dealsWonCount} deals closed</span>
-                  <span>•</span>
-                  <span>{kpis.activeVolunteersCount} active SDRs</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Follow-up Alerts */}
-            <div
-              className={`rounded-xl border p-4 space-y-2 shadow-2xs ${
-                kpis.overdueFollowUpsCount > 0
-                  ? "border-amber-500/40 bg-amber-500/5"
-                  : "border-border bg-surface"
+          <nav className="flex items-center gap-5 border-b border-border-subtle" aria-label="Dashboard views">
+            <button
+              type="button"
+              onClick={() => setActiveTab("overview")}
+              className={`border-b-2 px-0.5 pb-3 text-xs font-semibold transition-colors cursor-pointer ${
+                activeTab === "overview"
+                  ? "border-primary text-primary"
+                  : "border-transparent text-text-muted hover:text-text-primary"
               }`}
             >
-              <div className="flex items-center justify-between text-xs text-text-muted">
-                <span className="font-bold uppercase tracking-wider text-[10px] text-amber-800 dark:text-amber-400">
-                  Follow-Up Status
-                </span>
-                <AlertTriangle className="h-4 w-4 text-amber-600" />
-              </div>
+              Operations overview
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab("leaderboard")}
+              className={`border-b-2 px-0.5 pb-3 text-xs font-semibold transition-colors cursor-pointer ${
+                activeTab === "leaderboard"
+                  ? "border-primary text-primary"
+                  : "border-transparent text-text-muted hover:text-text-primary"
+              }`}
+            >
+              Team performance
+            </button>
+          </nav>
+        </div>
+      </header>
+
+      {activeTab === "leaderboard" ? (
+        <LeaderboardPodium />
+      ) : (
+        <div className="space-y-8">
+          <section aria-labelledby="portfolio-heading">
+            <div className="mb-4 flex items-end justify-between gap-4">
               <div>
-                <span className="text-2xl font-black text-amber-700 dark:text-amber-400">
-                  {kpis.overdueFollowUpsCount} overdue
-                </span>
-                <div className="text-[11px] text-text-secondary mt-1">
-                  Callbacks requiring volunteer intervention
-                </div>
+                <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-text-muted">Portfolio at a glance</p>
+                <h2 id="portfolio-heading" className="mt-1 text-base font-bold text-text-primary">Where attention is needed today</h2>
               </div>
-            </div>
-          </div>
-
-          {/* 2. Operational Health Bento: Volunteers Governance & Lead Pipeline */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Volunteer Governance */}
-            <div className="rounded-xl border border-border bg-surface p-4 space-y-3 shadow-2xs">
-              <div className="flex items-center justify-between border-b border-border-subtle pb-2">
-                <span className="text-xs font-bold text-text-primary flex items-center gap-1.5 uppercase tracking-wider">
-                  <Users className="h-4 w-4 text-primary" />
-                  Volunteer SDR Governance
-                </span>
-                <span className="text-xs font-bold text-text-primary">
-                  {volunteersBreakdown?.total ?? 0} Total Registered
-                </span>
-              </div>
-              <div className="grid grid-cols-4 gap-2 text-center">
-                <div className="p-2.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-100 dark:border-emerald-800/50">
-                  <span className="text-[10px] font-bold text-emerald-800 dark:text-emerald-300 uppercase block">Approved</span>
-                  <span className="text-lg font-black text-emerald-700 dark:text-emerald-400">{volunteersBreakdown?.approved ?? 0}</span>
-                </div>
-                <div className="p-2.5 rounded-lg bg-amber-50 dark:bg-amber-950/40 border border-amber-100 dark:border-amber-800/50">
-                  <span className="text-[10px] font-bold text-amber-800 dark:text-amber-300 uppercase block">Pending</span>
-                  <span className="text-lg font-black text-amber-700 dark:text-amber-400">{volunteersBreakdown?.pending ?? 0}</span>
-                </div>
-                <div className="p-2.5 rounded-lg bg-rose-50 dark:bg-rose-950/40 border border-rose-100 dark:border-rose-900/50">
-                  <span className="text-[10px] font-bold text-rose-800 dark:text-rose-300 uppercase block">Rejected</span>
-                  <span className="text-lg font-black text-rose-700 dark:text-rose-400">{volunteersBreakdown?.rejected ?? 0}</span>
-                </div>
-                <div className="p-2.5 rounded-lg bg-zinc-100 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800/60">
-                  <span className="text-[10px] font-bold text-zinc-700 dark:text-zinc-400 uppercase block">Suspended</span>
-                  <span className="text-lg font-black text-zinc-800 dark:text-zinc-200">{volunteersBreakdown?.suspended ?? 0}</span>
-                </div>
-              </div>
+              <Link href="/admin/analytics" className="hidden items-center gap-1 text-xs font-semibold text-primary hover:text-primary-hover sm:flex">
+                View audit trail <ArrowUpRight className="h-3.5 w-3.5" />
+              </Link>
             </div>
 
-            {/* Lead Lifecycle Distribution */}
-            <div className="rounded-xl border border-border bg-surface p-4 space-y-3 shadow-2xs">
-              <div className="flex items-center justify-between border-b border-border-subtle pb-2">
-                <span className="text-xs font-bold text-text-primary flex items-center gap-1.5 uppercase tracking-wider">
-                  <Building2 className="h-4 w-4 text-primary" />
-                  Lead Lifecycle Distribution
-                </span>
-                <span className="text-xs font-bold text-text-primary">
-                  {leadsBreakdown?.total ?? 0} Total Leads
-                </span>
+            <div className="grid gap-6 border-y border-border py-5 sm:grid-cols-2 lg:grid-cols-4">
+              <div className="border-l-2 border-success pl-4">
+                <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.14em] text-text-muted">
+                  <Coins className="h-3.5 w-3.5 text-success" /> Confirmed value
+                </div>
+                <p className="mt-3 text-2xl font-bold tabular-nums text-text-primary">{formatCurrencyINR(kpis.confirmedTotal)}</p>
+                <p className="mt-1 text-[11px] text-text-secondary">Cash {formatCurrencyINR(kpis.confirmedCash)} · In-kind {formatCurrencyINR(kpis.confirmedInKind)}</p>
               </div>
-              <div className="grid grid-cols-4 gap-2 text-center">
-                <div className="p-2.5 rounded-lg bg-amber-50 dark:bg-amber-950/40 border border-amber-100 dark:border-amber-800/50">
-                  <span className="text-[10px] font-bold text-amber-800 dark:text-amber-300 uppercase block">Unassigned</span>
-                  <span className="text-lg font-black text-amber-700 dark:text-amber-400">{leadsBreakdown?.unassigned ?? 0}</span>
+              <div className="border-l-2 border-primary pl-4">
+                <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.14em] text-text-muted">
+                  <TrendingUp className="h-3.5 w-3.5 text-primary" /> Pipeline potential
                 </div>
-                <div className="p-2.5 rounded-lg bg-sky-50 dark:bg-sky-950/40 border border-sky-100 dark:border-sky-800/50">
-                  <span className="text-[10px] font-bold text-sky-800 dark:text-sky-300 uppercase block">In Outreach</span>
-                  <span className="text-lg font-black text-sky-700 dark:text-sky-400">{leadsBreakdown?.inPipeline ?? 0}</span>
+                <p className="mt-3 text-2xl font-bold tabular-nums text-text-primary">{formatCurrencyINR(kpis.totalPipelinePotential)}</p>
+                <p className="mt-1 text-[11px] text-text-secondary">Across {kpis.totalSourcedLeads} sourced leads</p>
+              </div>
+              <div className="border-l-2 border-info pl-4">
+                <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.14em] text-text-muted">
+                  <PhoneCall className="h-3.5 w-3.5 text-info" /> Outreach velocity
                 </div>
-                <div className="p-2.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-100 dark:border-emerald-800/50">
-                  <span className="text-[10px] font-bold text-emerald-800 dark:text-emerald-300 uppercase block">Won</span>
-                  <span className="text-lg font-black text-emerald-700 dark:text-emerald-400">{leadsBreakdown?.won ?? 0}</span>
+                <p className="mt-3 text-2xl font-bold tabular-nums text-text-primary">{kpis.totalCallsLogged} calls</p>
+                <p className="mt-1 text-[11px] text-text-secondary">{kpis.activeVolunteersCount} active volunteers · {kpis.dealsWonCount} won</p>
+              </div>
+              <div className={`border-l-2 pl-4 ${kpis.overdueFollowUpsCount > 0 ? "border-warning" : "border-border-strong"}`}>
+                <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.14em] text-text-muted">
+                  <AlertTriangle className={`h-3.5 w-3.5 ${kpis.overdueFollowUpsCount > 0 ? "text-warning" : "text-text-muted"}`} /> Follow-up risk
                 </div>
-                <div className="p-2.5 rounded-lg bg-zinc-100 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800/60">
-                  <span className="text-[10px] font-bold text-zinc-700 dark:text-zinc-400 uppercase block">Lost</span>
-                  <span className="text-lg font-black text-zinc-800 dark:text-zinc-200">{leadsBreakdown?.lost ?? 0}</span>
-                </div>
+                <p className={`mt-3 text-2xl font-bold tabular-nums ${kpis.overdueFollowUpsCount > 0 ? "text-warning" : "text-text-primary"}`}>{kpis.overdueFollowUpsCount}</p>
+                <p className="mt-1 text-[11px] text-text-secondary">Callbacks requiring intervention</p>
               </div>
             </div>
-          </div>
+          </section>
 
-          {/* 3. Daily Outreach Velocity Chart (Recharts) */}
-          <div className="rounded-xl border border-border bg-surface p-5 shadow-2xs space-y-4">
-            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border-subtle pb-3">
-              <div>
-                <h4 className="text-xs font-bold text-text-primary uppercase tracking-wider flex items-center gap-1.5">
-                  <BarChart3 className="h-4 w-4 text-primary" />
-                  Daily Outreach Velocity (Last 7 Days)
-                </h4>
-                <p className="text-[11px] text-text-secondary">
-                  Real-time calls logged, proposals requested, and ratified partnerships.
-                </p>
+          <section className="grid gap-8 lg:grid-cols-[1.35fr_0.65fr]">
+            <div className="border border-border bg-surface p-5 sm:p-6">
+              <div className="flex flex-wrap items-start justify-between gap-4 border-b border-border-subtle pb-4">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <BarChart3 className="h-4 w-4 text-primary" />
+                    <h2 className="text-sm font-bold text-text-primary">Outreach velocity</h2>
+                  </div>
+                  <p className="mt-1 text-xs text-text-secondary">Calls, proposals, and wins logged over the last seven days.</p>
+                </div>
+                <div className="flex gap-4 text-[10px] font-semibold text-text-muted">
+                  <span className="inline-flex items-center gap-1.5"><i className="h-2 w-2 bg-primary" /> Calls</span>
+                  <span className="inline-flex items-center gap-1.5"><i className="h-2 w-2 bg-info" /> Proposals</span>
+                  <span className="inline-flex items-center gap-1.5"><i className="h-2 w-2 bg-success" /> Won</span>
+                </div>
               </div>
-
-              <div className="flex items-center gap-4 text-xs font-semibold">
-                <div className="flex items-center gap-1.5 text-text-secondary">
-                  <div className="h-2.5 w-2.5 rounded-full bg-teal-600"></div>
-                  <span>Calls Logged</span>
-                </div>
-                <div className="flex items-center gap-1.5 text-text-secondary">
-                  <div className="h-2.5 w-2.5 rounded-full bg-indigo-500"></div>
-                  <span>Proposals</span>
-                </div>
-                <div className="flex items-center gap-1.5 text-text-secondary">
-                  <div className="h-2.5 w-2.5 rounded-full bg-emerald-500"></div>
-                  <span>Deals Won</span>
-                </div>
+              <div className="mt-6 h-64 w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={velocityTimeSeries} margin={{ top: 8, right: 8, left: -24, bottom: 0 }}>
+                    <defs>
+                      <linearGradient id="adminCallsGradient" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="var(--brand-primary)" stopOpacity={0.28} />
+                        <stop offset="95%" stopColor="var(--brand-primary)" stopOpacity={0} />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid stroke="var(--border-subtle)" strokeDasharray="2 4" vertical={false} />
+                    <XAxis dataKey="date" tick={{ fontSize: 10, fill: "var(--text-muted)" }} tickLine={false} axisLine={false} />
+                    <YAxis tick={{ fontSize: 10, fill: "var(--text-muted)" }} tickLine={false} axisLine={false} allowDecimals={false} />
+                    <Tooltip contentStyle={{ backgroundColor: "var(--bg-surface-raised)", borderColor: "var(--border-default)", color: "var(--text-primary)", borderRadius: "6px", fontSize: "11px" }} />
+                    <Area type="monotone" dataKey="calls" name="Calls" stroke="var(--brand-primary)" strokeWidth={2} fill="url(#adminCallsGradient)" />
+                    <Area type="monotone" dataKey="proposals" name="Proposals" stroke="var(--info)" strokeWidth={2} fill="none" />
+                    <Area type="monotone" dataKey="dealsWon" name="Won" stroke="var(--success)" strokeWidth={2} fill="none" />
+                  </AreaChart>
+                </ResponsiveContainer>
               </div>
             </div>
 
-            <div className="h-64 w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart
-                  data={velocityTimeSeries}
-                  margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
-                >
-                  <defs>
-                    <linearGradient id="callsGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#237E72" stopOpacity={0.4} />
-                      <stop offset="95%" stopColor="#237E72" stopOpacity={0} />
-                    </linearGradient>
-                    <linearGradient id="propGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#6366F1" stopOpacity={0.3} />
-                      <stop offset="95%" stopColor="#6366F1" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#E2E5DE" opacity={0.6} />
-                  <XAxis
-                    dataKey="date"
-                    tick={{ fontSize: 11, fill: "#818982" }}
-                    tickLine={false}
-                    axisLine={{ stroke: "#E2E5DE" }}
-                  />
-                  <YAxis
-                    tick={{ fontSize: 11, fill: "#818982" }}
-                    tickLine={false}
-                    axisLine={{ stroke: "#E2E5DE" }}
-                    allowDecimals={false}
-                  />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: "#FFFFFF",
-                      borderColor: "#E2E5DE",
-                      borderRadius: "8px",
-                      fontSize: "12px",
-                      boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
-                    }}
-                  />
-                  <Area
-                    type="monotone"
-                    dataKey="calls"
-                    name="Calls Logged"
-                    stroke="#237E72"
-                    strokeWidth={2}
-                    fillOpacity={1}
-                    fill="url(#callsGrad)"
-                  />
-                  <Area
-                    type="monotone"
-                    dataKey="proposals"
-                    name="Proposals Sent"
-                    stroke="#6366F1"
-                    strokeWidth={2}
-                    fillOpacity={1}
-                    fill="url(#propGrad)"
-                  />
-                  <Area
-                    type="monotone"
-                    dataKey="dealsWon"
-                    name="Deals Won"
-                    stroke="#10B981"
-                    strokeWidth={2.5}
-                    fill="#10B981"
-                    fillOpacity={0.2}
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-
-          {/* 4. Team Intelligence & Sector Responsiveness */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Primary Corporate Objections */}
-            <div className="rounded-xl border border-border bg-surface p-5 shadow-2xs space-y-4">
-              <div className="border-b border-border-subtle pb-3">
-                <h4 className="text-xs font-bold text-text-primary uppercase tracking-wider flex items-center gap-1.5">
-                  <ShieldAlert className="h-4 w-4 text-amber-600" />
-                  Primary Corporate Objections (Team Roadblocks)
-                </h4>
-                <p className="text-[11px] text-text-secondary">
-                  Most frequent friction points logged across volunteer debrief reports.
-                </p>
+            <div className="border border-border bg-surface p-5 sm:p-6">
+              <div className="flex items-center gap-2 border-b border-border-subtle pb-4">
+                <Users className="h-4 w-4 text-primary" />
+                <div>
+                  <h2 className="text-sm font-bold text-text-primary">Team readiness</h2>
+                  <p className="mt-1 text-xs text-text-secondary">Verification and lead coverage.</p>
+                </div>
               </div>
+              <div className="mt-5 space-y-5">
+                <div>
+                  <div className="flex items-end justify-between gap-3">
+                    <span className="text-xs font-semibold text-text-primary">Volunteers</span>
+                    <span className="text-xs tabular-nums text-text-secondary">{volunteersBreakdown?.approved ?? 0} approved / {volunteersBreakdown?.total ?? 0}</span>
+                  </div>
+                  <div className="mt-2 h-1.5 bg-surface-subtle"><div className="h-full bg-success" style={{ width: `${volunteersBreakdown?.total ? Math.round(((volunteersBreakdown.approved ?? 0) / volunteersBreakdown.total) * 100) : 0}%` }} /></div>
+                </div>
+                <div>
+                  <div className="flex items-end justify-between gap-3">
+                    <span className="text-xs font-semibold text-text-primary">Leads in motion</span>
+                    <span className="text-xs tabular-nums text-text-secondary">{leadsBreakdown?.inPipeline ?? 0} / {leadsBreakdown?.total ?? 0}</span>
+                  </div>
+                  <div className="mt-2 h-1.5 bg-surface-subtle"><div className="h-full bg-primary" style={{ width: `${leadsBreakdown?.total ? Math.round(((leadsBreakdown.inPipeline ?? 0) / leadsBreakdown.total) * 100) : 0}%` }} /></div>
+                </div>
+                <div className="grid grid-cols-2 gap-x-6 gap-y-3 border-t border-border-subtle pt-4">
+                  <div><p className="text-[10px] uppercase tracking-wider text-text-muted">Pending review</p><p className="mt-1 text-lg font-bold tabular-nums text-warning">{volunteersBreakdown?.pending ?? 0}</p></div>
+                  <div><p className="text-[10px] uppercase tracking-wider text-text-muted">Unassigned leads</p><p className="mt-1 text-lg font-bold tabular-nums text-text-primary">{leadsBreakdown?.unassigned ?? 0}</p></div>
+                  <div><p className="text-[10px] uppercase tracking-wider text-text-muted">Won</p><p className="mt-1 text-lg font-bold tabular-nums text-success">{leadsBreakdown?.won ?? 0}</p></div>
+                  <div><p className="text-[10px] uppercase tracking-wider text-text-muted">Lost</p><p className="mt-1 text-lg font-bold tabular-nums text-text-secondary">{leadsBreakdown?.lost ?? 0}</p></div>
+                </div>
+              </div>
+            </div>
+          </section>
 
+          <section className="grid gap-8 lg:grid-cols-2">
+            <div className="border border-border bg-surface p-5 sm:p-6">
+              <div className="flex items-center gap-2 border-b border-border-subtle pb-4">
+                <ShieldAlert className="h-4 w-4 text-warning" />
+                <div><h2 className="text-sm font-bold text-text-primary">Conversation friction</h2><p className="mt-1 text-xs text-text-secondary">Objections appearing most often in call debriefs.</p></div>
+              </div>
               {topObjections.length === 0 ? (
-                <div className="py-8 text-center text-xs text-text-muted">
-                  No corporate objections recorded yet. Objections will populate as SDRs log call reports.
-                </div>
+                <p className="py-10 text-center text-xs text-text-muted">No objections recorded yet.</p>
               ) : (
-                <div className="space-y-3">
-                  {topObjections.map((item, idx) => {
-                    const maxCount = Math.max(...topObjections.map((o) => o.count), 1);
-                    const pct = Math.round((item.count / maxCount) * 100);
-                    return (
-                      <div key={idx} className="space-y-1 text-xs">
-                        <div className="flex items-center justify-between text-text-primary font-medium">
-                          <span className="truncate pr-2">{item.objection}</span>
-                          <span className="font-bold text-text-muted shrink-0">
-                            {item.count} calls
-                          </span>
-                        </div>
-                        <div className="h-2 w-full rounded-full bg-surface-subtle border border-border overflow-hidden">
-                          <div
-                            className="h-full bg-amber-500 rounded-full transition-all duration-500"
-                            style={{ width: `${item.count > 0 ? Math.max(pct, 8) : 2}%` }}
-                          ></div>
-                        </div>
-                      </div>
-                    );
+                <div className="mt-5 space-y-4">
+                  {topObjections.map((item, index) => {
+                    const maxCount = Math.max(...topObjections.map((entry) => entry.count), 1);
+                    const width = Math.max(Math.round((item.count / maxCount) * 100), 8);
+                    return <div key={`${item.objection}-${index}`}><div className="flex items-center justify-between gap-4 text-xs"><span className="truncate font-medium text-text-primary">{item.objection}</span><span className="shrink-0 tabular-nums text-text-muted">{item.count} calls</span></div><div className="mt-2 h-1 bg-surface-subtle"><div className="h-full bg-warning" style={{ width: `${width}%` }} /></div></div>;
                   })}
                 </div>
               )}
             </div>
 
-            {/* Sector Responsiveness */}
-            <div className="rounded-xl border border-border bg-surface p-5 shadow-2xs space-y-4">
-              <div className="border-b border-border-subtle pb-3">
-                <h4 className="text-xs font-bold text-text-primary uppercase tracking-wider flex items-center gap-1.5">
-                  <Building2 className="h-4 w-4 text-primary" />
-                  Sector Responsiveness & Pipeline Performance
-                </h4>
-                <p className="text-[11px] text-text-secondary">
-                  Outreach conversion and confirmed sponsorship by industry niche.
-                </p>
+            <div className="border border-border bg-surface p-5 sm:p-6">
+              <div className="flex items-center gap-2 border-b border-border-subtle pb-4">
+                <Building2 className="h-4 w-4 text-primary" />
+                <div><h2 className="text-sm font-bold text-text-primary">Sector response</h2><p className="mt-1 text-xs text-text-secondary">Where conversations are turning into sponsorship value.</p></div>
               </div>
-
               {sectorBreakdown.length === 0 ? (
-                <div className="py-8 text-center text-xs text-text-muted">
-                  No sector outreach data recorded yet.
-                </div>
+                <p className="py-10 text-center text-xs text-text-muted">No sector data recorded yet.</p>
               ) : (
-                <div className="overflow-x-auto">
+                <div className="mt-4 overflow-x-auto">
                   <table className="w-full text-left text-xs">
-                    <thead>
-                      <tr className="border-b border-border text-[10px] uppercase font-bold text-text-muted">
-                        <th className="py-2 px-2">Industry</th>
-                        <th className="py-2 px-2 text-right">Leads</th>
-                        <th className="py-2 px-2 text-right">Contacted</th>
-                        <th className="py-2 px-2 text-right">Won</th>
-                        <th className="py-2 px-2 text-right">Valuation</th>
-                      </tr>
-                    </thead>
+                    <thead><tr className="border-b border-border-subtle text-[10px] uppercase tracking-wider text-text-muted"><th className="py-2 pr-3">Industry</th><th className="py-2 px-2 text-right">Reach</th><th className="py-2 px-2 text-right">Won</th><th className="py-2 pl-2 text-right">Value</th></tr></thead>
                     <tbody className="divide-y divide-border-subtle">
-                      {sectorBreakdown.map((s, idx) => (
-                        <tr key={idx} className="hover:bg-surface-subtle transition-colors">
-                          <td className="py-2 px-2 font-semibold text-text-primary">
-                            {s.industry}
-                          </td>
-                          <td className="py-2 px-2 text-right text-text-muted">
-                            {s.totalLeads}
-                          </td>
-                          <td className="py-2 px-2 text-right text-text-secondary font-medium">
-                            {s.contacted} ({s.responsivenessRate}%)
-                          </td>
-                          <td className="py-2 px-2 text-right font-bold text-emerald-600">
-                            {s.won}
-                          </td>
-                          <td className="py-2 px-2 text-right font-bold text-primary">
-                            {s.totalValuation > 0
-                              ? formatCurrencyINR(s.totalValuation)
-                              : "—"}
-                          </td>
-                        </tr>
-                      ))}
+                      {sectorBreakdown.map((sector, index) => <tr key={`${sector.industry}-${index}`} className="hover:bg-surface-subtle/60"><td className="py-3 pr-3 font-semibold text-text-primary">{sector.industry}</td><td className="px-2 py-3 text-right text-text-secondary">{sector.contacted}/{sector.totalLeads}<span className="ml-1 text-[10px] text-text-muted">({sector.responsivenessRate}%)</span></td><td className="px-2 py-3 text-right font-bold text-success">{sector.won}</td><td className="py-3 pl-2 text-right font-semibold text-primary">{sector.totalValuation > 0 ? formatCurrencyINR(sector.totalValuation) : "—"}</td></tr>)}
                     </tbody>
                   </table>
                 </div>
               )}
             </div>
-          </div>
+          </section>
 
-          {/* 5. Live Recent Activity Stream from Audit Logs */}
-          <div className="rounded-xl border border-border bg-surface p-5 shadow-2xs space-y-4">
-            <div className="flex items-center justify-between border-b border-border-subtle pb-3">
-              <div>
-                <h4 className="text-xs font-bold text-text-primary uppercase tracking-wider flex items-center gap-1.5">
-                  <BarChart3 className="h-4 w-4 text-sky-600" />
-                  Live Operational Activity Feed
-                </h4>
-                <p className="text-[11px] text-text-secondary">
-                  Real-time immutable audit records from volunteer registrations, lead allocations, and commitments.
-                </p>
-              </div>
+          <section className="border border-border bg-surface p-5 sm:p-6">
+            <div className="flex flex-wrap items-end justify-between gap-3 border-b border-border-subtle pb-4">
+              <div><div className="flex items-center gap-2"><BarChart3 className="h-4 w-4 text-primary" /><h2 className="text-sm font-bold text-text-primary">Recent operational activity</h2></div><p className="mt-1 text-xs text-text-secondary">The latest recorded changes across the sponsorship workspace.</p></div>
+              <Link href="/admin/analytics" className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:text-primary-hover">Open full trail <ArrowUpRight className="h-3.5 w-3.5" /></Link>
             </div>
-
             {!recentActivity || recentActivity.length === 0 ? (
-              <div className="py-8 text-center text-xs text-text-muted">
-                No recent activity recorded in the audit trail yet.
-              </div>
+              <p className="py-10 text-center text-xs text-text-muted">No recent activity recorded.</p>
             ) : (
               <div className="divide-y divide-border-subtle">
-                {recentActivity.map((log: any) => (
-                  <div key={log._id} className="py-2.5 flex items-center justify-between text-xs">
-                    <div className="flex items-center gap-3">
-                      <span className="rounded-full bg-surface-subtle border border-border px-2 py-0.5 text-[10px] font-mono font-bold text-text-muted">
-                        {log.action}
-                      </span>
-                      <span className="text-text-primary font-medium">
-                        {log.actorName} ({log.actorRole})
-                      </span>
-                      <span className="text-text-muted text-[11px]">
-                        on {log.entityType} ({log.entityId.slice(-6)})
-                      </span>
-                    </div>
-                    <span className="text-text-muted text-[11px] font-mono whitespace-nowrap">
-                      {new Date(log.timestamp).toLocaleTimeString("en-IN", {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
-                    </span>
-                  </div>
-                ))}
+                {recentActivity.map((log) => <div key={log._id} className="grid gap-2 py-3 text-xs sm:grid-cols-[9rem_1fr_auto] sm:items-center"><span className="font-mono text-[10px] font-semibold text-primary">{log.action}</span><span className="text-text-primary"><strong className="font-semibold">{log.actorName}</strong><span className="text-text-muted"> · {log.actorRole} · {log.entityType} {log.entityId.slice(-6)}</span></span><span className="font-mono text-[10px] text-text-muted sm:text-right">{new Date(log.timestamp).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })}</span></div>)}
               </div>
             )}
-          </div>
+          </section>
         </div>
-      )}
-
-      {activeTab === "leaderboard" && (
-        <LeaderboardPodium />
       )}
     </div>
   );

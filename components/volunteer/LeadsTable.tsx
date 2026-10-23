@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { Id } from "@/convex/_generated/dataModel";
 import {
   Building2,
@@ -14,6 +14,11 @@ import {
   MapPin,
   Calendar,
   X,
+  Sparkles,
+  BookOpen,
+  Trophy,
+  Download,
+  RotateCcw,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -54,6 +59,9 @@ interface LeadsTableProps {
   onTabChange: (tab: string) => void;
   onSelectLead: (companyId: Id<"companies">) => void;
   onStartCall?: (lead: AssignedLeadItem) => void;
+  onOpenEventDeck?: () => void;
+  onOpenLeaderboard?: () => void;
+  volunteerName?: string;
   isLoading?: boolean;
 }
 
@@ -63,6 +71,9 @@ export function LeadsTable({
   onTabChange,
   onSelectLead,
   onStartCall,
+  onOpenEventDeck,
+  onOpenLeaderboard,
+  volunteerName,
   isLoading = false,
 }: LeadsTableProps) {
   const [searchQuery, setSearchQuery] = useState("");
@@ -71,76 +82,94 @@ export function LeadsTable({
   const [verificationFilter, setVerificationFilter] = useState<string>("all");
   const [isCompactDensity, setIsCompactDensity] = useState(false);
 
-  // Available unique industries from leads
-  const availableIndustries = Array.from(
-    new Set(leads.map((l) => l.industry).filter(Boolean))
-  ).sort();
+  // Memoized unique industries from leads
+  const availableIndustries = useMemo(() => {
+    return Array.from(new Set(leads.map((l) => l.industry).filter(Boolean))).sort();
+  }, [leads]);
 
-  // Client-side multi-attribute search and filtering
-  const filteredLeads = leads.filter((lead) => {
-    // Priority filter
-    if (priorityFilter !== "all" && lead.priority !== priorityFilter) {
-      return false;
+  // Memoized client-side multi-attribute search and filtering
+  const filteredLeads = useMemo(() => {
+    const trimmedQuery = searchQuery.trim().toLowerCase();
+    return leads.filter((lead) => {
+      // Priority filter
+      if (priorityFilter !== "all" && lead.priority !== priorityFilter) {
+        return false;
+      }
+
+      // Industry / Sector filter
+      if (industryFilter !== "all" && lead.industry !== industryFilter) {
+        return false;
+      }
+
+      // Contact Verification level filter
+      if (
+        verificationFilter !== "all" &&
+        lead.primaryContact?.contactVerification !== verificationFilter
+      ) {
+        return false;
+      }
+
+      // Search query
+      if (trimmedQuery.length > 0) {
+        const matchCompany =
+          lead.companyName.toLowerCase().includes(trimmedQuery) ||
+          lead.industry.toLowerCase().includes(trimmedQuery) ||
+          lead.niche.toLowerCase().includes(trimmedQuery) ||
+          (lead.location && lead.location.toLowerCase().includes(trimmedQuery));
+
+        const matchContact =
+          lead.primaryContact &&
+          (lead.primaryContact.contactName.toLowerCase().includes(trimmedQuery) ||
+            lead.primaryContact.phone.includes(trimmedQuery) ||
+            lead.primaryContact.designation.toLowerCase().includes(trimmedQuery));
+
+        return matchCompany || matchContact;
+      }
+
+      return true;
+    });
+  }, [leads, priorityFilter, industryFilter, verificationFilter, searchQuery]);
+
+  // Single-pass memoized tab counts
+  const tabCounts = useMemo(() => {
+    let toContact = 0;
+    let inProgress = 0;
+    let followUp = 0;
+    let interested = 0;
+
+    for (const l of leads) {
+      if (l.leadStatus === "ASSIGNED") {
+        toContact++;
+      }
+      if (["CONTACTED", "FOLLOW_UP", "PROPOSAL_REQUESTED", "PROPOSAL_SENT", "NEGOTIATION"].includes(l.leadStatus)) {
+        inProgress++;
+      }
+      if (l.leadStatus === "FOLLOW_UP") {
+        followUp++;
+      }
+      if (["INTERESTED", "PROPOSAL_REQUESTED", "PROPOSAL_SENT", "NEGOTIATION", "WON"].includes(l.leadStatus)) {
+        interested++;
+      }
     }
 
-    // Industry / Sector filter
-    if (industryFilter !== "all" && lead.industry !== industryFilter) {
-      return false;
-    }
-
-    // Contact Verification level filter
-    if (
-      verificationFilter !== "all" &&
-      lead.primaryContact?.contactVerification !== verificationFilter
-    ) {
-      return false;
-    }
-
-    // Search query
-    if (searchQuery.trim().length > 0) {
-      const q = searchQuery.toLowerCase().trim();
-      const matchCompany =
-        lead.companyName.toLowerCase().includes(q) ||
-        lead.industry.toLowerCase().includes(q) ||
-        lead.niche.toLowerCase().includes(q) ||
-        (lead.location && lead.location.toLowerCase().includes(q));
-
-      const matchContact =
-        lead.primaryContact &&
-        (lead.primaryContact.contactName.toLowerCase().includes(q) ||
-          lead.primaryContact.phone.includes(q) ||
-          lead.primaryContact.designation.toLowerCase().includes(q));
-
-      return matchCompany || matchContact;
-    }
-
-    return true;
-  });
-
-  // Calculate tab counts
-  const countAll = leads.length;
-  const countToContact = leads.filter((l) => l.leadStatus === "ASSIGNED").length;
-  const countInProgress = leads.filter((l) =>
-    ["CONTACTED", "FOLLOW_UP", "PROPOSAL_REQUESTED", "PROPOSAL_SENT", "NEGOTIATION"].includes(
-      l.leadStatus
-    )
-  ).length;
-  const countFollowUp = leads.filter((l) => l.leadStatus === "FOLLOW_UP").length;
-  const countInterested = leads.filter((l) =>
-    ["INTERESTED", "PROPOSAL_REQUESTED", "PROPOSAL_SENT", "NEGOTIATION", "WON"].includes(
-      l.leadStatus
-    )
-  ).length;
+    return {
+      all: leads.length,
+      toContact,
+      inProgress,
+      followUp,
+      interested,
+    };
+  }, [leads]);
 
   return (
-    <div className="rounded-xl border border-border bg-surface p-5 shadow-xs">
+    <div className="border border-border bg-surface overflow-hidden shadow-2xs">
       {/* Table Header: Title & Counts */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-border-subtle pb-4">
-        <div className="flex items-center gap-2">
-          <h2 className="text-base font-bold text-text-primary">
-            My Assigned Outreach Queue
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-5 border-b border-border-subtle">
+        <div className="flex items-center gap-3">
+          <h2 className="text-base font-bold text-text-primary tracking-tight">
+            MY ASSIGNED OUTREACH QUEUE
           </h2>
-          <span className="rounded-full bg-accent-mint/30 px-2.5 py-0.5 text-xs font-bold text-primary border border-primary/20">
+          <span className="bg-accent-mint px-2 py-0.5 text-xs font-bold text-primary">
             {leads.length} active
           </span>
         </div>
@@ -149,109 +178,116 @@ export function LeadsTable({
         </p>
       </div>
 
-      {/* Filter Tabs */}
-      <div className="flex items-center gap-2 overflow-x-auto py-3 text-xs border-b border-border-subtle">
+      {/* Filter Tabs matching Admin editorial style */}
+      <nav className="flex items-center gap-6 border-b border-border-subtle px-5 overflow-x-auto" aria-label="Lead Queue Filters">
         <button
+          type="button"
           onClick={() => onTabChange("all")}
-          className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 font-semibold transition-colors cursor-pointer ${
+          className={`border-b-2 py-3 text-xs font-semibold transition-colors cursor-pointer flex items-center gap-2 shrink-0 ${
             activeTab === "all"
-              ? "bg-primary text-white"
-              : "text-text-secondary hover:bg-surface-subtle hover:text-text-primary"
+              ? "border-primary text-primary"
+              : "border-transparent text-text-muted hover:text-text-primary"
           }`}
         >
-          All Assigned
+          <span>All Assigned</span>
           <span
-            className={`rounded px-1.5 py-0.2 text-[10px] font-semibold tabular-nums ${
-              activeTab === "all" ? "bg-white/20 text-white" : "bg-black/5 dark:bg-white/10 text-text-muted"
+            className={`px-1.5 py-0.2 text-[10px] font-bold tabular-nums ${
+              activeTab === "all"
+                ? "bg-accent-mint text-primary"
+                : "bg-surface-subtle text-text-muted"
             }`}
           >
-            {countAll}
+            {tabCounts.all}
           </span>
         </button>
 
         <button
+          type="button"
           onClick={() => onTabChange("to_contact")}
-          className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 font-medium transition-colors cursor-pointer ${
+          className={`border-b-2 py-3 text-xs font-semibold transition-colors cursor-pointer flex items-center gap-2 shrink-0 ${
             activeTab === "to_contact"
-              ? "bg-primary text-white"
-              : "text-text-secondary hover:bg-surface-subtle hover:text-text-primary"
+              ? "border-primary text-primary"
+              : "border-transparent text-text-muted hover:text-text-primary"
           }`}
         >
-          To Contact
+          <span>To Contact</span>
           <span
-            className={`rounded px-1.5 py-0.2 text-[10px] font-semibold tabular-nums ${
+            className={`px-1.5 py-0.2 text-[10px] font-bold tabular-nums ${
               activeTab === "to_contact"
-                ? "bg-white/20 text-white"
+                ? "bg-accent-mint text-primary"
                 : "bg-surface-subtle text-text-muted"
             }`}
           >
-            {countToContact}
+            {tabCounts.toContact}
           </span>
         </button>
 
         <button
+          type="button"
           onClick={() => onTabChange("in_progress")}
-          className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 font-medium transition-colors cursor-pointer ${
+          className={`border-b-2 py-3 text-xs font-semibold transition-colors cursor-pointer flex items-center gap-2 shrink-0 ${
             activeTab === "in_progress"
-              ? "bg-primary text-white"
-              : "text-text-secondary hover:bg-surface-subtle hover:text-text-primary"
+              ? "border-primary text-primary"
+              : "border-transparent text-text-muted hover:text-text-primary"
           }`}
         >
-          In Progress
+          <span>In Progress</span>
           <span
-            className={`rounded px-1.5 py-0.2 text-[10px] font-semibold tabular-nums ${
+            className={`px-1.5 py-0.2 text-[10px] font-bold tabular-nums ${
               activeTab === "in_progress"
-                ? "bg-white/20 text-white"
+                ? "bg-accent-mint text-primary"
                 : "bg-surface-subtle text-text-muted"
             }`}
           >
-            {countInProgress}
+            {tabCounts.inProgress}
           </span>
         </button>
 
         <button
+          type="button"
           onClick={() => onTabChange("follow_up")}
-          className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 font-medium transition-colors cursor-pointer ${
+          className={`border-b-2 py-3 text-xs font-semibold transition-colors cursor-pointer flex items-center gap-2 shrink-0 ${
             activeTab === "follow_up"
-              ? "bg-primary text-white"
-              : "text-text-secondary hover:bg-surface-subtle hover:text-text-primary"
+              ? "border-primary text-primary"
+              : "border-transparent text-text-muted hover:text-text-primary"
           }`}
         >
-          Follow-up
+          <span>Follow-up</span>
           <span
-            className={`rounded px-1.5 py-0.2 text-[10px] font-semibold tabular-nums ${
+            className={`px-1.5 py-0.2 text-[10px] font-bold tabular-nums ${
               activeTab === "follow_up"
-                ? "bg-white/20 text-white"
+                ? "bg-accent-mint text-primary"
                 : "bg-surface-subtle text-text-muted"
             }`}
           >
-            {countFollowUp}
+            {tabCounts.followUp}
           </span>
         </button>
 
         <button
+          type="button"
           onClick={() => onTabChange("interested")}
-          className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 font-medium transition-colors cursor-pointer ${
+          className={`border-b-2 py-3 text-xs font-semibold transition-colors cursor-pointer flex items-center gap-2 shrink-0 ${
             activeTab === "interested"
-              ? "bg-primary text-white"
-              : "text-text-secondary hover:bg-surface-subtle hover:text-text-primary"
+              ? "border-primary text-primary"
+              : "border-transparent text-text-muted hover:text-text-primary"
           }`}
         >
-          Interested
+          <span>Interested</span>
           <span
-            className={`rounded px-1.5 py-0.2 text-[10px] font-semibold tabular-nums ${
+            className={`px-1.5 py-0.2 text-[10px] font-bold tabular-nums ${
               activeTab === "interested"
-                ? "bg-white/20 text-white"
+                ? "bg-accent-mint text-primary"
                 : "bg-surface-subtle text-text-muted"
             }`}
           >
-            {countInterested}
+            {tabCounts.interested}
           </span>
         </button>
-      </div>
+      </nav>
 
       {/* Search and Secondary Filter Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 py-3 border-b border-border-subtle">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 border-b border-border-subtle bg-surface-subtle/20">
         <div className="relative w-full sm:w-72">
           <Search className="pointer-events-none absolute left-3 top-2.5 h-3.5 w-3.5 text-text-muted" />
           <input
@@ -259,7 +295,7 @@ export function LeadsTable({
             placeholder="Search company, contact, or niche..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="h-8 w-full rounded-lg border border-border bg-surface-subtle/50 pl-8 pr-8 text-xs text-text-primary placeholder:text-text-muted focus:border-primary focus:outline-none"
+            className="h-8 w-full border border-border bg-background pl-8 pr-8 text-xs text-text-primary placeholder:text-text-muted focus:border-primary focus:outline-hidden"
           />
           {searchQuery && (
             <button
@@ -281,7 +317,7 @@ export function LeadsTable({
               value={priorityFilter}
               aria-label="Filter leads by priority"
               onChange={(e) => setPriorityFilter(e.target.value)}
-              className="h-8 rounded-lg border border-border bg-surface px-2 text-xs text-text-primary focus:border-primary focus:outline-none"
+              className="h-8 border border-border bg-surface px-2 text-xs text-text-primary focus:border-primary focus:outline-hidden"
             >
               <option value="all">All Priorities</option>
               <option value="High">High (P0)</option>
@@ -297,7 +333,7 @@ export function LeadsTable({
               value={industryFilter}
               aria-label="Filter leads by industry sector"
               onChange={(e) => setIndustryFilter(e.target.value)}
-              className="h-8 rounded-lg border border-border bg-surface px-2 text-xs text-text-primary focus:border-primary focus:outline-none max-w-[140px] truncate"
+              className="h-8 border border-border bg-surface px-2 text-xs text-text-primary focus:border-primary focus:outline-hidden max-w-[140px] truncate"
             >
               <option value="all">All Sectors</option>
               {availableIndustries.map((ind) => (
@@ -313,7 +349,7 @@ export function LeadsTable({
             value={verificationFilter}
             aria-label="Filter leads by contact verification"
             onChange={(e) => setVerificationFilter(e.target.value)}
-            className="h-8 rounded-lg border border-border bg-surface px-2 text-xs text-text-primary focus:border-primary focus:outline-none"
+            className="h-8 border border-border bg-surface px-2 text-xs text-text-primary focus:border-primary focus:outline-hidden"
           >
             <option value="all">All Contacts</option>
             <option value="VERIFIED_DECISION_MAKER">Decision Makers</option>
@@ -326,7 +362,7 @@ export function LeadsTable({
           <button
             onClick={() => setIsCompactDensity((prev) => !prev)}
             title="Toggle Row Density"
-            className={`h-8 px-2.5 rounded-lg border text-xs font-medium transition-colors cursor-pointer flex items-center gap-1 ${
+            className={`h-8 px-2.5 border text-xs font-medium transition-colors cursor-pointer flex items-center gap-1 ${
               isCompactDensity
                 ? "bg-surface-subtle border-primary/40 text-primary font-semibold"
                 : "border-border bg-surface text-text-secondary hover:text-text-primary"
@@ -343,35 +379,145 @@ export function LeadsTable({
           <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
           <p className="text-xs text-text-secondary">Loading assigned leads...</p>
         </div>
+      ) : leads.length === 0 ? (
+        <div className="py-10 px-4 sm:px-6">
+          <div className="mx-auto max-w-2xl border border-border bg-surface-subtle/40 p-6 sm:p-8 text-center space-y-6">
+            <div className="mx-auto flex h-12 w-12 items-center justify-center bg-primary text-primary-foreground">
+              <Sparkles className="h-6 w-6" />
+            </div>
+
+            <div className="space-y-2">
+              <h3 className="text-lg sm:text-xl font-bold tracking-tight text-text-primary">
+                Welcome to your Outreach Desk{volunteerName ? `, ${volunteerName}` : ""}!
+              </h3>
+              <p className="text-xs sm:text-sm text-text-secondary leading-relaxed max-w-lg mx-auto">
+                Your volunteer credentials are verified. The Sponsorship Head is currently assigning your batch of corporate leads. Get ready by studying festival deliverables and pitch strategy below.
+              </p>
+            </div>
+
+            {/* 3 Fast-Start Steps */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-left">
+              <div className="border border-border bg-surface p-4 space-y-2 shadow-2xs">
+                <div className="flex items-center gap-2">
+                  <span className="flex h-5 w-5 items-center justify-center bg-primary text-[10px] font-bold text-white">
+                    1
+                  </span>
+                  <span className="text-xs font-bold text-text-primary">
+                    Study Packages
+                  </span>
+                </div>
+                <p className="text-[11px] text-text-secondary leading-relaxed">
+                  Review the 5 sponsorship tiers (Title ₹4L, Powered By ₹2L, Associate ₹1L, Event Partner ₹50K, In-Kind).
+                </p>
+              </div>
+
+              <div className="border border-border bg-surface p-4 space-y-2 shadow-2xs">
+                <div className="flex items-center gap-2">
+                  <span className="flex h-5 w-5 items-center justify-center bg-primary text-[10px] font-bold text-white">
+                    2
+                  </span>
+                  <span className="text-xs font-bold text-text-primary">
+                    Master Call Mode
+                  </span>
+                </div>
+                <p className="text-[11px] text-text-secondary leading-relaxed">
+                  Every lead includes verified contact tiers, concise talking points, and 9 quick outcome buttons.
+                </p>
+              </div>
+
+              <div className="border border-border bg-surface p-4 space-y-2 shadow-2xs">
+                <div className="flex items-center gap-2">
+                  <span className="flex h-5 w-5 items-center justify-center bg-primary text-[10px] font-bold text-white">
+                    3
+                  </span>
+                  <span className="text-xs font-bold text-text-primary">
+                    Earn SDR Points
+                  </span>
+                </div>
+                <p className="text-[11px] text-text-secondary leading-relaxed">
+                  Every completed call, audio debrief, and pipeline stage advancement earns points on the team leaderboard.
+                </p>
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+              {onOpenEventDeck && (
+                <Button
+                  variant="primary"
+                  size="md"
+                  onClick={onOpenEventDeck}
+                  className="text-xs font-semibold"
+                >
+                  <BookOpen className="h-4 w-4 mr-1.5" />
+                  Explore Event Deck & Packages
+                </Button>
+              )}
+              {onOpenLeaderboard && (
+                <Button
+                  variant="outline"
+                  size="md"
+                  onClick={onOpenLeaderboard}
+                  className="text-xs font-semibold border-border text-text-secondary hover:text-text-primary"
+                >
+                  <Trophy className="h-4 w-4 mr-1.5 text-amber-500" />
+                  View Team Leaderboard
+                </Button>
+              )}
+              <a
+                href="/brochure/praroha-2026-sponsorship-brochure.pdf"
+                target="_blank"
+                download
+                className="inline-flex items-center gap-1.5 border border-border bg-surface px-3 py-2 text-xs font-semibold text-text-secondary hover:text-text-primary hover:bg-surface-subtle transition-colors shadow-2xs"
+              >
+                <Download className="h-3.5 w-3.5 text-primary" />
+                Brochure PDF
+              </a>
+            </div>
+          </div>
+        </div>
       ) : filteredLeads.length === 0 ? (
         <div className="py-10">
           <EmptyState
             icon={Building2}
             title={
-              leads.length === 0
-                ? "No leads assigned yet"
-                : searchQuery.trim().length > 0
+              searchQuery.trim().length > 0
                 ? "No matching accounts found"
                 : activeTab === "to_contact"
-                ? "All assigned accounts dialed! 👏"
-                : activeTab === "follow_up"
-                ? "No callbacks due right now"
-                : activeTab === "interested"
-                ? "No active interested deals yet"
-                : "No leads match current filters"
+                  ? "All assigned accounts dialed! 👏"
+                  : activeTab === "follow_up"
+                    ? "No callbacks due right now"
+                    : activeTab === "interested"
+                      ? "No active interested deals yet"
+                      : "No leads match current filters"
             }
             description={
-              leads.length === 0
-                ? "Your allocated sponsorship leads will automatically populate here once assigned by the Sponsorship Head."
-                : searchQuery.trim().length > 0
-                ? `No assigned leads match "${searchQuery}". Clear your search query to see all accounts.`
+              searchQuery.trim().length > 0
+                ? `No assigned leads match "${searchQuery}". Reset filters to see all accounts.`
                 : activeTab === "to_contact"
-                ? "You've contacted every fresh account in your initial queue. Head to 'Follow-ups' for scheduled callbacks or review active deals."
-                : activeTab === "follow_up"
-                ? "Your follow-up pipeline is currently clear. Focus on high-priority accounts or review proposal statuses."
-                : activeTab === "interested"
-                ? "Direct conversations turn corporate interest into signed festival partnerships. Keep dialing!"
-                : "Try clearing your sector or priority filter dropdowns."
+                  ? "You've contacted every fresh account in your initial queue. Head to 'Follow-ups' for scheduled callbacks or review active deals."
+                  : activeTab === "follow_up"
+                    ? "Your follow-up pipeline is currently clear. Focus on high-priority accounts or review proposal statuses."
+                    : activeTab === "interested"
+                      ? "Direct conversations turn corporate interest into signed festival partnerships. Keep dialing!"
+                      : "Try resetting your sector, priority, or search filters."
+            }
+            action={
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setSearchQuery("");
+                  setPriorityFilter("all");
+                  setIndustryFilter("all");
+                  setVerificationFilter("all");
+                  onTabChange("all");
+                }}
+                className="text-xs border-border text-text-secondary hover:text-text-primary"
+              >
+                <RotateCcw className="h-3.5 w-3.5 mr-1.5" />
+                Reset All Filters
+              </Button>
             }
           />
         </div>
@@ -379,13 +525,13 @@ export function LeadsTable({
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="border-b border-border-subtle text-[11px] font-semibold text-text-muted uppercase tracking-wider">
-                <th className="py-3 px-3">Company & Sector</th>
-                <th className="py-3 px-3">Decision Maker / Contact</th>
-                <th className="py-3 px-3">Priority</th>
-                <th className="py-3 px-3">Stage Status</th>
-                <th className="py-3 px-3">Timeline</th>
-                <th className="py-3 px-3 text-right">Actions</th>
+              <tr className="border-b border-border bg-table-header/70 text-[10px] font-bold text-text-muted uppercase tracking-[0.14em]">
+                <th className="py-3 px-4">Company & Sector</th>
+                <th className="py-3 px-4">Decision Maker / Contact</th>
+                <th className="py-3 px-4">Priority</th>
+                <th className="py-3 px-4">Stage Status</th>
+                <th className="py-3 px-4">Timeline</th>
+                <th className="py-3 px-4 text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border-subtle text-xs">
@@ -393,33 +539,33 @@ export function LeadsTable({
                 <tr
                   key={lead._id}
                   onClick={() => onSelectLead(lead._id)}
-                  className="group hover:bg-surface-subtle/70 transition-colors cursor-pointer"
+                  className="group hover:bg-table-row-hover transition-colors cursor-pointer"
                 >
                   {/* Company & Sector */}
-                  <td className={isCompactDensity ? "py-1.5 px-3" : "py-3 px-3"}>
+                  <td className={isCompactDensity ? "py-2 px-4" : "py-3 px-4"}>
                     <div className="space-y-1">
                       <div className="flex items-center gap-2">
-                        <span className="font-bold text-text-primary group-hover:text-primary transition-colors">
+                        <span className="font-bold text-text-primary group-hover:text-primary transition-colors text-sm">
                           {lead.companyName}
                         </span>
                         {lead.leadScore !== undefined && (
-                          <span className="rounded bg-accent-mint/30 px-1.5 py-0.2 text-[10px] font-bold text-primary tabular-nums">
+                          <span className="bg-accent-mint px-1.5 py-0.2 text-[10px] font-bold text-primary tabular-nums">
                             {lead.leadScore} pts
                           </span>
                         )}
                       </div>
-                      <div className="flex items-center gap-2 text-[11px] text-text-secondary">
-                        <span className="rounded bg-surface-subtle px-1.5 py-0.5 border border-border-subtle font-medium">
+                      <div className="flex items-center gap-2 text-xs text-text-secondary">
+                        <span className="font-medium text-text-primary">
                           {lead.industry}
                         </span>
                         <span className="text-text-muted">•</span>
-                        <span className="text-text-muted truncate max-w-[160px]">
+                        <span className="text-text-muted truncate max-w-[180px]">
                           {lead.niche}
                         </span>
                       </div>
                       {lead.location && !isCompactDensity && (
-                        <div className="flex items-center gap-1 text-[10px] text-text-muted">
-                          <MapPin className="h-2.5 w-2.5" />
+                        <div className="flex items-center gap-1 text-[11px] text-text-muted">
+                          <MapPin className="h-3 w-3" />
                           <span>{lead.location}</span>
                         </div>
                       )}
@@ -427,7 +573,7 @@ export function LeadsTable({
                   </td>
 
                   {/* Decision Maker / Contact */}
-                  <td className={isCompactDensity ? "py-1.5 px-3" : "py-3 px-3"}>
+                  <td className={isCompactDensity ? "py-2 px-4" : "py-3 px-4"}>
                     {lead.primaryContact ? (
                       <div className="space-y-1">
                         <div className="flex items-center gap-1.5">
@@ -435,7 +581,7 @@ export function LeadsTable({
                             {lead.primaryContact.contactName}
                           </span>
                         </div>
-                        <p className="text-[11px] text-text-secondary truncate max-w-[180px]">
+                        <p className="text-xs text-text-secondary truncate max-w-[200px]">
                           {lead.primaryContact.designation}
                         </p>
                         <div className="flex items-center gap-1.5 flex-wrap pt-0.5">
@@ -453,18 +599,18 @@ export function LeadsTable({
                   </td>
 
                   {/* Priority */}
-                  <td className={isCompactDensity ? "py-1.5 px-3" : "py-3 px-3"}>
+                  <td className={isCompactDensity ? "py-2 px-4" : "py-3 px-4"}>
                     <PriorityBadge priority={lead.priority} />
                   </td>
 
                   {/* Status */}
-                  <td className={isCompactDensity ? "py-1.5 px-3" : "py-3 px-3"}>
+                  <td className={isCompactDensity ? "py-2 px-4" : "py-3 px-4"}>
                     <LeadStatusBadge status={lead.leadStatus} />
                   </td>
 
                   {/* Timeline */}
-                  <td className={isCompactDensity ? "py-1.5 px-3" : "py-3 px-3"}>
-                    <div className="space-y-0.5 text-[11px] text-text-muted">
+                  <td className={isCompactDensity ? "py-2 px-4" : "py-3 px-4"}>
+                    <div className="space-y-0.5 text-xs text-text-muted">
                       {lead.assignedAt && (
                         <div className="flex items-center gap-1">
                           <Calendar className="h-3 w-3 text-text-muted" />
@@ -478,7 +624,7 @@ export function LeadsTable({
                         </div>
                       )}
                       {lead.lastContactedAt && !isCompactDensity && (
-                        <p className="text-[10px] text-primary tabular-nums">
+                        <p className="text-[11px] text-primary tabular-nums font-medium">
                           Called{" "}
                           {new Date(lead.lastContactedAt).toLocaleDateString("en-US", {
                             month: "short",
@@ -490,7 +636,7 @@ export function LeadsTable({
                   </td>
 
                   {/* Actions */}
-                  <td className={`${isCompactDensity ? "py-1.5 px-3" : "py-3 px-3"} text-right`}>
+                  <td className={`${isCompactDensity ? "py-2 px-4" : "py-3 px-4"} text-right`}>
                     <div
                       className="flex items-center justify-end gap-1.5"
                       onClick={(e) => e.stopPropagation()}
@@ -510,7 +656,7 @@ export function LeadsTable({
                         onClick={() => {
                           if (onStartCall) onStartCall(lead);
                         }}
-                        className="h-7 px-2.5 bg-primary hover:bg-primary/90 text-white text-xs font-semibold shadow-xs"
+                        className="h-7 px-2.5 bg-primary hover:bg-primary-hover text-white text-xs font-semibold shadow-2xs"
                       >
                         <PhoneCall className="h-3 w-3 mr-1" />
                         Call

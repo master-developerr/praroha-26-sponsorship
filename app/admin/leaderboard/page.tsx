@@ -24,6 +24,8 @@ import {
 import { formatCurrencyINR } from "@/lib/utils";
 import { AdjustPointsModal } from "@/components/admin/AdjustPointsModal";
 import { PointConfigDrawer } from "@/components/admin/PointConfigDrawer";
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
+import { AdminKpiStrip } from "@/components/admin/AdminKpiStrip";
 import { Button } from "@/components/ui/button";
 import { StatCard } from "@/components/ui/stat-card";
 
@@ -72,221 +74,154 @@ function HonorsLeaderboardContent() {
     };
   }, [leaderboard]);
 
-  return (
-    <div className="space-y-6">
-      {/* 1. Header Banner */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-border">
-        <div>
-          <div className="flex items-center gap-2">
-            <span className="rounded-full bg-amber-100 text-amber-900 border border-amber-300 px-2.5 py-0.5 text-[10px] font-bold">
-              P3 TEAM MANAGEMENT & GAMIFICATION
-            </span>
-            <span className="text-xs text-text-muted">PRAROHA'26 SOE CUSAT</span>
-          </div>
-          <h1 className="text-2xl font-bold tracking-tight text-text-primary mt-1">
-            Honors Leaderboard & SDR Rankings
-          </h1>
-          <p className="text-xs text-text-secondary mt-0.5">
-            Real-time student volunteer outreach ranking podium, conversion telemetry, and gamification point ledger.
-          </p>
-        </div>
+  const kpiItems = [
+    {
+      label: "Total Points Awarded",
+      value: aggregateStats.totalPoints.toLocaleString(),
+      subtext: "Across all verified SDRs",
+      icon: Award,
+      variant: "primary" as const,
+    },
+    {
+      label: "Outreach Calls Completed",
+      value: aggregateStats.totalCalls.toLocaleString(),
+      subtext: `In ${timeframe.replace("_", " ")}`,
+      icon: PhoneCall,
+      variant: "info" as const,
+    },
+    {
+      label: "Confirmed Deals Won",
+      value: aggregateStats.totalDeals.toLocaleString(),
+      subtext: "Ratified corporate commitments",
+      icon: Trophy,
+      variant: "success" as const,
+    },
+    {
+      label: "Active SDR Volunteers",
+      value: aggregateStats.activeVolunteers.toLocaleString(),
+      subtext: "Approved outreach committee",
+      icon: Users,
+      variant: "neutral" as const,
+    },
+  ];
 
-        <div className="flex items-center gap-2">
-          {/* Timeframe Switcher */}
-          <div className="flex rounded-xl border border-border bg-surface p-1 shadow-2xs">
-            {(
-              [
-                { label: "Today", value: "today" },
-                { label: "This Week", value: "this_week" },
-                { label: "This Month", value: "this_month" },
-                { label: "All Time", value: "all_time" },
-              ] as const
-            ).map((t) => (
-              <button
-                key={t.value}
-                onClick={() => setTimeframe(t.value)}
-                className={`px-3 py-1 rounded-lg text-xs font-semibold transition-colors cursor-pointer ${
-                  timeframe === t.value
-                    ? "bg-primary text-white shadow-xs font-bold"
-                    : "text-text-secondary hover:text-text-primary"
+  return (
+    <div className="space-y-8">
+      {/* 1. Editorial Header */}
+      <AdminPageHeader
+        category="HONORS LEADERBOARD"
+        title="Recognize outreach performance across the sponsorship team."
+        description="Real-time volunteer performance standings, verified call debriefs, and corporate commitments for PRAROHA'26."
+        actions={
+          <div className="flex items-center gap-3">
+            {/* Timeframe Switcher */}
+            <div className="flex border border-border bg-surface">
+              {(
+                [
+                  { label: "Today", value: "today" },
+                  { label: "This Week", value: "this_week" },
+                  { label: "This Month", value: "this_month" },
+                  { label: "All Time", value: "all_time" },
+                ] as const
+              ).map((t) => (
+                <button
+                  key={t.value}
+                  onClick={() => setTimeframe(t.value)}
+                  className={`px-3 py-1.5 text-xs font-semibold transition-colors cursor-pointer ${
+                    timeframe === t.value
+                      ? "bg-primary text-white font-bold"
+                      : "text-text-secondary hover:text-text-primary hover:bg-surface-subtle"
+                  }`}
+                >
+                  {t.label}
+                </button>
+              ))}
+            </div>
+
+            {/* Configure Point Rules */}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsConfigDrawerOpen(true)}
+              className="gap-1.5 text-xs font-bold border-primary/30 text-primary hover:bg-primary/5"
+            >
+              <Sliders className="h-3.5 w-3.5" />
+              <span>Point Rules</span>
+            </Button>
+          </div>
+        }
+      />
+
+      {/* 2. Aggregate KPI Strip */}
+      <AdminKpiStrip items={kpiItems} columns={4} />
+
+      {/* 3. Top 3 Executive Performance Cards */}
+      {topThree.length > 0 && (
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          {topThree.map((item, idx) => {
+            const isFirst = idx === 0;
+            const isSecond = idx === 1;
+            const isThird = idx === 2;
+
+            return (
+              <div
+                key={item._id}
+                className={`border bg-surface p-4 text-xs transition-colors ${
+                  isFirst
+                    ? "border-primary/50 bg-primary/5 border-l-2 border-l-primary"
+                    : isSecond
+                    ? "border-border-strong border-l-2 border-l-border-strong"
+                    : "border-border border-l-2 border-l-border"
                 }`}
               >
-                {t.label}
-              </button>
-            ))}
-          </div>
-
-          {/* Configure Point Rules */}
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setIsConfigDrawerOpen(true)}
-            className="h-8 gap-1.5 text-xs font-bold border-primary/30 text-primary hover:bg-primary/5"
-          >
-            <Sliders className="h-3.5 w-3.5" />
-            <span>Point Rules</span>
-          </Button>
-        </div>
-      </div>
-
-      {/* 2. Aggregate KPI Stat Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <StatCard
-          title="Total Points Awarded"
-          value={aggregateStats.totalPoints.toLocaleString()}
-          change="Across all verified SDRs"
-          icon={Award}
-        />
-        <StatCard
-          title="Outreach Calls Completed"
-          value={aggregateStats.totalCalls.toLocaleString()}
-          change={`In ${timeframe.replace("_", " ")}`}
-          icon={PhoneCall}
-        />
-        <StatCard
-          title="Confirmed Deals Won"
-          value={aggregateStats.totalDeals.toLocaleString()}
-          change="Ratified corporate commitments"
-          icon={Trophy}
-        />
-        <StatCard
-          title="Active SDR Volunteers"
-          value={aggregateStats.activeVolunteers.toLocaleString()}
-          change="Approved outreach committee"
-          icon={Users}
-        />
-      </div>
-
-      {/* 3. Top 3 Podium Cards */}
-      {topThree.length > 0 && (
-        <div className="rounded-2xl border border-border bg-gradient-to-b from-surface to-surface-subtle p-6 shadow-xs">
-          <div className="text-center mb-6">
-            <span className="text-[10px] font-extrabold uppercase tracking-widest text-teal-700 dark:text-teal-300 bg-teal-500/10 px-3 py-1 rounded-full border border-teal-500/20">
-              PRAROHA'26 TOP PERFORMERS
-            </span>
-            <h3 className="text-lg font-black text-text-primary mt-2">
-              Outreach Honors Podium
-            </h3>
-            <p className="text-xs text-text-secondary mt-0.5">
-              Top SDR volunteers recognized for exceptional lead generation and deal velocity
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-4xl mx-auto items-end">
-            {/* Rank #2 - Silver */}
-            {topThree[1] && (
-              <div className="order-2 md:order-1 rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-surface p-4 text-center space-y-3 shadow-xs hover:border-zinc-300 transition-all">
-                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-zinc-100 text-zinc-700 shadow-2xs">
-                  <Medal className="h-6 w-6 text-zinc-500" />
-                </div>
-                <div>
-                  <span className="rounded-full bg-zinc-100 px-2.5 py-0.5 text-[10px] font-extrabold text-zinc-700 uppercase">
-                    Rank #2 • Silver
+                <div className="flex items-center justify-between pb-2 border-b border-border-subtle">
+                  <div className="flex items-center gap-1.5">
+                    {isFirst ? (
+                      <span className="inline-flex items-center gap-1 font-bold text-amber-600 dark:text-amber-400">
+                        <Crown className="h-3.5 w-3.5" /> Rank #1
+                      </span>
+                    ) : isSecond ? (
+                      <span className="font-bold text-text-secondary">Rank #2</span>
+                    ) : (
+                      <span className="font-bold text-text-muted">Rank #3</span>
+                    )}
+                  </div>
+                  <span className="font-mono text-xs font-bold text-primary">
+                    {item.totalPoints} pts
                   </span>
-                  <h4 className="font-bold text-sm text-text-primary mt-1 line-clamp-1">
-                    {topThree[1].name}
-                  </h4>
-                  <p className="text-[11px] text-text-secondary">
-                    {topThree[1].department} {topThree[1].semester ? `• Sem ${topThree[1].semester}` : ""}
+                </div>
+
+                <div className="mt-3">
+                  <h3 className="font-bold text-sm text-text-primary line-clamp-1">
+                    {item.name}
+                  </h3>
+                  <p className="text-[11px] text-text-muted mt-0.5">
+                    {item.department || "Civil Engineering"}{" "}
+                    {item.semester ? `• Sem ${item.semester}` : ""}
                   </p>
                 </div>
-                <div className="pt-2 border-t border-border-subtle flex justify-around text-xs">
-                  <div>
-                    <span className="text-[10px] text-text-muted block">Calls</span>
-                    <strong className="text-text-primary">{topThree[1].callsCount}</strong>
-                  </div>
-                  <div>
-                    <span className="text-[10px] text-text-muted block">Won</span>
-                    <strong className="text-emerald-700 font-bold">{topThree[1].dealsWonCount}</strong>
-                  </div>
-                  <div>
-                    <span className="text-[10px] text-text-muted block">Points</span>
-                    <strong className="text-primary font-black text-sm">{topThree[1].totalPoints}</strong>
-                  </div>
-                </div>
-              </div>
-            )}
 
-            {/* Rank #1 - Gold */}
-            {topThree[0] && (
-              <div className="order-1 md:order-2 rounded-2xl border-2 border-amber-400 bg-amber-50/20 dark:bg-amber-950/10 p-5 text-center space-y-3 shadow-md scale-105 z-10">
-                <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-tr from-amber-400 to-yellow-200 text-amber-900 shadow-xs">
-                  <Crown className="h-7 w-7 text-amber-900" />
-                </div>
-                <div>
-                  <span className="rounded-full bg-amber-200/80 px-3 py-0.5 text-[10px] font-black text-amber-950 uppercase tracking-wide">
-                    👑 Rank #1 • Gold Laureate
+                <div className="mt-4 pt-3 border-t border-border-subtle flex items-center justify-between text-[11px] text-text-secondary">
+                  <span>{item.callsCount} calls logged</span>
+                  <span className="font-semibold text-text-primary">
+                    {item.dealsWonCount} deals won
                   </span>
-                  <h4 className="font-black text-base text-text-primary mt-1.5 line-clamp-1">
-                    {topThree[0].name}
-                  </h4>
-                  <p className="text-[11px] text-text-secondary font-medium">
-                    {topThree[0].department} {topThree[0].semester ? `• Sem ${topThree[0].semester}` : ""}
-                  </p>
-                </div>
-                <div className="pt-2.5 border-t border-amber-200/50 flex justify-around text-xs">
-                  <div>
-                    <span className="text-[10px] text-text-muted block">Calls</span>
-                    <strong className="text-text-primary text-sm">{topThree[0].callsCount}</strong>
-                  </div>
-                  <div>
-                    <span className="text-[10px] text-text-muted block">Deals Won</span>
-                    <strong className="text-emerald-700 font-bold text-sm">{topThree[0].dealsWonCount}</strong>
-                  </div>
-                  <div>
-                    <span className="text-[10px] text-text-muted block">Points</span>
-                    <strong className="text-amber-800 dark:text-amber-300 font-black text-base">{topThree[0].totalPoints}</strong>
-                  </div>
                 </div>
               </div>
-            )}
-
-            {/* Rank #3 - Bronze */}
-            {topThree[2] && (
-              <div className="order-3 rounded-2xl border border-amber-200/60 bg-surface p-4 text-center space-y-3 shadow-xs hover:border-amber-300 transition-all">
-                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-100/60 text-amber-800 shadow-2xs">
-                  <Medal className="h-6 w-6 text-amber-700" />
-                </div>
-                <div>
-                  <span className="rounded-full bg-amber-100 px-2.5 py-0.5 text-[10px] font-extrabold text-amber-900 uppercase">
-                    Rank #3 • Bronze
-                  </span>
-                  <h4 className="font-bold text-sm text-text-primary mt-1 line-clamp-1">
-                    {topThree[2].name}
-                  </h4>
-                  <p className="text-[11px] text-text-secondary">
-                    {topThree[2].department} {topThree[2].semester ? `• Sem ${topThree[2].semester}` : ""}
-                  </p>
-                </div>
-                <div className="pt-2 border-t border-border-subtle flex justify-around text-xs">
-                  <div>
-                    <span className="text-[10px] text-text-muted block">Calls</span>
-                    <strong className="text-text-primary">{topThree[2].callsCount}</strong>
-                  </div>
-                  <div>
-                    <span className="text-[10px] text-text-muted block">Won</span>
-                    <strong className="text-emerald-700 font-bold">{topThree[2].dealsWonCount}</strong>
-                  </div>
-                  <div>
-                    <span className="text-[10px] text-text-muted block">Points</span>
-                    <strong className="text-primary font-black text-sm">{topThree[2].totalPoints}</strong>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
+            );
+          })}
         </div>
       )}
 
-      {/* 4. Full Leaderboard Table */}
-      <div className="rounded-2xl border border-border bg-surface overflow-hidden shadow-xs">
-        <div className="p-4 border-b border-border flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      {/* 4. Full Leaderboard Table Container */}
+      <div className="border border-border bg-surface overflow-hidden">
+        <div className="p-4 border-b border-border-subtle flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-surface-subtle/30">
           <div>
             <h3 className="font-bold text-sm text-text-primary">
-              Complete SDR Rankings ({filteredLeaderboard.length} Volunteers)
+              Outreach Leaderboard ({filteredLeaderboard.length} Volunteers)
             </h3>
             <p className="text-[11px] text-text-secondary">
-              Conversion rate reflects won sponsorships vs. total companies reached
+              Verified corporate outreach velocity and secured sponsorship commitments
             </p>
           </div>
 
@@ -297,7 +232,7 @@ function HonorsLeaderboardContent() {
               placeholder="Search volunteer or dept..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="h-8 w-full rounded-lg border border-border bg-surface-subtle/50 pl-8 pr-3 text-xs text-text-primary focus:border-primary focus:outline-none"
+              className="h-8 w-full border border-border bg-background pl-8 pr-3 text-xs text-text-primary focus:border-primary focus:outline-none"
             />
           </div>
         </div>

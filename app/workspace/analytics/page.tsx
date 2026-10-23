@@ -1,12 +1,10 @@
 "use client";
 
-import React from "react";
+import React, { useMemo } from "react";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useAuthUser } from "@/components/providers/AuthProvider";
 import { useWorkspace } from "@/components/volunteer/WorkspaceContext";
-import { PersonalPerformanceCard } from "@/components/volunteer/PersonalPerformanceCard";
-import { Card, CardContent } from "@/components/ui/card";
 import {
   BarChart3,
   TrendingUp,
@@ -16,10 +14,27 @@ import {
   Trophy,
   Target,
   Flame,
+  Award,
+  Coins,
+  ArrowUpRight,
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { formatCurrencyINR } from "@/lib/utils";
+import {
+  Area,
+  AreaChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  BarChart,
+  Bar,
+  Cell,
+} from "recharts";
 
 export default function VolunteerAnalyticsPage() {
-  const { user } = useAuthUser();
+  const { user, profile } = useAuthUser();
   const { openLeaderboard } = useWorkspace();
   const clerkId = user?.id || "";
 
@@ -33,155 +48,267 @@ export default function VolunteerAnalyticsPage() {
     clerkId ? { clerkId } : "skip"
   );
 
+  const recentCalls = useQuery(
+    api.calls.getMyRecentCalls,
+    clerkId ? { volunteerClerkId: clerkId } : "skip"
+  );
+
+  const assignedLeadsRaw = useQuery(
+    api.assignments.getMyAssignedLeads,
+    clerkId ? { volunteerClerkId: clerkId, tab: "all" } : "skip"
+  );
+
   const totalAssigned = metrics?.totalAssigned || 0;
   const callsCompleted = metrics?.callsCompleted || 0;
   const interested = metrics?.interestedCount || 0;
   const inProgress = metrics?.inProgressCount || 0;
 
   const connectionRate = totalAssigned > 0 ? Math.round((callsCompleted / totalAssigned) * 100) : 0;
-  const qualificationRate = callsCompleted > 0 ? Math.round((interested / callsCompleted) * 100) : 0;
+  const qualificationRate = callsCompleted > 0 ? Math.round((interested / Math.max(1, callsCompleted)) * 100) : 0;
+  const followUpRate = callsCompleted > 0 ? Math.round(((metrics?.todayFollowUps || 0) + (metrics?.overdueFollowUps || 0)) / Math.max(1, callsCompleted) * 100) : 0;
+
+  // Compute pipeline progression funnel
+  const pipelineFunnel = useMemo(() => {
+    const leads = assignedLeadsRaw || [];
+    let assigned = 0;
+    let contacted = 0;
+    let qualified = 0;
+    let proposal = 0;
+    let negotiation = 0;
+    let won = 0;
+
+    for (const l of leads) {
+      if (l.leadStatus === "ASSIGNED") assigned++;
+      if (l.leadStatus === "CONTACTED") contacted++;
+      if (l.leadStatus === "INTERESTED") qualified++;
+      if (["PROPOSAL_REQUESTED", "PROPOSAL_SENT"].includes(l.leadStatus)) proposal++;
+      if (l.leadStatus === "NEGOTIATION") negotiation++;
+      if (l.leadStatus === "WON") won++;
+    }
+
+    return [
+      { stage: "Assigned", count: assigned, color: "var(--text-muted)" },
+      { stage: "Contacted", count: contacted, color: "var(--brand-primary)" },
+      { stage: "Interested", count: qualified, color: "var(--status-info)" },
+      { stage: "Proposal", count: proposal, color: "var(--status-warning)" },
+      { stage: "Negotiation", count: negotiation, color: "var(--accent-coral-text)" },
+      { stage: "Won", count: won, color: "var(--status-success)" },
+    ];
+  }, [assignedLeadsRaw]);
+
+  // 7-day activity chart data
+  const activityData = useMemo(() => {
+    const calls = recentCalls || [];
+    const days: Record<string, { date: string; calls: number }> = {};
+    const now = new Date();
+
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(now);
+      d.setDate(d.getDate() - i);
+      const key = d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+      days[key] = { date: key, calls: 0 };
+    }
+
+    for (const c of calls) {
+      const key = new Date(c.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+      if (days[key]) {
+        days[key].calls++;
+      }
+    }
+
+    return Object.values(days);
+  }, [recentCalls]);
 
   return (
-    <div className="space-y-6">
-      {/* Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-border-subtle pb-4">
-        <div>
-          <div className="flex items-center gap-2 text-xs font-semibold text-primary mb-1">
-            <BarChart3 className="h-4 w-4" />
-            <span>Personal Performance</span>
+    <div className="space-y-8">
+      {/* Editorial Page Header matching Admin Control Room */}
+      <header className="border-b border-border pb-6">
+        <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary flex items-center gap-1.5">
+              <BarChart3 className="h-3.5 w-3.5" />
+              OUTREACH ANALYTICS
+            </p>
+            <h1 className="mt-3 text-3xl font-bold tracking-[-0.035em] text-text-primary sm:text-4xl">
+              Personal Outreach Velocity & Pipeline Conversion
+            </h1>
+            <p className="mt-3 max-w-2xl text-sm leading-6 text-text-secondary">
+              Personal analytics on call consistency, conversion rates, and points earned for PRAROHA&apos;26.
+            </p>
+            <p className="mt-3 text-[11px] font-medium text-text-muted">
+              DEC 04-05 · Division of Civil Engineering · Cochin University of Science and Technology (CUSAT)
+            </p>
           </div>
-          <h1 className="text-xl font-bold tracking-tight text-text-primary">
-            Outreach Velocity & Conversion Metrics
-          </h1>
-          <p className="text-xs text-text-secondary mt-0.5">
-            Personal analytics on call consistency, qualified sponsor leads, and points earned.
-          </p>
+
+          <div className="flex items-center gap-3">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={openLeaderboard}
+              className="text-xs border-border text-text-secondary hover:text-text-primary"
+            >
+              <Trophy className="h-3.5 w-3.5 mr-1.5 text-amber-500" />
+              View Team Leaderboard
+            </Button>
+          </div>
+        </div>
+      </header>
+
+      {/* Operational KPI Strip */}
+      <section aria-labelledby="analytics-kpi-heading" className="space-y-4">
+        <div>
+          <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-text-muted">Conversion Efficiency</p>
+          <h2 id="analytics-kpi-heading" className="mt-1 text-base font-bold text-text-primary">
+            Key Execution Indicators
+          </h2>
+        </div>
+
+        <div className="grid gap-6 border-y border-border py-5 sm:grid-cols-2 lg:grid-cols-7 bg-surface">
+          <div className="border-l-2 border-primary pl-3">
+            <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-text-muted">Outreach Velocity</p>
+            <p className="mt-2 text-2xl font-bold tabular-nums text-text-primary">{callsCompleted} <span className="text-xs font-normal text-text-muted">calls</span></p>
+            <p className="mt-0.5 text-[10px] text-text-secondary">Daily pacing</p>
+          </div>
+          <div className="border-l-2 border-border-strong pl-3">
+            <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-text-muted">Calls Completed</p>
+            <p className="mt-2 text-2xl font-bold tabular-nums text-text-primary">{callsCompleted}</p>
+            <p className="mt-0.5 text-[10px] text-text-secondary">Logged in portal</p>
+          </div>
+          <div className="border-l-2 border-success pl-3">
+            <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-text-muted">Connection Rate</p>
+            <p className="mt-2 text-2xl font-bold tabular-nums text-success">{connectionRate}%</p>
+            <p className="mt-0.5 text-[10px] text-text-secondary">Assigned vs dialed</p>
+          </div>
+          <div className="border-l-2 border-warning pl-3">
+            <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-text-muted">Follow-up Rate</p>
+            <p className="mt-2 text-2xl font-bold tabular-nums text-warning">{followUpRate}%</p>
+            <p className="mt-0.5 text-[10px] text-text-secondary">Callback queue</p>
+          </div>
+          <div className="border-l-2 border-primary pl-3">
+            <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-text-muted">Interested</p>
+            <p className="mt-2 text-2xl font-bold tabular-nums text-primary">{interested}</p>
+            <p className="mt-0.5 text-[10px] text-text-secondary">Qualified accounts</p>
+          </div>
+          <div className="border-l-2 border-info pl-3">
+            <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-text-muted">In Progress</p>
+            <p className="mt-2 text-2xl font-bold tabular-nums text-info">{inProgress}</p>
+            <p className="mt-0.5 text-[10px] text-text-secondary">Active dialogs</p>
+          </div>
+          <div className="border-l-2 border-success pl-3">
+            <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-text-muted">Points Earned</p>
+            <p className="mt-2 text-2xl font-bold tabular-nums text-primary">{pointsSummary?.totalPoints ?? 0}</p>
+            <p className="mt-0.5 text-[10px] text-text-secondary">SDR ledger total</p>
+          </div>
+        </div>
+      </section>
+
+      {/* Grid: Outreach Activity Chart & Pipeline Progression */}
+      <div className="grid gap-8 lg:grid-cols-[1.3fr_0.7fr]">
+        {/* Left: Outreach Activity Area Chart */}
+        <div className="border border-border bg-surface p-5 sm:p-6 shadow-2xs">
+          <div className="flex flex-wrap items-start justify-between gap-4 border-b border-border-subtle pb-4">
+            <div>
+              <div className="flex items-center gap-2">
+                <BarChart3 className="h-4 w-4 text-primary" />
+                <h2 className="text-sm font-bold text-text-primary">Outreach Activity</h2>
+              </div>
+              <p className="mt-1 text-xs text-text-secondary">
+                Daily call volume executed over the last seven days.
+              </p>
+            </div>
+          </div>
+          <div className="mt-6 h-64 w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={activityData} margin={{ top: 8, right: 8, left: -24, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="analyticsCallsGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="var(--brand-primary)" stopOpacity={0.25} />
+                    <stop offset="95%" stopColor="var(--brand-primary)" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border-subtle)" />
+                <XAxis dataKey="date" tickLine={false} axisLine={false} tick={{ fontSize: 10, fill: "var(--text-muted)" }} />
+                <YAxis tickLine={false} axisLine={false} tick={{ fontSize: 10, fill: "var(--text-muted)" }} allowDecimals={false} />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: "var(--bg-surface)",
+                    borderColor: "var(--border-default)",
+                    borderRadius: "8px",
+                    fontSize: "12px",
+                  }}
+                />
+                <Area type="monotone" dataKey="calls" stroke="var(--brand-primary)" strokeWidth={2} fillOpacity={1} fill="url(#analyticsCallsGrad)" name="Calls" />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        {/* Right: Pipeline Progression */}
+        <div className="border border-border bg-surface p-5 sm:p-6 shadow-2xs">
+          <div className="border-b border-border-subtle pb-4">
+            <div className="flex items-center gap-2">
+              <TrendingUp className="h-4 w-4 text-primary" />
+              <h2 className="text-sm font-bold text-text-primary">Pipeline Progression</h2>
+            </div>
+            <p className="mt-1 text-xs text-text-secondary">
+              Stage distribution of your assigned accounts.
+            </p>
+          </div>
+          <div className="mt-6 space-y-3">
+            {pipelineFunnel.map((item) => {
+              const pct = totalAssigned > 0 ? Math.round((item.count / totalAssigned) * 100) : 0;
+              return (
+                <div key={item.stage} className="space-y-1">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="font-semibold text-text-primary">{item.stage}</span>
+                    <span className="tabular-nums font-bold text-text-secondary">{item.count}</span>
+                  </div>
+                  <div className="h-1.5 w-full bg-surface-subtle overflow-hidden">
+                    <div
+                      className="h-full transition-all duration-500"
+                      style={{
+                        width: `${pct}%`,
+                        backgroundColor: item.color,
+                      }}
+                    />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
       </div>
 
-      {/* Rank & Points Banner */}
-      {clerkId && (
-        <PersonalPerformanceCard
-          clerkId={clerkId}
-          onOpenLeaderboard={openLeaderboard}
-        />
-      )}
+      {/* Points Ledger Card */}
+      <div className="border border-border bg-surface p-5 sm:p-6 shadow-2xs">
+        <div className="flex items-center justify-between border-b border-border-subtle pb-4">
+          <div className="flex items-center gap-2">
+            <Trophy className="h-4 w-4 text-amber-500" />
+            <h2 className="text-sm font-bold text-text-primary">Gamification Points Ledger</h2>
+          </div>
+          <span className="text-xs font-semibold text-primary tabular-nums">
+            Total: {pointsSummary?.totalPoints ?? 0} pts
+          </span>
+        </div>
 
-      {/* Primary KPI Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <Card className="border-border bg-surface shadow-xs">
-          <CardContent className="p-4 space-y-1">
-            <span className="text-[11px] font-semibold text-text-muted uppercase tracking-wider flex items-center gap-1.5">
-              <Target className="h-3.5 w-3.5 text-primary" />
-              Coverage Rate
-            </span>
-            <p className="text-2xl font-bold text-text-primary">{connectionRate}%</p>
-            <p className="text-[10px] text-text-secondary">
-              {callsCompleted} of {totalAssigned} assigned leads contacted
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card className="border-border bg-surface shadow-xs">
-          <CardContent className="p-4 space-y-1">
-            <span className="text-[11px] font-semibold text-text-muted uppercase tracking-wider flex items-center gap-1.5">
-              <TrendingUp className="h-3.5 w-3.5 text-emerald-600" />
-              Qualification Rate
-            </span>
-            <p className="text-2xl font-bold text-emerald-700">{qualificationRate}%</p>
-            <p className="text-[10px] text-text-secondary">
-              Positive/interested reception on completed calls
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card className="border-border bg-surface shadow-xs">
-          <CardContent className="p-4 space-y-1">
-            <span className="text-[11px] font-semibold text-text-muted uppercase tracking-wider flex items-center gap-1.5">
-              <CheckCircle2 className="h-3.5 w-3.5 text-teal-600" />
-              Qualified Leads
-            </span>
-            <p className="text-2xl font-bold text-teal-700">{interested}</p>
-            <p className="text-[10px] text-text-secondary">
-              Deals currently in proposal or negotiation stage
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card className="border-border bg-surface shadow-xs">
-          <CardContent className="p-4 space-y-1">
-            <span className="text-[11px] font-semibold text-text-muted uppercase tracking-wider flex items-center gap-1.5">
-              <Flame className="h-3.5 w-3.5 text-amber-500" />
-              Pipeline In-Flight
-            </span>
-            <p className="text-2xl font-bold text-amber-700">{inProgress}</p>
-            <p className="text-[10px] text-text-secondary">
-              Accounts undergoing active follow-ups
-            </p>
-          </CardContent>
-        </Card>
+        <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="border border-border bg-surface-subtle/30 p-4 space-y-1">
+            <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-text-muted">Outreach Call Logged</span>
+            <p className="text-lg font-bold text-text-primary">+10 pts</p>
+            <p className="text-[11px] text-text-secondary">Awarded for each verified call debrief</p>
+          </div>
+          <div className="border border-border bg-surface-subtle/30 p-4 space-y-1">
+            <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-text-muted">Proposal Requested</span>
+            <p className="text-lg font-bold text-text-primary">+15 pts</p>
+            <p className="text-[11px] text-text-secondary">Advanced to official pitch dispatch</p>
+          </div>
+          <div className="border border-border bg-surface-subtle/30 p-4 space-y-1">
+            <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-text-muted">Meeting Secured</span>
+            <p className="text-lg font-bold text-text-primary">+20 pts</p>
+            <p className="text-[11px] text-text-secondary">Corporate decision-maker meeting booked</p>
+          </div>
+        </div>
       </div>
-
-      {/* Gamification Points Rules Card */}
-      <Card className="border-border bg-surface shadow-xs">
-        <CardContent className="p-5 space-y-3">
-          <div className="flex items-center justify-between border-b border-border-subtle pb-3">
-            <div className="flex items-center gap-2">
-              <Trophy className="h-4 w-4 text-amber-500" />
-              <h3 className="text-xs font-bold text-text-primary uppercase tracking-wider">
-                PRAROHA'26 Points System & Incentives
-              </h3>
-            </div>
-            <span className="text-[10px] font-medium text-text-muted">
-              Live automated ledger
-            </span>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 text-xs">
-            <div className="p-3 rounded-lg bg-surface-subtle border border-border-subtle flex items-center justify-between">
-              <span className="text-text-secondary font-medium">Logged Outreach Call</span>
-              <span className="font-bold text-primary bg-accent-mint px-2 py-0.5 rounded-full text-[11px]">
-                +10 pts
-              </span>
-            </div>
-
-            <div className="p-3 rounded-lg bg-surface-subtle border border-border-subtle flex items-center justify-between">
-              <span className="text-text-secondary font-medium">Follow-Up Completed</span>
-              <span className="font-bold text-primary bg-accent-mint px-2 py-0.5 rounded-full text-[11px]">
-                +10 pts
-              </span>
-            </div>
-
-            <div className="p-3 rounded-lg bg-surface-subtle border border-border-subtle flex items-center justify-between">
-              <span className="text-text-secondary font-medium">Proposal Requested</span>
-              <span className="font-bold text-teal-700 bg-teal-50 px-2 py-0.5 rounded-full text-[11px]">
-                +15 pts
-              </span>
-            </div>
-
-            <div className="p-3 rounded-lg bg-surface-subtle border border-border-subtle flex items-center justify-between">
-              <span className="text-text-secondary font-medium">Meeting Secured</span>
-              <span className="font-bold text-teal-700 bg-teal-50 px-2 py-0.5 rounded-full text-[11px]">
-                +20 pts
-              </span>
-            </div>
-
-            <div className="p-3 rounded-lg bg-surface-subtle border border-border-subtle flex items-center justify-between">
-              <span className="text-text-secondary font-medium">In-Kind Deal Closed</span>
-              <span className="font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full text-[11px]">
-                +50 pts
-              </span>
-            </div>
-
-            <div className="p-3 rounded-lg bg-surface-subtle border border-border-subtle flex items-center justify-between">
-              <span className="text-text-secondary font-medium">Sponsorship Deal Won</span>
-              <span className="font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full text-[11px]">
-                +100 pts
-              </span>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 }

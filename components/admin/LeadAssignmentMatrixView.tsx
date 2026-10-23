@@ -31,6 +31,8 @@ import {
 } from "@/components/ui/badge";
 import { CompanyDossierDrawer } from "@/components/admin/CompanyDossierDrawer";
 import { ReassignLeadModal } from "@/components/admin/ReassignLeadModal";
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
+import { AdminKpiStrip } from "@/components/admin/AdminKpiStrip";
 import { PriorityLevel } from "@/types";
 
 export function LeadAssignmentMatrixView() {
@@ -142,57 +144,53 @@ export function LeadAssignmentMatrixView() {
     }
   };
 
-  return (
-    <div className="space-y-6">
-      {/* 1. Header with KPIs */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-bold tracking-tight text-text-primary">
-              Lead Allocation Matrix
-            </h1>
-            <span className="rounded-full bg-sky-100 px-2.5 py-0.5 text-xs font-semibold text-sky-800 border border-sky-300">
-              P0 Operational Cockpit
-            </span>
-          </div>
-          <p className="text-xs text-text-secondary mt-1">
-            Distribute unassigned corporate leads across approved student SDRs with balanced capacities.
-          </p>
-        </div>
+  const kpiItems = [
+    {
+      label: "Unassigned Pool",
+      value: metrics?.unassigned ?? 0,
+      subtext: "Awaiting distribution",
+      icon: Building2,
+      variant: (metrics?.unassigned ?? 0) > 0 ? ("warning" as const) : ("neutral" as const),
+    },
+    {
+      label: "Assigned Leads",
+      value: (metrics?.total ?? 0) - (metrics?.unassigned ?? 0),
+      subtext: "Currently in SDR queues",
+      icon: CheckCircle2,
+      variant: "primary" as const,
+    },
+    {
+      label: "Active Assignees",
+      value: volunteerRoster?.length ?? 0,
+      subtext: "Approved volunteers & Admins",
+      icon: Users2,
+      variant: "info" as const,
+    },
+    {
+      label: "In Pipeline",
+      value: metrics?.inPipeline ?? 0,
+      subtext: "Active corporate touchpoints",
+      icon: Flame,
+      variant: "success" as const,
+    },
+  ];
 
-        {/* Aggregate KPI Badges */}
-        <div className="flex items-center gap-3">
-          <div className="rounded-xl border border-border bg-surface px-3 py-2 shadow-xs text-center">
-            <span className="text-[10px] uppercase font-bold text-text-muted">
-              Unassigned Pool
-            </span>
-            <p className="text-lg font-bold text-text-primary leading-tight">
-              {metrics?.unassigned ?? "—"}
-            </p>
-          </div>
-          <div className="rounded-xl border border-border bg-surface px-3 py-2 shadow-xs text-center">
-            <span className="text-[10px] uppercase font-bold text-text-muted">
-              Active Assignees
-            </span>
-            <p className="text-lg font-bold text-primary leading-tight">
-              {volunteerRoster?.length ?? "—"}
-            </p>
-          </div>
-          <div className="rounded-xl border border-border bg-surface px-3 py-2 shadow-xs text-center">
-            <span className="text-[10px] uppercase font-bold text-text-muted">
-              In Pipeline
-            </span>
-            <p className="text-lg font-bold text-sky-700 leading-tight">
-              {metrics?.inPipeline ?? "—"}
-            </p>
-          </div>
-        </div>
-      </div>
+  return (
+    <div className="space-y-8">
+      {/* 1. Editorial Header */}
+      <AdminPageHeader
+        category="LEAD ALLOCATION"
+        title="Distribute sponsorship opportunities across the active outreach team."
+        description="Balance corporate pipeline distribution between student SDRs and Sponsorship Committee Admins with real-time capacity monitoring."
+      />
+
+      {/* Aggregate KPI Strip */}
+      <AdminKpiStrip items={kpiItems} columns={4} />
 
       {/* Success Notification Alert */}
       {feedbackMessage && (
-        <div className="flex items-center gap-2 rounded-xl bg-emerald-50 border border-emerald-200 p-4 text-xs text-emerald-800 shadow-xs animate-in fade-in">
-          <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
+        <div className="flex items-center gap-2 border border-emerald-500/30 bg-accent-mint p-4 text-xs text-success shadow-xs animate-in fade-in">
+          <CheckCircle2 className="h-4 w-4 text-success shrink-0" />
           <span className="font-semibold">{feedbackMessage}</span>
         </div>
       )}
@@ -201,7 +199,7 @@ export function LeadAssignmentMatrixView() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* Left Column: Unassigned Leads Pool (7 cols) */}
         <div className="lg:col-span-7 space-y-4">
-          <div className="rounded-xl border border-border bg-surface p-5 shadow-xs space-y-4">
+          <div className="border border-border bg-surface p-5 space-y-4">
             {/* Header & Select All */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-border-subtle pb-3">
               <div className="flex items-center gap-2">
@@ -366,10 +364,9 @@ export function LeadAssignmentMatrixView() {
           </div>
         </div>
 
-        {/* Right Column: Approved SDRs Roster & Workload (5 cols) */}
         {/* Right Column: Approved Assignees Roster & Workload (5 cols) */}
         <div className="lg:col-span-5 space-y-4">
-          <div className="rounded-xl border border-border bg-surface p-5 shadow-xs space-y-4">
+          <div className="border border-border bg-surface p-5 space-y-4">
             <div className="flex items-center justify-between border-b border-border-subtle pb-3">
               <div className="flex items-center gap-2">
                 <UserCheck className="h-4 w-4 text-primary" />

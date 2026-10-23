@@ -17,6 +17,8 @@ import { ManualLeadCreateModal } from "@/components/forms/ManualLeadCreateModal"
 import { EditLeadModal } from "@/components/forms/EditLeadModal";
 import { CompanyDossierDrawer } from "@/components/admin/CompanyDossierDrawer";
 import { generateCsvTemplate } from "@/lib/csvParser";
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
+import { AdminKpiStrip } from "@/components/admin/AdminKpiStrip";
 import Link from "next/link";
 import {
   Building2,
@@ -202,132 +204,107 @@ export function MasterLeadDirectoryView() {
     document.body.removeChild(link);
   };
 
-  return (
-    <div className="space-y-6">
-      {/* 1. Header Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-text-primary">
-            Master Company Lead Directory
-          </h1>
-          <p className="mt-1 text-xs text-text-secondary">
-            Ingest canonical CSV spreadsheets, resolve duplicates, and manage the PRAROHA'26 corporate pipeline.
-          </p>
-        </div>
+  const kpiItems = [
+    {
+      label: "Total Leads",
+      value: metrics.total,
+      subtext: "Ingested corporate entities",
+      icon: Building2,
+      variant: "primary" as const,
+    },
+    {
+      label: "Unassigned Pool",
+      value: metrics.unassigned,
+      subtext: "Awaiting volunteer allocation",
+      icon: Layers,
+      variant: (metrics.unassigned > 0 ? "warning" : "neutral") as "warning" | "neutral",
+    },
+    {
+      label: "In Outreach",
+      value: metrics.inPipeline,
+      subtext: "Assigned or under negotiation",
+      icon: Briefcase,
+      variant: "info" as const,
+    },
+    {
+      label: "Confirmed Sponsors",
+      value: metrics.won,
+      subtext: "Won / committed partnerships",
+      icon: CheckCircle2,
+      variant: "success" as const,
+    },
+  ];
 
-        <div className="flex flex-wrap items-center gap-2">
-          <Link href="/admin/assignments">
+  return (
+    <div className="space-y-8">
+      {/* 1. Header Bar */}
+      <AdminPageHeader
+        category="MASTER LEAD DIRECTORY"
+        title="Corporate sponsorship records and outreach intelligence."
+        description="Ingest canonical CSV spreadsheets, resolve duplicates, and manage the PRAROHA'26 corporate pipeline."
+        actions={
+          <>
+            <Link href="/admin/assignments">
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-xs text-primary border-primary/30 bg-accent-mint/10 hover:bg-accent-mint/20"
+              >
+                <Users2 className="h-3.5 w-3.5 mr-1.5 text-primary" />
+                Allocation Matrix
+              </Button>
+            </Link>
+
             <Button
               variant="outline"
               size="sm"
-              className="text-xs text-primary border-primary/30 bg-accent-mint/10 hover:bg-accent-mint/20"
+              onClick={handleExportFilteredCsv}
+              className="text-xs"
             >
-              <Users2 className="h-3.5 w-3.5 mr-1.5 text-primary" />
-              Allocation Matrix
+              <Download className="h-3.5 w-3.5 mr-1.5 text-primary" />
+              Export ({companies.length})
             </Button>
-          </Link>
 
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleExportFilteredCsv}
-            className="text-xs"
-          >
-            <Download className="h-3.5 w-3.5 mr-1.5 text-primary" />
-            Export ({companies.length})
-          </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleDownloadTemplate}
+              className="text-xs"
+            >
+              <Download className="h-3.5 w-3.5 mr-1.5 text-text-muted" />
+              CSV Template
+            </Button>
 
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleDownloadTemplate}
-            className="text-xs"
-          >
-            <Download className="h-3.5 w-3.5 mr-1.5 text-text-muted" />
-            CSV Template
-          </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsAddLeadModalOpen(true)}
+              className="text-xs"
+            >
+              <Plus className="h-3.5 w-3.5 mr-1.5 text-primary" />
+              Add Single Lead
+            </Button>
 
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setIsAddLeadModalOpen(true)}
-            className="text-xs"
-          >
-            <Plus className="h-3.5 w-3.5 mr-1.5 text-primary" />
-            Add Single Lead
-          </Button>
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={() => setIsImportModalOpen(true)}
+              className="text-xs"
+            >
+              <Upload className="h-3.5 w-3.5 mr-1.5" />
+              Import Leads (CSV)
+            </Button>
+          </>
+        }
+      />
 
-          <Button
-            variant="primary"
-            size="sm"
-            onClick={() => setIsImportModalOpen(true)}
-            className="text-xs"
-          >
-            <Upload className="h-3.5 w-3.5 mr-1.5" />
-            Import Leads (CSV)
-          </Button>
-        </div>
-      </div>
-
-      {/* 2. Directory Metric Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <div className="rounded-xl border border-border bg-surface p-4 shadow-xs">
-          <span className="text-[11px] font-semibold uppercase tracking-wider text-text-muted flex items-center gap-1.5">
-            <Building2 className="h-3.5 w-3.5 text-primary" />
-            Total Leads
-          </span>
-          <span className="text-2xl font-bold text-text-primary mt-1.5 block">
-            {metrics.total}
-          </span>
-          <p className="text-[10px] text-text-secondary mt-0.5">
-            Ingested corporate entities
-          </p>
-        </div>
-
-        <div className="rounded-xl border border-border bg-surface p-4 shadow-xs">
-          <span className="text-[11px] font-semibold uppercase tracking-wider text-text-muted flex items-center gap-1.5">
-            <Layers className="h-3.5 w-3.5 text-amber-600" />
-            Unassigned Pool
-          </span>
-          <span className="text-2xl font-bold text-amber-700 mt-1.5 block">
-            {metrics.unassigned}
-          </span>
-          <p className="text-[10px] text-text-secondary mt-0.5">
-            Awaiting volunteer allocation
-          </p>
-        </div>
-
-        <div className="rounded-xl border border-border bg-surface p-4 shadow-xs">
-          <span className="text-[11px] font-semibold uppercase tracking-wider text-text-muted flex items-center gap-1.5">
-            <Briefcase className="h-3.5 w-3.5 text-sky-600" />
-            In Outreach
-          </span>
-          <span className="text-2xl font-bold text-sky-700 mt-1.5 block">
-            {metrics.inPipeline}
-          </span>
-          <p className="text-[10px] text-text-secondary mt-0.5">
-            Assigned or under negotiation
-          </p>
-        </div>
-
-        <div className="rounded-xl border border-border bg-surface p-4 shadow-xs">
-          <span className="text-[11px] font-semibold uppercase tracking-wider text-text-muted flex items-center gap-1.5">
-            <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
-            Confirmed Sponsors
-          </span>
-          <span className="text-2xl font-bold text-emerald-700 mt-1.5 block">
-            {metrics.won}
-          </span>
-          <p className="text-[10px] text-text-secondary mt-0.5">
-            Won / committed partnerships
-          </p>
-        </div>
-      </div>
+      {/* 2. Directory KPI Strip */}
+      <AdminKpiStrip items={kpiItems} columns={4} />
 
       {/* 3. Main Data Grid & Filter Toolbar */}
-      <div className="rounded-xl border border-border bg-surface p-5 shadow-xs">
+      <div className="border border-border bg-surface overflow-hidden">
         {/* Toolbar */}
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 border-b border-border-subtle pb-4">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 border-b border-border-subtle p-4 bg-surface-subtle/30">
           {/* Search Input */}
           <div className="relative w-full lg:w-72">
             <Search className="pointer-events-none absolute left-3 top-2.5 h-3.5 w-3.5 text-text-muted" />
@@ -336,7 +313,7 @@ export function MasterLeadDirectoryView() {
               placeholder="Search companies, niches, contacts..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="h-8 w-full rounded-lg border border-border bg-surface-subtle pl-8 pr-3 text-xs text-text-primary placeholder:text-text-muted focus:border-primary focus:bg-surface focus:outline-none"
+              className="h-8 w-full border border-border bg-background pl-8 pr-3 text-xs text-text-primary placeholder:text-text-muted focus:border-primary focus:bg-surface focus:outline-none"
             />
           </div>
 

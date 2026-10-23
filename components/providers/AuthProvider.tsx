@@ -62,32 +62,15 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const AUTH_TIMEOUT_MS = 8000;
-
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  let clerkUser = null;
-  let clerkLoaded = true;
-  let clerkSignOut: (() => Promise<void>) | null = null;
+  const { user: clerkUser, isLoaded: clerkLoaded } = useUser();
+  const { signOut: clerkSignOut } = useClerk();
 
-  try {
-    const clerk = useUser();
-    clerkUser = clerk.user;
-    clerkLoaded = clerk.isLoaded;
-    const clerkHook = useClerk();
-    clerkSignOut = clerkHook.signOut;
-  } catch {
-    clerkLoaded = true;
-  }
-
-  const [timedOut, setTimedOut] = useState(false);
   const [customError, setCustomError] = useState<string | null>(null);
-  const [retryKey, setRetryKey] = useState(0);
 
   const retryAuth = useCallback(() => {
     devLog("AUTH", "Retrying authentication and profile loading...");
-    setTimedOut(false);
     setCustomError(null);
-    setRetryKey((k) => k + 1);
   }, []);
 
   const currentClerkId = clerkUser?.id ?? "";
@@ -98,22 +81,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     currentClerkId ? { clerkId: currentClerkId } : "skip"
   );
 
-  // Fallback timer: NEVER let the UI wait indefinitely
-  useEffect(() => {
-    if (!currentClerkId || convexProfile !== undefined) {
-      setTimedOut(false);
-      return;
-    }
-
-    const timer = setTimeout(() => {
-      devLog("AUTH", `Auth initialization timed out after ${AUTH_TIMEOUT_MS}ms`);
-      setTimedOut(true);
-    }, AUTH_TIMEOUT_MS);
-
-    return () => clearTimeout(timer);
-  }, [currentClerkId, convexProfile, retryKey]);
-
-  const isAuthenticated = !timedOut && clerkLoaded && Boolean(clerkUser);
+  const isAuthenticated = clerkLoaded && Boolean(clerkUser);
 
   // Authenticated User Presentation
   const user = isAuthenticated && clerkUser
@@ -130,13 +98,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // Derive explicit application state
   let authState: AuthState = "AUTH_LOADING";
-  let authError: string | null = customError;
+  const authError: string | null = customError;
 
-  if (timedOut) {
-    authState = "ERROR";
-    authError =
-      "Connection to PRAROHA'26 services timed out. Please check your network connection or verify that the Convex backend is accessible.";
-  } else if (!clerkLoaded) {
+  if (!clerkLoaded) {
     authState = "AUTH_LOADING";
   } else if (!isAuthenticated) {
     authState = "UNAUTHENTICATED";
@@ -207,14 +171,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     devLog("AUTH", "Signing out...");
     if (clerkSignOut) {
       try {
-        await clerkSignOut();
+        await clerkSignOut({ redirectUrl: "/sign-in" });
       } catch (err) {
         console.error("[AUTH] Clerk signOut error:", err);
+        window.location.href = "/sign-in";
       }
+    } else {
+      window.location.href = "/sign-in";
     }
-    setTimedOut(false);
     setCustomError(null);
   };
+
 
   const refetchProfile = () => {
     // Convex queries are reactive and automatically update via WebSockets

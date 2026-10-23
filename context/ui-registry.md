@@ -84,7 +84,8 @@ The application unites **two connected visual expressions** under a single share
 ### Card `[IMPLEMENTED]`
 - **Purpose:** Foundational content container (`Card`, `CardHeader`, `CardTitle`, `CardDescription`, `CardContent`, `CardFooter`).
 - **Target Path:** `components/ui/card.tsx`
-- **Tokens Used:** `bg-surface border border-border rounded-xl shadow-xs`.
+- **Tokens Used:** `bg-surface border border-border rounded-xl shadow-xs overflow-hidden`.
+- **Surface Architecture Contract:** The Card root owns the background, border, radius, shadow, and clipping (`overflow-hidden`). Child headers, controls, and table sections connect flush with `border-b border-border` and matching horizontal padding.
 
 ### Dialog / Modal `[IMPLEMENTED]`
 - **Purpose:** Accessible modal dialog with backdrop blur, escape key listener, and size options (`sm`, `md`, `lg`, `xl`).
@@ -132,8 +133,12 @@ The application unites **two connected visual expressions** under a single share
 - **Target Path:** `components/forms/VolunteerRegistrationModal.tsx`
 
 ### VerificationPendingScreen `[IMPLEMENTED]`
-- **Purpose:** Holding view for pending volunteers with submitted credential card and sign out.
-- **Target Path:** `components/volunteer/VerificationPendingScreen.tsx`
+- **Purpose:** High-value Pre-Flight Briefing Station for pending volunteers featuring a real-time listener, submitted credential review, committee escalation contacts (with one-click phone links), and interactive briefing tabs (`Pitch Essentials & Tiers`, `4-Step Calling Protocol`, `In-Kind & Non-Cash Deals`).
+- **Target Path:** `components/volunteer/VerificationPendingScreen.tsx` & `app/pending/page.tsx`
+
+### First-Run SDR Launchpad & Empty States `[IMPLEMENTED]`
+- **Purpose:** High-motivation onboarding launchpad rendered when a newly verified volunteer has 0 assigned leads. Features 3 fast-start steps (Study Packages, Master Call Mode, Earn SDR Points) and instant actions (`Explore Event Deck & Packages`, `View Team Leaderboard`, `Brochure PDF`).
+- **Target Path:** `components/volunteer/LeadsTable.tsx` & `components/volunteer/TodayWorkBar.tsx`
 
 ### VerificationRejectedScreen & AccountSuspendedScreen `[IMPLEMENTED]`
 - **Purpose:** Status screens for rejected (with admin feedback and re-edit button) and suspended accounts.
@@ -351,6 +356,8 @@ The application unites **two connected visual expressions** under a single share
 4. **Use Semantic Design Tokens:** Use `bg-primary`, `bg-surface`, `border-border` — never raw hex codes.
 5. **Enforce Contact Verification Distinctions:** Clearly display whether a phone number is a verified decision-maker or an unverified corporate desk.
 6. **No AI Clichés:** No purple gradients, robot avatars, or generic chat bubbles. Use crisp cards, subtle teal badges, and glanceable live phone bullets.
+7. **Single Surface & Corner Geometry Contract:** The outer card owns the border radius (`rounded-xl`), border, and overflow clipping (`overflow-hidden`). Child sections never render as hard 90-degree rectangular white blocks or standalone strips with `border-y`. Tables sit directly within the card with flush horizontal borders, full-width headers (`bg-surface-subtle/60`), and edge-to-edge hover rows that clip naturally against the parent's rounded corners.
+8. **Radius Hierarchy Scale:** Outer cards & dialogs (`rounded-xl`), buttons, inputs, pills, internal cards (`rounded-lg`), compact controls (`rounded-md`), and status badges/avatars (`rounded-full`). Never introduce arbitrary one-off pixel values.
 
 ---
 

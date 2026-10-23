@@ -5,19 +5,21 @@ import { RouteGuard } from "@/components/providers/RouteGuard";
 import { WorkspaceProvider, useWorkspace } from "@/components/volunteer/WorkspaceContext";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Navbar } from "@/components/layout/Navbar";
+import { useAuthUser } from "@/components/providers/AuthProvider";
+import { useQuery } from "convex/react";
+import { api } from "@/convex/_generated/api";
 
 function WorkspaceShellInner({ children }: { children: React.ReactNode }) {
   const { openEventInfo, openLeaderboard, startCallMode } = useWorkspace();
+  const { user } = useAuthUser();
+  const assignedLeads = useQuery(
+    api.assignments.getMyAssignedLeads,
+    user?.id ? { volunteerClerkId: user.id, tab: "all" } : "skip"
+  );
 
   const handleLogCallClick = () => {
-    // Open call mode with general placeholder or prompt user
-    startCallMode({
-      companyName: "PRAROHA Outreach Call",
-      contactName: "Corporate Decision Maker",
-      phone: "+91 98765 43210",
-      phoneType: "direct_official",
-      companyId: "placeholder",
-    });
+    const nextLead = assignedLeads?.find((lead) => lead.leadStatus !== "WON" && lead.leadStatus !== "LOST");
+    if (nextLead) startCallMode(nextLead);
   };
 
   return (

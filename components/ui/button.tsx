@@ -22,13 +22,13 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     ref
   ) => {
     const baseStyles =
-      "inline-flex items-center justify-center font-medium transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 select-none cursor-pointer";
+      "inline-flex items-center justify-center font-medium transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-focus-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 select-none cursor-pointer";
 
     const variantStyles = {
       primary:
-        "bg-primary text-white hover:bg-primary-hover shadow-xs active:translate-y-[0.5px]",
+        "bg-primary text-primary-foreground hover:bg-primary-hover shadow-xs active:translate-y-[0.5px]",
       secondary:
-        "bg-accent-mint text-accent-mint-text hover:bg-accent-mint/80 font-semibold",
+        "bg-accent-mint text-accent-mint-text hover:bg-accent-mint/80 font-semibold border border-primary/15",
       outline:
         "border border-border bg-surface text-text-primary hover:bg-surface-subtle hover:text-text-primary shadow-xs",
       ghost:

@@ -9,7 +9,6 @@ import {
   Menu,
   X,
   LayoutDashboard,
-  Users,
   Trophy,
   BarChart3,
   Building2,
@@ -26,7 +25,6 @@ import { useAuthUser } from "@/components/providers/AuthProvider";
 import { NotificationPopover } from "@/components/layout/NotificationPopover";
 import { GlobalCommandPalette } from "@/components/search/GlobalCommandPalette";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { eventConfig } from "@/lib/eventConfig";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 
@@ -39,9 +37,7 @@ export function Navbar({
   onOpenEventInfo?: () => void;
   onOpenLeaderboard?: () => void;
 }) {
-  const pathname = usePathname();
   const { role, profile, signOut } = useAuthUser();
-  const [showCallNotice, setShowCallNotice] = useState(false);
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -61,19 +57,12 @@ export function Navbar({
   }, [isMobileMenuOpen]);
 
   const handleLogCall = () => {
-    if (onLogCallClick) {
-      onLogCallClick();
-    } else {
-      setShowCallNotice(true);
-      setTimeout(() => setShowCallNotice(false), 3000);
-    }
+    onLogCallClick?.();
   };
-
-  const isAdminPath = pathname.startsWith("/admin");
 
   return (
     <>
-      <header className="sticky top-0 z-30 flex h-16 w-full items-center justify-between border-b border-border bg-surface px-3 sm:px-6">
+      <header className="sticky top-0 z-30 flex h-14 w-full items-center justify-between border-b border-border bg-surface px-3 sm:px-6">
         <div className="flex items-center gap-2 sm:gap-3 flex-1 max-w-md mr-2">
           {/* Mobile Navigation Drawer Trigger (Visible < lg) */}
           <button
@@ -99,7 +88,7 @@ export function Navbar({
               readOnly
               placeholder="Search companies, leads... (⌘K)"
               aria-label="Search companies, contacts, or leads"
-              className="h-9 w-full rounded-lg border border-border bg-background pl-9 pr-12 text-xs text-text-primary placeholder:text-text-muted group-hover:border-primary/50 group-hover:bg-surface cursor-pointer focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary transition-all"
+              className="h-9 w-full border border-border bg-background pl-9 pr-12 text-xs text-text-primary placeholder:text-text-muted group-hover:border-primary/50 group-hover:bg-surface cursor-pointer focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary transition-all"
             />
             <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2.5">
               <kbd className="hidden sm:inline-flex items-center gap-0.5 rounded border border-border bg-surface px-1.5 py-0.5 text-[10px] font-medium text-text-muted shadow-2xs">
@@ -120,7 +109,7 @@ export function Navbar({
           {/* Event Date Badge */}
           <div
             onClick={onOpenEventInfo}
-            className="hidden md:flex items-center gap-2 rounded-lg border border-border bg-surface px-3 py-1.5 text-xs text-text-secondary shadow-xs hover:border-primary/40 transition-colors cursor-pointer"
+            className="hidden md:flex items-center gap-2 border-l border-border px-3 py-1.5 text-xs text-text-secondary hover:border-primary/40 transition-colors cursor-pointer"
             title="View PRAROHA'26 Event Information & Pitch Brochure"
           >
             <Calendar className="h-3.5 w-3.5 text-primary" />
@@ -129,8 +118,8 @@ export function Navbar({
             <span>{eventConfig.datesCompact}</span>
           </div>
 
-          {/* Primary Call Action */}
-          <div className="relative">
+          {/* Primary Call Action — only rendered where the shell can provide a real lead */}
+          {onLogCallClick && (
             <Button
               variant="primary"
               size="md"
@@ -141,13 +130,7 @@ export function Navbar({
               <span className="hidden sm:inline">Log a Call</span>
               <span className="sm:hidden">Call</span>
             </Button>
-
-            {showCallNotice && (
-              <div className="absolute right-0 top-11 z-50 w-64 rounded-lg border border-border bg-surface p-2.5 text-xs text-text-secondary shadow-md animate-in fade-in">
-                <span className="font-semibold text-text-primary">Call Mode:</span> Launching in-call workstation.
-              </div>
-            )}
-          </div>
+          )}
         </div>
       </header>
 
@@ -176,7 +159,7 @@ export function Navbar({
                   </div>
                   <div>
                     <h2 className="text-xs font-bold tracking-tight text-text-primary">
-                      PRAROHA'26
+                      PRAROHA&apos;26
                     </h2>
                     <p className="text-[10px] text-text-muted">Outreach Cockpit</p>
                   </div>
@@ -201,7 +184,7 @@ export function Navbar({
                     {profile.department} • {profile.semester}
                   </p>
                   <div className="mt-2 flex items-center justify-between">
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full uppercase bg-teal-50 text-teal-700 border border-teal-200 dark:bg-teal-950/60 dark:text-teal-300 dark:border-teal-800/50">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-primary">
                       {role || "volunteer"}
                     </span>
                     <span className="text-[10px] font-semibold text-text-muted">
@@ -315,7 +298,7 @@ export function Navbar({
                   >
                     <div className="flex items-center gap-2.5">
                       <FileText className="h-4 w-4 text-teal-600" />
-                      <span>PRAROHA Event Brochure</span>
+                      <span>PRAROHA&apos;26 Event Brochure</span>
                     </div>
                     <ChevronRight className="h-3.5 w-3.5 text-text-muted" />
                   </button>
@@ -367,4 +350,3 @@ export function Navbar({
     </>
   );
 }
-

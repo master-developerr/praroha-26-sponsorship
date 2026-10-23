@@ -374,7 +374,7 @@ export const syncClerkUser = mutation({
     name: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    let existing = await ctx.db
+    const existing = await ctx.db
       .query("users")
       .withIndex("by_clerk_id", (q) => q.eq("clerkId", args.clerkId))
       .unique();

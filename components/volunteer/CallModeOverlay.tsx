@@ -1,22 +1,16 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Id } from "@/convex/_generated/dataModel";
 import {
   PhoneCall,
   X,
   Clock,
   Sparkles,
-  Building2,
-  ExternalLink,
-  ShieldCheck,
-  CheckCircle2,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import {
   ContactVerificationBadge,
   PhoneTypeBadge,
-  PriorityBadge,
 } from "@/components/ui/badge";
 import { ConciseTalkingPoints } from "@/components/volunteer/ConciseTalkingPoints";
 import { QuickCallOutcome, ContactVerificationLevel, PhoneType, PriorityLevel } from "@/types";
@@ -54,60 +48,59 @@ interface CallModeOverlayProps {
   ) => void;
 }
 
+function CallStopwatch({ startedAt }: { startedAt: number }) {
+  const [elapsed, setElapsed] = useState(0);
+
+  useEffect(() => {
+    setElapsed(Math.max(0, Math.floor((Date.now() - startedAt) / 1000)));
+    const interval = setInterval(() => {
+      setElapsed(Math.max(0, Math.floor((Date.now() - startedAt) / 1000)));
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [startedAt]);
+
+  const mins = Math.floor(elapsed / 60);
+  const secs = elapsed % 60;
+  const formatted = `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
+
+  return (
+    <div className="flex items-center gap-2 rounded-md border border-border bg-surface px-3 py-1 font-mono text-xs font-semibold text-text-primary shadow-xs">
+      <Clock className="h-3.5 w-3.5 text-primary" />
+      <span>{formatted}</span>
+    </div>
+  );
+}
+
 export function CallModeOverlay({
   isOpen,
   onClose,
   lead,
   onSelectOutcome,
 }: CallModeOverlayProps) {
-  const [startedAt, setStartedAt] = useState<number>(Date.now());
-  const [seconds, setSeconds] = useState(0);
-
-  // Active call timer
-  useEffect(() => {
-    if (isOpen) {
-      const now = Date.now();
-      setStartedAt(now);
-      setSeconds(0);
-
-      const interval = setInterval(() => {
-        setSeconds((prev) => prev + 1);
-      }, 1000);
-
-      return () => clearInterval(interval);
-    }
-  }, [isOpen]);
+  const [startedAt] = useState(() => Date.now());
 
   if (!isOpen || !lead) return null;
 
-  const formatTimer = (totalSeconds: number) => {
-    const mins = Math.floor(totalSeconds / 60);
-    const secs = totalSeconds % 60;
-    return `${mins.toString().padStart(2, "0")}:${secs
-      .toString()
-      .padStart(2, "0")}`;
-  };
-
   const handleOutcomeClick = (outcome: QuickCallOutcome) => {
     const endedAt = Date.now();
-    const duration = Math.max(1, seconds);
+    const duration = Math.max(1, Math.floor((endedAt - startedAt) / 1000));
     onSelectOutcome(outcome, duration, startedAt, endedAt);
   };
 
   const contactPhone = lead.primaryContact?.phone || "";
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-      <div className="relative flex flex-col w-full max-w-3xl max-h-[90vh] rounded-2xl border-2 border-primary bg-surface shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 animate-in fade-in duration-200">
+      <div className="relative flex flex-col w-full max-w-3xl max-h-[90vh] rounded-xl border border-border bg-surface shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
         {/* Top Header Bar */}
-        <div className="flex items-center justify-between border-b border-border-subtle bg-surface-subtle/80 px-6 py-4">
+        <div className="flex items-center justify-between border-b border-border bg-surface-subtle px-6 py-4">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-white shadow-xs">
-              <PhoneCall className="h-5 w-5" />
+            <div className="flex h-9 w-9 items-center justify-center rounded-md bg-primary text-white shadow-xs">
+              <PhoneCall className="h-4 w-4" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-xs font-bold uppercase tracking-wider text-primary">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-primary">
                   Active Call Mode
                 </span>
                 <span className="flex h-2 w-2 rounded-full bg-emerald-500 animate-ping" />
@@ -119,18 +112,15 @@ export function CallModeOverlay({
           </div>
 
           <div className="flex items-center gap-4">
-            {/* Stopwatch Timer */}
-            <div className="flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-3 py-1 font-mono text-sm font-bold text-primary shadow-xs">
-              <Clock className="h-4 w-4" />
-              <span>{formatTimer(seconds)}</span>
-            </div>
+            {/* Stopwatch Timer (Isolated Component to prevent parent re-renders) */}
+            <CallStopwatch startedAt={startedAt} />
 
             <button
               onClick={onClose}
               aria-label="Close call overlay"
-              className="flex h-8 w-8 items-center justify-center rounded-full text-text-muted hover:bg-surface-subtle hover:text-text-primary transition-colors cursor-pointer"
+              className="flex h-8 w-8 items-center justify-center rounded-md text-text-muted hover:bg-surface hover:text-text-primary transition-colors cursor-pointer border border-transparent hover:border-border"
             >
-              <X className="h-5 w-5" />
+              <X className="h-4 w-4" />
             </button>
           </div>
         </div>
@@ -138,7 +128,7 @@ export function CallModeOverlay({
         {/* Scrollable Center Body */}
         <div className="flex-1 overflow-y-auto p-6 space-y-6">
           {/* Dialing Hero Card */}
-          <div className="rounded-xl border border-primary/20 bg-gradient-to-r from-accent-mint/20 via-surface to-surface p-5 shadow-xs flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="rounded-lg border border-border bg-surface-subtle p-5 shadow-xs flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div className="space-y-1">
               <div className="flex items-center gap-2">
                 <span className="text-base font-bold text-text-primary">
@@ -216,7 +206,7 @@ export function CallModeOverlay({
             {/* 1. Interested */}
             <button
               onClick={() => handleOutcomeClick("Interested")}
-              className="flex min-h-[44px] items-center justify-center rounded-lg border border-emerald-300 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/40 px-3 py-2 text-xs font-bold text-emerald-800 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 active:scale-[0.98] transition-all duration-150 shadow-xs cursor-pointer focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary"
+              className="flex min-h-[44px] items-center justify-center rounded-md border border-success/30 bg-accent-mint px-3 py-2 text-xs font-bold text-success hover:bg-accent-mint/70 active:scale-[0.98] transition-all duration-150 shadow-xs cursor-pointer focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-focus-ring"
             >
               Interested
             </button>
@@ -224,7 +214,7 @@ export function CallModeOverlay({
             {/* 2. Asked for proposal */}
             <button
               onClick={() => handleOutcomeClick("Asked for proposal")}
-              className="flex min-h-[44px] items-center justify-center rounded-lg border border-sky-300 dark:border-sky-800 bg-sky-50 dark:bg-sky-950/40 px-3 py-2 text-xs font-bold text-sky-800 dark:text-sky-300 hover:bg-sky-100 dark:hover:bg-sky-900/50 active:scale-[0.98] transition-all duration-150 shadow-xs cursor-pointer focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary"
+              className="flex min-h-[44px] items-center justify-center rounded-md border border-info/30 bg-accent-blue px-3 py-2 text-xs font-bold text-accent-blue-text hover:bg-accent-blue/70 active:scale-[0.98] transition-all duration-150 shadow-xs cursor-pointer focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-focus-ring"
             >
               Proposal Req.
             </button>
@@ -232,7 +222,7 @@ export function CallModeOverlay({
             {/* 3. Asked for budget */}
             <button
               onClick={() => handleOutcomeClick("Asked for budget")}
-              className="flex min-h-[44px] items-center justify-center rounded-lg border border-indigo-300 dark:border-indigo-800 bg-indigo-50 dark:bg-indigo-950/40 px-3 py-2 text-xs font-bold text-indigo-800 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 active:scale-[0.98] transition-all duration-150 shadow-xs cursor-pointer focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary"
+              className="flex min-h-[44px] items-center justify-center rounded-md border border-info/30 bg-accent-blue px-3 py-2 text-xs font-bold text-accent-blue-text hover:bg-accent-blue/70 active:scale-[0.98] transition-all duration-150 shadow-xs cursor-pointer focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-focus-ring"
             >
               Budget Req.
             </button>
@@ -240,7 +230,7 @@ export function CallModeOverlay({
             {/* 4. Meeting requested */}
             <button
               onClick={() => handleOutcomeClick("Meeting requested")}
-              className="flex min-h-[44px] items-center justify-center rounded-lg border border-teal-300 dark:border-teal-800 bg-teal-50 dark:bg-teal-950/40 px-3 py-2 text-xs font-bold text-teal-800 dark:text-teal-300 hover:bg-teal-100 dark:hover:bg-teal-900/50 active:scale-[0.98] transition-all duration-150 shadow-xs cursor-pointer focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary"
+              className="flex min-h-[44px] items-center justify-center rounded-md border border-primary/30 bg-accent-mint px-3 py-2 text-xs font-bold text-accent-mint-text hover:bg-accent-mint/70 active:scale-[0.98] transition-all duration-150 shadow-xs cursor-pointer focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-focus-ring"
             >
               Meeting Set
             </button>
@@ -248,7 +238,7 @@ export function CallModeOverlay({
             {/* 5. Non-cash opportunity */}
             <button
               onClick={() => handleOutcomeClick("Non-cash opportunity")}
-              className="flex min-h-[44px] items-center justify-center rounded-lg border border-purple-300 dark:border-purple-800 bg-purple-50 dark:bg-purple-950/40 px-3 py-2 text-xs font-bold text-purple-800 dark:text-purple-300 hover:bg-purple-100 dark:hover:bg-purple-900/50 active:scale-[0.98] transition-all duration-150 shadow-xs cursor-pointer focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary"
+              className="flex min-h-[44px] items-center justify-center rounded-md border border-primary/25 bg-accent-mint px-3 py-2 text-xs font-bold text-accent-mint-text hover:bg-accent-mint/70 active:scale-[0.98] transition-all duration-150 shadow-xs cursor-pointer focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-focus-ring"
             >
               Non-Cash / In-Kind
             </button>
@@ -256,7 +246,7 @@ export function CallModeOverlay({
             {/* 6. Call back */}
             <button
               onClick={() => handleOutcomeClick("Call back")}
-              className="flex min-h-[44px] items-center justify-center rounded-lg border border-amber-300 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/40 px-3 py-2 text-xs font-bold text-amber-800 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/50 active:scale-[0.98] transition-all duration-150 shadow-xs cursor-pointer focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary"
+              className="flex min-h-[44px] items-center justify-center rounded-md border border-warning/30 bg-accent-yellow px-3 py-2 text-xs font-bold text-accent-yellow-text hover:bg-accent-yellow/70 active:scale-[0.98] transition-all duration-150 shadow-xs cursor-pointer focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-focus-ring"
             >
               Call Back Later
             </button>
@@ -264,7 +254,7 @@ export function CallModeOverlay({
             {/* 7. Wrong person */}
             <button
               onClick={() => handleOutcomeClick("Wrong person")}
-              className="flex min-h-[44px] items-center justify-center rounded-lg border border-border-subtle bg-surface-subtle px-3 py-2 text-xs font-semibold text-text-secondary hover:bg-surface-hover hover:text-text-primary active:scale-[0.98] transition-all duration-150 shadow-xs cursor-pointer focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary"
+              className="flex min-h-[44px] items-center justify-center rounded-md border border-border-subtle bg-surface-subtle px-3 py-2 text-xs font-semibold text-text-secondary hover:bg-surface hover:text-text-primary active:scale-[0.98] transition-all duration-150 shadow-xs cursor-pointer focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-focus-ring"
             >
               Wrong Contact
             </button>
@@ -272,7 +262,7 @@ export function CallModeOverlay({
             {/* 8. Rejected */}
             <button
               onClick={() => handleOutcomeClick("Rejected")}
-              className="flex min-h-[44px] items-center justify-center rounded-lg border border-rose-300 dark:border-rose-800 bg-rose-50 dark:bg-rose-950/40 px-3 py-2 text-xs font-bold text-rose-800 dark:text-rose-300 hover:bg-rose-100 dark:hover:bg-rose-900/50 active:scale-[0.98] transition-all duration-150 shadow-xs cursor-pointer focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary"
+              className="flex min-h-[44px] items-center justify-center rounded-md border border-error/30 bg-accent-coral px-3 py-2 text-xs font-bold text-accent-coral-text hover:bg-accent-coral/70 active:scale-[0.98] transition-all duration-150 shadow-xs cursor-pointer focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-focus-ring"
             >
               Rejected
             </button>
@@ -280,7 +270,7 @@ export function CallModeOverlay({
             {/* 9. Other */}
             <button
               onClick={() => handleOutcomeClick("Other")}
-              className="flex min-h-[44px] items-center justify-center rounded-lg border border-border-subtle bg-surface-subtle px-3 py-2 text-xs font-semibold text-text-secondary hover:bg-surface-hover hover:text-text-primary active:scale-[0.98] transition-all duration-150 shadow-xs cursor-pointer col-span-2 sm:col-span-1 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary"
+              className="flex min-h-[44px] items-center justify-center rounded-md border border-border-subtle bg-surface-subtle px-3 py-2 text-xs font-semibold text-text-secondary hover:bg-surface hover:text-text-primary active:scale-[0.98] transition-all duration-150 shadow-xs cursor-pointer col-span-2 sm:col-span-1 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-focus-ring"
             >
               Other Outcome
             </button>

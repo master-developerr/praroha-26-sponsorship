@@ -1,6 +1,5 @@
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
-import { Id } from "./_generated/dataModel";
 
 export const getVolunteerFollowUps = query({
   args: {
@@ -99,6 +98,9 @@ export const completeFollowUp = mutation({
     if (!followUp) {
       throw new Error("Follow-up not found");
     }
+    if (user.role === "volunteer" && followUp.volunteerId !== user._id) {
+      throw new Error("Unauthorized: Follow-up is not assigned to this volunteer");
+    }
 
     const now = Date.now();
     await ctx.db.patch(args.followUpId, {
@@ -146,5 +148,58 @@ export const scheduleFollowUp = mutation({
     });
 
     return { success: true, followUpId: id };
+  },
+});
+
+export const rescheduleFollowUp = mutation({
+  args: {
+    volunteerClerkId: v.string(),
+    followUpId: v.id("followUps"),
+    dueDate: v.number(),
+    notes: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_clerk_id", (q) => q.eq("clerkId", args.volunteerClerkId))
+      .unique();
+    const followUp = await ctx.db.get(args.followUpId);
+    if (!user || !followUp || user.verificationStatus !== "approved") {
+      throw new Error("Unauthorized");
+    }
+    if (user.role === "volunteer" && followUp.volunteerId !== user._id) {
+      throw new Error("Unauthorized: Follow-up is not assigned to this volunteer");
+    }
+    if (args.dueDate <= Date.now()) {
+      throw new Error("Choose a future follow-up date");
+    }
+    await ctx.db.patch(args.followUpId, {
+      dueDate: args.dueDate,
+      ...(args.notes !== undefined ? { notes: args.notes.trim() } : {}),
+      updatedAt: Date.now(),
+    });
+    return { success: true };
+  },
+});
+
+export const cancelFollowUp = mutation({
+  args: {
+    volunteerClerkId: v.string(),
+    followUpId: v.id("followUps"),
+  },
+  handler: async (ctx, args) => {
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_clerk_id", (q) => q.eq("clerkId", args.volunteerClerkId))
+      .unique();
+    const followUp = await ctx.db.get(args.followUpId);
+    if (!user || !followUp || user.verificationStatus !== "approved") {
+      throw new Error("Unauthorized");
+    }
+    if (user.role === "volunteer" && followUp.volunteerId !== user._id) {
+      throw new Error("Unauthorized: Follow-up is not assigned to this volunteer");
+    }
+    await ctx.db.patch(args.followUpId, { status: "cancelled", updatedAt: Date.now() });
+    return { success: true };
   },
 });

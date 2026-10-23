@@ -3,7 +3,7 @@
 import React from "react";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
-import { Trophy, Award, TrendingUp, PhoneCall, CheckCircle2 } from "lucide-react";
+import { Trophy, PhoneCall, CheckCircle2 } from "lucide-react";
 
 interface PersonalPerformanceCardProps {
   clerkId: string;
@@ -18,15 +18,14 @@ export function PersonalPerformanceCard({
 
   if (!profile) return null;
 
-  const isTopThree = profile.rank <= 3;
   const rankColor =
     profile.rank === 1
-      ? "text-amber-700 dark:text-amber-400 bg-amber-500/10 border-amber-500/30"
+      ? "text-warning bg-accent-yellow border-warning/30"
       : profile.rank === 2
-      ? "text-slate-700 dark:text-slate-300 bg-slate-500/10 border-slate-400/30"
-      : profile.rank === 3
-      ? "text-amber-900 dark:text-amber-400 bg-amber-700/10 border-amber-700/30"
-      : "text-teal-700 dark:text-teal-400 bg-teal-500/10 border-teal-500/20";
+        ? "text-text-secondary bg-surface-subtle border-border"
+        : profile.rank === 3
+          ? "text-warning bg-accent-yellow border-warning/30"
+          : "text-accent-mint-text bg-accent-mint border-primary/20";
 
   return (
     <div className="rounded-xl border border-border bg-surface p-3 shadow-2xs flex flex-wrap items-center justify-between gap-3 text-xs">
@@ -49,12 +48,12 @@ export function PersonalPerformanceCard({
               ({profile.rank} of {profile.totalVolunteers} volunteers)
             </span>
             {profile.rank === 1 && (
-              <span className="rounded-full bg-amber-100 dark:bg-amber-950/60 border border-amber-300 dark:border-amber-700/50 px-2 py-0.2 text-[10px] font-black text-amber-800 dark:text-amber-300">
+              <span className="rounded-full bg-accent-yellow border border-warning/25 px-2 py-0.2 text-[10px] font-black text-accent-yellow-text">
                 Podium Leader 👑
               </span>
             )}
             {profile.dealsWon > 0 && profile.rank > 1 && (
-              <span className="rounded-full bg-emerald-100 dark:bg-emerald-950/60 border border-emerald-300 dark:border-emerald-700/50 px-2 py-0.2 text-[10px] font-bold text-emerald-800 dark:text-emerald-300 tabular-nums">
+              <span className="rounded-full bg-accent-mint border border-primary/20 px-2 py-0.2 text-[10px] font-bold text-success tabular-nums">
                 {profile.dealsWon} Deals Won 🏆
               </span>
             )}
@@ -66,7 +65,7 @@ export function PersonalPerformanceCard({
             </span>
             <span>•</span>
             <span className="flex items-center gap-1">
-              <CheckCircle2 className="h-3 w-3 text-emerald-600" />
+              <CheckCircle2 className="h-3 w-3 text-success" />
               {profile.dealsWon} deals won
             </span>
           </div>
@@ -76,7 +75,7 @@ export function PersonalPerformanceCard({
       {onOpenLeaderboard && (
         <button
           onClick={onOpenLeaderboard}
-          className="px-3 py-1.5 rounded-lg border border-teal-500/30 bg-teal-500/5 hover:bg-teal-500/15 text-teal-700 dark:text-teal-300 font-bold text-xs flex items-center gap-1.5 transition-colors cursor-pointer"
+          className="px-3 py-1.5 rounded-md border border-primary/25 bg-accent-mint hover:bg-accent-mint/70 text-accent-mint-text font-bold text-xs flex items-center gap-1.5 transition-colors cursor-pointer"
         >
           <Trophy className="h-3.5 w-3.5 text-amber-500" />
           View Team Leaderboard

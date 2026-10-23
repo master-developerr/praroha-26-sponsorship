@@ -23,7 +23,7 @@ interface ConciseTalkingPointsProps {
   alternativeSupport?: string;
 }
 
-export function ConciseTalkingPoints({
+function ConciseTalkingPointsComponent({
   companyName,
   industry,
   niche,
@@ -277,3 +277,5 @@ export function ConciseTalkingPoints({
     </div>
   );
 }
+
+export const ConciseTalkingPoints = React.memo(ConciseTalkingPointsComponent);

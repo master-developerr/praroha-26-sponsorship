@@ -1,7 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import Image from "next/image";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import Link from "next/link";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
@@ -11,21 +10,14 @@ import { TodayWorkBar } from "@/components/volunteer/TodayWorkBar";
 import { LeadsTable } from "@/components/volunteer/LeadsTable";
 import { SectionErrorBoundary } from "@/components/ui/error-boundary";
 import { Button } from "@/components/ui/button";
-import { PrarohaHeroVisual } from "@/components/ui/PrarohaHeroVisual";
 import {
-  PhoneCall,
-  Calendar,
-  Trophy,
   ArrowRight,
-  Sparkles,
-  Users,
-  Flame,
-  Target,
+  ShieldCheck,
 } from "lucide-react";
 
 export default function VolunteerDashboardPage() {
   const { user, profile } = useAuthUser();
-  const { openCompanyDossier, startCallMode, openEventInfo } = useWorkspace();
+  const { openCompanyDossier, startCallMode, openEventInfo, openLeaderboard } = useWorkspace();
   const [activeTab, setActiveTab] = useState("all");
 
   const clerkId = user?.id || "";
@@ -59,7 +51,7 @@ export default function VolunteerDashboardPage() {
   const firstName = profile?.name ? profile.name.split(" ")[0] : "Volunteer";
 
   // Prioritized leads: show High Priority and freshly assigned first
-  const leads = assignedLeadsRaw || [];
+  const leads = useMemo(() => assignedLeadsRaw || [], [assignedLeadsRaw]);
 
   useEffect(() => {
     if (assignedLeadsRaw !== undefined) {
@@ -67,103 +59,85 @@ export default function VolunteerDashboardPage() {
     }
   }, [assignedLeadsRaw, leads.length]);
 
-  const prioritizedLeads = [...leads].sort((a, b) => {
-    // 1. High priority
-    if (a.priority === "High" && b.priority !== "High") return -1;
-    if (a.priority !== "High" && b.priority === "High") return 1;
-    // 2. Freshly assigned
-    if (a.leadStatus === "ASSIGNED" && b.leadStatus !== "ASSIGNED") return -1;
-    if (a.leadStatus !== "ASSIGNED" && b.leadStatus === "ASSIGNED") return 1;
-    return 0;
-  });
+  const prioritizedLeads = useMemo(() => {
+    return [...leads].sort((a, b) => {
+      // 1. High priority
+      if (a.priority === "High" && b.priority !== "High") return -1;
+      if (a.priority !== "High" && b.priority === "High") return 1;
+      // 2. Freshly assigned
+      if (a.leadStatus === "ASSIGNED" && b.leadStatus !== "ASSIGNED") return -1;
+      if (a.leadStatus !== "ASSIGNED" && b.leadStatus === "ASSIGNED") return 1;
+      return 0;
+    });
+  }, [leads]);
 
   // Fallback metrics while loading so shell renders immediately
-  const displayMetrics = metrics || {
-    totalAssigned: leads.length,
-    toContact: leads.filter((l) => l.leadStatus === "ASSIGNED").length,
-    highPriority: leads.filter((l) => l.priority === "High").length,
-    callsCompleted: 0,
-    dailyTarget: 15,
-    callsRemaining: 15,
-    overdueFollowUps: 0,
-    todayFollowUps: 0,
-    interestedCount: 0,
-    inProgressCount: 0,
-  };
+  const displayMetrics = useMemo(() => {
+    if (metrics) return metrics;
+    let toContact = 0;
+    let highPriority = 0;
+    for (const l of leads) {
+      if (l.leadStatus === "ASSIGNED") toContact++;
+      if (l.priority === "High") highPriority++;
+    }
+    return {
+      totalAssigned: leads.length,
+      toContact,
+      highPriority,
+      callsCompleted: 0,
+      dailyTarget: 15,
+      callsRemaining: 15,
+      overdueFollowUps: 0,
+      todayFollowUps: 0,
+      interestedCount: 0,
+      inProgressCount: 0,
+    };
+  }, [metrics, leads]);
+
+  const handleStartNextCall = useCallback(() => {
+    if (prioritizedLeads.length > 0) {
+      const topLead = prioritizedLeads[0];
+      startCallMode(topLead);
+    }
+  }, [prioritizedLeads, startCallMode]);
 
   return (
-    <div className="space-y-5">
-      {/* 1. Compact, Focused Command Header (~200px height) */}
+    <div className="space-y-8">
+      {/* 1. Operational editorial page header matching Admin Control Room */}
       <SectionErrorBoundary sectionTitle="Command Header">
-        <div className="relative overflow-hidden rounded-2xl border border-border bg-surface shadow-xs min-h-[160px] md:h-[195px] lg:h-[205px] flex flex-col md:flex-row justify-between">
-          {/* LEFT Operational Content Layer */}
-          <div className="relative z-10 w-full md:w-[56%] lg:w-[54%] p-5 sm:p-6 flex flex-col justify-between space-y-3">
-            <div className="space-y-1">
-              <div className="flex flex-wrap items-center gap-2">
-                <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-text-primary leading-tight">
-                  {greeting}, {firstName}
-                </h1>
-                <span className="inline-flex items-center gap-1 rounded-full bg-accent-mint px-2.5 py-0.5 text-[11px] font-semibold text-accent-mint-text border border-primary/20">
-                  <Sparkles className="h-3 w-3 text-primary" />
-                  PRAROHA&apos;26 Active
-                </span>
-              </div>
-              <p className="text-xs text-text-secondary leading-relaxed max-w-md line-clamp-2">
-                Connect with corporate sponsors, confirm corporate deliverables, and advance deals through your pipeline.
+        <header className="border-b border-border pb-6">
+          <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary">
+                OUTREACH DESK
+              </p>
+              <h1 className="mt-3 text-3xl font-bold tracking-[-0.035em] text-text-primary sm:text-4xl">
+                {greeting}, {firstName}.
+              </h1>
+              <p className="mt-3 max-w-2xl text-sm leading-6 text-text-secondary">
+                Your next sponsor, callback, and pipeline action — kept in one operational view.
+              </p>
+              <p className="mt-3 text-[11px] font-medium text-text-muted">
+                DEC 04-05 · Division of Civil Engineering · Cochin University of Science and Technology (CUSAT)
               </p>
             </div>
 
-            {/* 4 Distinct Operational Stats (Non-redundant with TodayWorkBar) */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1">
-              <div className="rounded-lg border border-border-subtle bg-surface-subtle/70 px-2.5 py-2">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-text-muted flex items-center gap-1">
-                  <Users className="h-3 w-3 text-primary" />
-                  Assigned
-                </span>
-                <p className="mt-0.5 text-lg font-black text-text-primary tabular-nums">
-                  {metrics ? metrics.totalAssigned : leads.length}
-                </p>
+            <div className="flex items-center divide-x divide-border border border-border bg-surface shadow-2xs">
+              <div className="px-5 py-3 text-center min-w-[5.5rem]">
+                <p className="text-[9px] font-bold uppercase tracking-[0.14em] text-text-muted">Assigned</p>
+                <p className="mt-1 text-2xl font-bold tabular-nums text-text-primary">{metrics ? metrics.totalAssigned : leads.length}</p>
               </div>
-
-              <div className="rounded-lg border border-border-subtle bg-surface-subtle/70 px-2.5 py-2">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-rose-700 dark:text-rose-400 flex items-center gap-1">
-                  <Flame className="h-3 w-3 text-rose-600 dark:text-rose-400" />
-                  High Priority
-                </span>
-                <p className="mt-0.5 text-lg font-black text-rose-700 dark:text-rose-400 tabular-nums">
-                  {displayMetrics.highPriority}
-                </p>
+              <div className="px-5 py-3 text-center min-w-[5.5rem]">
+                <p className="text-[9px] font-bold uppercase tracking-[0.14em] text-text-muted">Priority</p>
+                <p className="mt-1 text-2xl font-bold tabular-nums text-error">{displayMetrics.highPriority}</p>
               </div>
-
-              <div className="rounded-lg border border-border-subtle bg-surface-subtle/70 px-2.5 py-2">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400 flex items-center gap-1">
-                  <Target className="h-3 w-3 text-emerald-600 dark:text-emerald-400" />
-                  In Progress
-                </span>
-                <p className="mt-0.5 text-lg font-black text-emerald-700 dark:text-emerald-400 tabular-nums">
-                  {displayMetrics.inProgressCount}
-                </p>
-              </div>
-
-              <div className="rounded-lg border border-border-subtle bg-surface-subtle/70 px-2.5 py-2">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-amber-700 dark:text-amber-400 flex items-center gap-1">
-                  <Trophy className="h-3 w-3 text-amber-500" />
-                  Total Points
-                </span>
-                <p className="mt-0.5 text-lg font-black text-text-primary tabular-nums">
-                  {pointsSummary?.totalPoints ?? 0}
-                </p>
+              <div className="px-5 py-3 text-center min-w-[5.5rem]">
+                <p className="text-[9px] font-bold uppercase tracking-[0.14em] text-text-muted">Points</p>
+                <p className="mt-1 text-2xl font-bold tabular-nums text-primary">{pointsSummary?.totalPoints ?? 0}</p>
               </div>
             </div>
           </div>
-
-          {/* RIGHT Integrated Editorial Artwork (Desktop / Tablet) */}
-          <PrarohaHeroVisual
-            variant="dashboard-hero"
-            className="w-[44%] lg:w-[46%]"
-            priority
-          />
-        </div>
+        </header>
       </SectionErrorBoundary>
 
       {/* 2. Today's Outreach Command Bar */}
@@ -171,24 +145,20 @@ export default function VolunteerDashboardPage() {
         <TodayWorkBar
           metrics={displayMetrics}
           onOpenEventDeck={openEventInfo}
-          onQuickAction={() => {
-            if (prioritizedLeads.length > 0) {
-              const topLead = prioritizedLeads[0];
-              startCallMode(topLead);
-            }
-          }}
+          onQuickAction={handleStartNextCall}
         />
       </SectionErrorBoundary>
 
       {/* 3. Action-First Priority Leads Section */}
       <SectionErrorBoundary sectionTitle="Assigned Leads Queue">
-        <div className="space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <section aria-labelledby="assigned-leads-heading" className="space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
             <div>
-              <h2 className="text-base font-bold text-text-primary tracking-tight">
+              <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-text-muted">Active Pipeline</p>
+              <h2 id="assigned-leads-heading" className="mt-1 text-base font-bold text-text-primary tracking-tight">
                 My Assigned Leads
               </h2>
-              <p className="text-xs text-text-secondary">
+              <p className="mt-0.5 text-xs text-text-secondary">
                 Urgent callbacks and high-priority accounts surfaced first for action
               </p>
             </div>
@@ -198,7 +168,7 @@ export default function VolunteerDashboardPage() {
                 <Button
                   variant="outline"
                   size="sm"
-                  className="text-xs font-semibold text-primary hover:bg-accent-mint/30 border-border"
+                  className="text-xs font-semibold text-primary border-border hover:bg-surface-subtle"
                 >
                   <span>View All Leads ({leads.length})</span>
                   <ArrowRight className="h-3.5 w-3.5 ml-1.5" />
@@ -215,8 +185,11 @@ export default function VolunteerDashboardPage() {
             onTabChange={setActiveTab}
             onSelectLead={(companyId) => openCompanyDossier(companyId)}
             onStartCall={(lead) => startCallMode(lead)}
+            onOpenEventDeck={openEventInfo}
+            onOpenLeaderboard={openLeaderboard}
+            volunteerName={firstName}
           />
-        </div>
+        </section>
       </SectionErrorBoundary>
     </div>
   );

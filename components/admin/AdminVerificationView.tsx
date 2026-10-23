@@ -9,6 +9,8 @@ import { VerificationBadge, RoleBadge } from "@/components/ui/badge";
 import { Dialog } from "@/components/ui/dialog";
 import { EmptyState } from "@/components/ui/empty-state";
 import { formatDate } from "@/lib/utils";
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
+import { AdminKpiStrip } from "@/components/admin/AdminKpiStrip";
 import {
   CheckCircle,
   XCircle,
@@ -28,6 +30,8 @@ import {
   PhoneCall,
   Award,
   Sparkles,
+  Copy,
+  Check,
 } from "lucide-react";
 import { Id } from "@/convex/_generated/dataModel";
 
@@ -35,6 +39,7 @@ export function AdminVerificationView() {
   const { user } = useAuthUser();
   const [activeTab, setActiveTab] = useState<"pending" | "approved" | "rejected" | "suspended" | "all">("pending");
   const [searchQuery, setSearchQuery] = useState("");
+  const [copiedRegLink, setCopiedRegLink] = useState(false);
 
   // Inspect User Modal
   const [inspectUserId, setInspectUserId] = useState<Id<"users"> | null>(null);
@@ -167,36 +172,95 @@ export function AdminVerificationView() {
   const rejectedCount = (allUsers || []).filter((u) => u.verificationStatus === "rejected").length;
   const suspendedCount = (allUsers || []).filter((u) => u.verificationStatus === "suspended").length;
 
-  return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-text-primary">
-            Volunteer & Team Management
-          </h1>
-          <p className="mt-1 text-xs text-text-secondary">
-            Audit SDR registrations, adjust permissions, monitor workload velocity, and grant outreach clearances.
-          </p>
-        </div>
-      </div>
+  const kpiItems = [
+    {
+      label: "Pending Review",
+      value: pendingCount,
+      subtext: "Applications awaiting clearance",
+      icon: AlertTriangle,
+      variant: (pendingCount > 0 ? "warning" : "neutral") as "warning" | "neutral",
+    },
+    {
+      label: "Approved SDRs",
+      value: approvedCount,
+      subtext: "Active outreach volunteers",
+      icon: UserCheck,
+      variant: "success" as const,
+    },
+    {
+      label: "Rejected",
+      value: rejectedCount,
+      subtext: "Denied registrations",
+      icon: XCircle,
+      variant: (rejectedCount > 0 ? "error" : "neutral") as "error" | "neutral",
+    },
+    {
+      label: "Total Volunteers",
+      value: (allUsers || []).length,
+      subtext: "Total registered in database",
+      icon: ShieldCheck,
+      variant: "primary" as const,
+    },
+  ];
 
-      {/* Main Table Card */}
-      <div className="rounded-xl border border-border bg-surface p-5 shadow-xs">
-        {/* Navigation Tabs */}
-        <div className="flex items-center gap-2 border-b border-border-subtle pb-4 overflow-x-auto text-xs">
+  return (
+    <div className="space-y-8">
+      {/* Editorial Header */}
+      <AdminPageHeader
+        category="VOLUNTEER OPERATIONS"
+        title="Volunteer verification."
+        description="Audit SDR registrations, adjust permissions, monitor workload velocity, and grant outreach clearances."
+        actions={
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              if (typeof window !== "undefined") {
+                navigator.clipboard.writeText(
+                  window.location.origin + "/register/profile"
+                );
+                setCopiedRegLink(true);
+                setTimeout(() => setCopiedRegLink(false), 2000);
+              }
+            }}
+            className="text-xs border-border"
+          >
+            {copiedRegLink ? (
+              <>
+                <Check className="h-3.5 w-3.5 mr-1.5 text-emerald-600" />
+                Registration Link Copied!
+              </>
+            ) : (
+              <>
+                <Copy className="h-3.5 w-3.5 mr-1.5" />
+                Copy Registration Link
+              </>
+            )}
+          </Button>
+        }
+      />
+
+      {/* KPI Strip */}
+      <AdminKpiStrip items={kpiItems} columns={4} />
+
+      {/* Main Table Container */}
+      <div className="border border-border bg-surface overflow-hidden">
+        {/* Underline Tabs */}
+        <div className="flex items-center gap-6 px-6 pt-4 border-b border-border-subtle overflow-x-auto text-xs">
           <button
             onClick={() => setActiveTab("pending")}
-            className={`flex items-center gap-2 rounded-lg px-3 py-1.5 font-semibold transition-colors cursor-pointer ${
+            className={`border-b-2 pb-3 font-semibold transition-colors cursor-pointer flex items-center gap-2 ${
               activeTab === "pending"
-                ? "bg-amber-500 text-white shadow-xs"
-                : "text-text-secondary hover:bg-surface-subtle hover:text-text-primary"
+                ? "border-primary text-primary"
+                : "border-transparent text-text-muted hover:text-text-primary"
             }`}
           >
             Pending Verification
             <span
-              className={`rounded-full px-1.5 py-0.2 text-[10px] font-bold ${
-                activeTab === "pending" ? "bg-black/20 text-white" : "bg-amber-100 text-amber-800"
+              className={`rounded px-1.5 py-0.5 text-[10px] font-bold ${
+                activeTab === "pending"
+                  ? "bg-primary/10 text-primary"
+                  : "bg-surface-subtle text-text-muted"
               }`}
             >
               {pendingCount}
@@ -205,16 +269,18 @@ export function AdminVerificationView() {
 
           <button
             onClick={() => setActiveTab("approved")}
-            className={`flex items-center gap-2 rounded-lg px-3 py-1.5 font-medium transition-colors cursor-pointer ${
+            className={`border-b-2 pb-3 font-semibold transition-colors cursor-pointer flex items-center gap-2 ${
               activeTab === "approved"
-                ? "bg-primary text-white shadow-xs"
-                : "text-text-secondary hover:bg-surface-subtle hover:text-text-primary"
+                ? "border-primary text-primary"
+                : "border-transparent text-text-muted hover:text-text-primary"
             }`}
           >
             Approved Volunteers
             <span
-              className={`rounded-full px-1.5 py-0.2 text-[10px] font-bold ${
-                activeTab === "approved" ? "bg-black/20 text-white" : "bg-surface-subtle text-text-muted"
+              className={`rounded px-1.5 py-0.5 text-[10px] font-bold ${
+                activeTab === "approved"
+                  ? "bg-primary/10 text-primary"
+                  : "bg-surface-subtle text-text-muted"
               }`}
             >
               {approvedCount}
@@ -223,16 +289,18 @@ export function AdminVerificationView() {
 
           <button
             onClick={() => setActiveTab("rejected")}
-            className={`flex items-center gap-2 rounded-lg px-3 py-1.5 font-medium transition-colors cursor-pointer ${
+            className={`border-b-2 pb-3 font-semibold transition-colors cursor-pointer flex items-center gap-2 ${
               activeTab === "rejected"
-                ? "bg-rose-600 text-white shadow-xs"
-                : "text-text-secondary hover:bg-surface-subtle hover:text-text-primary"
+                ? "border-primary text-primary"
+                : "border-transparent text-text-muted hover:text-text-primary"
             }`}
           >
             Rejected
             <span
-              className={`rounded-full px-1.5 py-0.2 text-[10px] font-bold ${
-                activeTab === "rejected" ? "bg-black/20 text-white" : "bg-surface-subtle text-text-muted"
+              className={`rounded px-1.5 py-0.5 text-[10px] font-bold ${
+                activeTab === "rejected"
+                  ? "bg-primary/10 text-primary"
+                  : "bg-surface-subtle text-text-muted"
               }`}
             >
               {rejectedCount}
@@ -241,16 +309,18 @@ export function AdminVerificationView() {
 
           <button
             onClick={() => setActiveTab("suspended")}
-            className={`flex items-center gap-2 rounded-lg px-3 py-1.5 font-medium transition-colors cursor-pointer ${
+            className={`border-b-2 pb-3 font-semibold transition-colors cursor-pointer flex items-center gap-2 ${
               activeTab === "suspended"
-                ? "bg-amber-700 text-white shadow-xs"
-                : "text-text-secondary hover:bg-surface-subtle hover:text-text-primary"
+                ? "border-primary text-primary"
+                : "border-transparent text-text-muted hover:text-text-primary"
             }`}
           >
             Suspended
             <span
-              className={`rounded-full px-1.5 py-0.2 text-[10px] font-bold ${
-                activeTab === "suspended" ? "bg-black/20 text-white" : "bg-surface-subtle text-text-muted"
+              className={`rounded px-1.5 py-0.5 text-[10px] font-bold ${
+                activeTab === "suspended"
+                  ? "bg-primary/10 text-primary"
+                  : "bg-surface-subtle text-text-muted"
               }`}
             >
               {suspendedCount}
@@ -259,18 +329,27 @@ export function AdminVerificationView() {
 
           <button
             onClick={() => setActiveTab("all")}
-            className={`flex items-center gap-2 rounded-lg px-3 py-1.5 font-medium transition-colors cursor-pointer ${
+            className={`border-b-2 pb-3 font-semibold transition-colors cursor-pointer flex items-center gap-2 ${
               activeTab === "all"
-                ? "bg-text-primary text-white shadow-xs"
-                : "text-text-secondary hover:bg-surface-subtle hover:text-text-primary"
+                ? "border-primary text-primary"
+                : "border-transparent text-text-muted hover:text-text-primary"
             }`}
           >
-            All Registered ({(allUsers || []).length})
+            All Registered
+            <span
+              className={`rounded px-1.5 py-0.5 text-[10px] font-bold ${
+                activeTab === "all"
+                  ? "bg-primary/10 text-primary"
+                  : "bg-surface-subtle text-text-muted"
+              }`}
+            >
+              {(allUsers || []).length}
+            </span>
           </button>
         </div>
 
         {/* Search Filter Bar */}
-        <div className="flex items-center justify-between py-3 border-b border-border-subtle">
+        <div className="flex items-center justify-between p-4 border-b border-border-subtle bg-surface-subtle/30">
           <div className="relative w-full max-w-sm">
             <Search className="pointer-events-none absolute left-3 top-2.5 h-3.5 w-3.5 text-text-muted" />
             <input
@@ -278,7 +357,7 @@ export function AdminVerificationView() {
               placeholder="Filter by name, phone, department, or email..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="h-8 w-full rounded-lg border border-border bg-surface-subtle pl-8 pr-3 text-xs text-text-primary placeholder:text-text-muted focus:border-primary focus:bg-surface focus:outline-none"
+              className="h-8 w-full border border-border bg-background pl-8 pr-3 text-xs text-text-primary placeholder:text-text-muted focus:border-primary focus:bg-surface focus:outline-none"
             />
           </div>
         </div>
@@ -295,8 +374,38 @@ export function AdminVerificationView() {
               }
               description={
                 activeTab === "pending"
-                  ? "All volunteer applications have been reviewed. New submissions will appear here automatically."
+                  ? "All volunteer applications have been reviewed. Share the student onboarding link to register new committee SDRs."
                   : "Try clearing your search query or switching tabs."
+              }
+              action={
+                activeTab === "pending" ? (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      if (typeof window !== "undefined") {
+                        navigator.clipboard.writeText(
+                          window.location.origin + "/register/profile"
+                        );
+                        setCopiedRegLink(true);
+                        setTimeout(() => setCopiedRegLink(false), 2000);
+                      }
+                    }}
+                    className="text-xs border-border"
+                  >
+                    {copiedRegLink ? (
+                      <>
+                        <Check className="h-3.5 w-3.5 mr-1.5 text-emerald-600" />
+                        Registration Link Copied!
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="h-3.5 w-3.5 mr-1.5" />
+                        Copy Volunteer Registration Link
+                      </>
+                    )}
+                  </Button>
+                ) : undefined
               }
             />
           </div>

@@ -7,7 +7,6 @@ import {
   UserCheck,
   Building2,
   Users2,
-  PhoneCall,
   FileCheck2,
   Award,
   BarChart3,
@@ -30,108 +29,87 @@ export function AdminSidebar() {
       icon: BarChart3,
       href: "/admin",
       isActive: pathname === "/admin",
-      badge: "Active",
     },
     {
       label: "Volunteer Verification",
       icon: UserCheck,
       href: "/admin/verifications",
       isActive: pathname.startsWith("/admin/verifications"),
-      badge: "Active",
     },
     {
       label: "Master Lead Directory",
       icon: Building2,
       href: "/admin/leads",
       isActive: pathname.startsWith("/admin/leads"),
-      badge: "Active",
     },
     {
       label: "Lead Allocation Matrix",
       icon: Users2,
       href: "/admin/assignments",
       isActive: pathname.startsWith("/admin/assignments"),
-      badge: "Active",
     },
     {
       label: "Sponsorship Commitments",
       icon: FileCheck2,
       href: "/admin/commitments",
       isActive: pathname.startsWith("/admin/commitments"),
-      badge: "Active",
     },
     {
       label: "Audit & Data Export",
       icon: BarChart3,
       href: "/admin/analytics",
       isActive: pathname.startsWith("/admin/analytics"),
-      badge: "Active",
     },
     {
       label: "Honors Leaderboard",
       icon: Award,
       href: "/admin/leaderboard",
       isActive: pathname.startsWith("/admin/leaderboard"),
-      badge: "Active",
     },
     {
       label: "Data Management",
       icon: Database,
       href: "/admin/data-management",
       isActive: pathname.startsWith("/admin/data-management"),
-      badge: "Active",
     },
   ];
 
   return (
-    <aside className="flex h-screen w-64 flex-col justify-between border-r border-border bg-surface select-none">
+    <aside className="flex h-screen w-60 flex-col justify-between border-r border-border bg-sidebar-background select-none">
       <div>
-        <div className="flex items-center gap-3 px-6 py-5 border-b border-border-subtle">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-sky-50 dark:bg-sky-950/60 text-sky-700 dark:text-sky-300">
+        <div className="flex items-center gap-3 border-b border-border-subtle px-4 py-4">
+          <div className="flex h-8 w-8 items-center justify-center bg-primary text-primary-foreground">
             <ShieldAlert className="h-6 w-6" />
           </div>
           <div>
             <h1 className="text-base font-bold tracking-tight text-text-primary leading-tight">
-              PRAROHA'26
+              PRAROHA&apos;26
             </h1>
-            <p className="text-[11px] font-semibold text-sky-700 dark:text-sky-400 leading-none mt-0.5">
-              Admin Leadership Cockpit
+            <p className="mt-0.5 text-[11px] font-semibold leading-none text-primary">
+              Sponsorship control room
             </p>
           </div>
         </div>
 
-        <nav className="space-y-1 px-3 py-4">
+        <nav className="space-y-0.5 px-2.5 py-4">
           {adminNavItems.map((item) => {
             const Icon = item.icon;
             return (
               <Link
                 key={item.label}
                 href={item.href}
-                className={`flex items-center justify-between rounded-xl px-3.5 py-2.5 text-xs font-semibold transition-all ${
-                  item.isActive
-                    ? "bg-sky-50 dark:bg-sky-950/60 text-sky-900 dark:text-sky-200 shadow-xs font-bold"
-                    : "text-text-secondary hover:text-text-primary hover:bg-surface-subtle"
-                }`}
+                className={`flex items-center justify-between border-l-2 px-3 py-2.5 text-xs font-semibold transition-colors ${item.isActive
+                    ? "border-primary bg-sidebar-active text-text-primary font-bold"
+                    : "border-transparent text-text-secondary hover:border-border-strong hover:bg-surface-subtle hover:text-text-primary"
+                  }`}
               >
                 <div className="flex items-center gap-3">
                   <Icon
-                    className={`h-4 w-4 transition-colors ${
-                      item.isActive ? "text-sky-700 dark:text-sky-400" : "text-text-muted"
-                    }`}
+                    className={`h-4 w-4 transition-colors ${item.isActive ? "text-primary" : "text-text-muted"
+                      }`}
                   />
                   <span>{item.label}</span>
                 </div>
-                {item.badge && (
-                  <span
-                    className={`text-[10px] rounded px-1.5 py-0.2 font-mono font-medium ${
-                      item.isActive
-                        ? "bg-sky-100 dark:bg-sky-900/60 text-sky-800 dark:text-sky-300"
-                        : "bg-surface-subtle text-text-muted border border-border-subtle"
-                    }`}
-                  >
-                    {item.badge}
-                  </span>
-                )}
               </Link>
             );
           })}
@@ -142,32 +120,29 @@ export function AdminSidebar() {
         {/* Switch to Volunteer Workspace */}
         <Link
           href="/workspace"
-          className="flex items-center justify-between rounded-xl border border-border bg-surface-subtle px-3 py-2 text-xs font-medium text-text-secondary hover:text-text-primary hover:bg-surface transition-colors shadow-xs"
+          className="flex items-center justify-between border-l-2 border-border-strong bg-surface-subtle px-3 py-2 text-xs font-medium text-text-secondary transition-colors hover:border-primary hover:bg-surface hover:text-text-primary"
         >
           <div className="flex items-center gap-2">
             <ArrowLeft className="h-3.5 w-3.5 text-text-muted" />
             <span>Volunteer Workspace</span>
           </div>
-          <span className="rounded bg-accent-mint px-1.5 py-0.5 text-[10px] font-semibold text-accent-mint-text">
-            Live
-          </span>
         </Link>
 
         {/* User Profile */}
         <div className="relative border-t border-border-subtle pt-2">
           <div
             onClick={() => setShowUserMenu(!showUserMenu)}
-            className="flex items-center justify-between rounded-xl p-2 hover:bg-surface-subtle transition-colors cursor-pointer"
+            className="flex items-center justify-between p-2 hover:bg-surface-subtle transition-colors cursor-pointer"
           >
             <div className="flex items-center gap-2.5 truncate">
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-sky-700 text-xs font-bold text-white shadow-xs">
-                AD
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center bg-primary text-xs font-bold text-primary-foreground">
+                {(profile?.name || user?.fullName || "AD").split(" ").map((part) => part[0]).join("").slice(0, 2).toUpperCase()}
               </div>
               <div className="truncate text-left">
                 <p className="truncate text-xs font-semibold text-text-primary">
                   {profile?.name || user?.fullName || "Admin"}
                 </p>
-                <p className="truncate text-[10px] font-medium text-sky-700 dark:text-sky-400">
+                <p className="truncate text-[10px] font-medium text-primary">
                   Sponsorship Head
                 </p>
               </div>

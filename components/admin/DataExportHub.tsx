@@ -68,26 +68,26 @@ export function DataExportHub() {
   return (
     <div className="space-y-6">
       {/* Notice Banner */}
-      <div className="flex items-center gap-3 p-4 rounded-xl border border-sky-200 bg-sky-50 text-sky-900 text-xs">
-        <ShieldCheck className="h-5 w-5 text-sky-700 shrink-0" />
+      <div className="flex items-center gap-3 p-4 border border-border bg-surface-subtle text-xs text-text-primary">
+        <ShieldCheck className="h-5 w-5 text-primary shrink-0" />
         <div>
-          <p className="font-bold">Administrative Confidential Export Authority</p>
-          <p className="text-[11px] text-sky-800 mt-0.5">
+          <p className="font-bold text-text-primary">Administrative Confidential Export Authority</p>
+          <p className="text-[11px] text-text-secondary mt-0.5">
             Exports are generated directly from real-time Convex collections in canonical RFC-4180 CSV formats. All export operations are recorded in the audit trail.
           </p>
         </div>
       </div>
 
-      {/* 4 Export Bento Cards */}
+      {/* 4 Export Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Card 1: Master Companies */}
-        <div className="flex flex-col justify-between p-5 rounded-2xl border border-border bg-surface shadow-xs hover:border-primary/40 transition-colors">
+        <div className="flex flex-col justify-between p-5 border border-border bg-surface shadow-xs hover:border-primary/40 transition-colors">
           <div>
             <div className="flex items-center justify-between mb-4">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-teal-50 text-teal-700">
-                <Building2 className="h-5 w-5" />
+              <div className="flex h-9 w-9 items-center justify-center rounded-md bg-accent-mint text-primary">
+                <Building2 className="h-4 w-4" />
               </div>
-              <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-teal-50 text-teal-800 border border-teal-200">
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded border border-primary/20 bg-accent-mint text-primary">
                 29 Canonical Fields
               </span>
             </div>
@@ -120,13 +120,13 @@ export function DataExportHub() {
         </div>
 
         {/* Card 2: Call History & Debriefs */}
-        <div className="flex flex-col justify-between p-5 rounded-2xl border border-border bg-surface shadow-xs hover:border-sky-400 transition-colors">
+        <div className="flex flex-col justify-between p-5 border border-border bg-surface shadow-xs hover:border-primary/40 transition-colors">
           <div>
             <div className="flex items-center justify-between mb-4">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-sky-50 text-sky-700">
-                <PhoneCall className="h-5 w-5" />
+              <div className="flex h-9 w-9 items-center justify-center rounded-md bg-accent-blue text-accent-blue-text">
+                <PhoneCall className="h-4 w-4" />
               </div>
-              <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-sky-50 text-sky-800 border border-sky-200">
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded border border-border bg-surface-subtle text-text-secondary">
                 Audited Logs
               </span>
             </div>
@@ -150,7 +150,7 @@ export function DataExportHub() {
             <button
               onClick={handleExportCalls}
               disabled={!callsData || callsData.length === 0}
-              className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl font-bold text-xs bg-sky-700 hover:bg-sky-800 text-white shadow-xs transition-colors cursor-pointer disabled:opacity-50"
+              className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-md font-bold text-xs bg-primary hover:bg-primary-hover text-white shadow-xs transition-colors cursor-pointer disabled:opacity-50"
             >
               <ArrowDownToLine className="h-4 w-4" />
               {downloadingType === "calls" ? "Generating CSV..." : "Export Call Logs CSV"}
@@ -159,13 +159,13 @@ export function DataExportHub() {
         </div>
 
         {/* Card 3: Sponsorship Commitments */}
-        <div className="flex flex-col justify-between p-5 rounded-2xl border border-border bg-surface shadow-xs hover:border-emerald-400 transition-colors">
+        <div className="flex flex-col justify-between p-5 border border-border bg-surface shadow-xs hover:border-primary/40 transition-colors">
           <div>
             <div className="flex items-center justify-between mb-4">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700">
-                <Award className="h-5 w-5" />
+              <div className="flex h-9 w-9 items-center justify-center rounded-md bg-accent-mint text-success">
+                <Award className="h-4 w-4" />
               </div>
-              <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200">
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded border border-primary/20 bg-accent-mint text-success">
                 Ratified Deals
               </span>
             </div>
@@ -189,7 +189,7 @@ export function DataExportHub() {
             <button
               onClick={handleExportCommitments}
               disabled={!commitmentsData || commitmentsData.length === 0}
-              className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl font-bold text-xs bg-emerald-700 hover:bg-emerald-800 text-white shadow-xs transition-colors cursor-pointer disabled:opacity-50"
+              className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-md font-bold text-xs bg-primary hover:bg-primary-hover text-white shadow-xs transition-colors cursor-pointer disabled:opacity-50"
             >
               <ArrowDownToLine className="h-4 w-4" />
               {downloadingType === "commitments" ? "Generating CSV..." : "Export Commitments CSV"}
@@ -198,13 +198,13 @@ export function DataExportHub() {
         </div>
 
         {/* Card 4: Administrative Audit Trail */}
-        <div className="flex flex-col justify-between p-5 rounded-2xl border border-border bg-surface shadow-xs hover:border-purple-400 transition-colors">
+        <div className="flex flex-col justify-between p-5 border border-border bg-surface shadow-xs hover:border-primary/40 transition-colors">
           <div>
             <div className="flex items-center justify-between mb-4">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-purple-50 text-purple-700">
-                <ShieldCheck className="h-5 w-5" />
+              <div className="flex h-9 w-9 items-center justify-center rounded-md bg-surface-subtle text-text-primary">
+                <ShieldCheck className="h-4 w-4" />
               </div>
-              <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-purple-50 text-purple-800 border border-purple-200">
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded border border-border bg-surface-subtle text-text-secondary">
                 System Audit
               </span>
             </div>
@@ -228,7 +228,7 @@ export function DataExportHub() {
             <button
               onClick={handleExportAuditLogs}
               disabled={!auditLogsData || auditLogsData.length === 0}
-              className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl font-bold text-xs bg-purple-700 hover:bg-purple-800 text-white shadow-xs transition-colors cursor-pointer disabled:opacity-50"
+              className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-md font-bold text-xs bg-primary hover:bg-primary-hover text-white shadow-xs transition-colors cursor-pointer disabled:opacity-50"
             >
               <ArrowDownToLine className="h-4 w-4" />
               {downloadingType === "audit_logs" ? "Generating CSV..." : "Export Audit Trail CSV"}

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { Suspense, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useAuthUser, devLog } from "@/components/providers/AuthProvider";
 import { AdminSidebar } from "@/components/layout/AdminSidebar";
 import { Navbar } from "@/components/layout/Navbar";
@@ -9,6 +9,7 @@ import { ShieldAlert, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AuthErrorFallback } from "@/components/ui/error-boundary";
 import Link from "next/link";
+import { buildSignInUrl } from "@/lib/authRedirect";
 
 function AdminLayoutContent({
   children,
@@ -16,6 +17,7 @@ function AdminLayoutContent({
   children: React.ReactNode;
 }) {
   const router = useRouter();
+  const pathname = usePathname();
   const {
     authState,
     authError,
@@ -28,9 +30,9 @@ function AdminLayoutContent({
   useEffect(() => {
     devLog("AUTH", `AdminLayout: authState = ${authState}, role = ${role}`);
     if (authState === "UNAUTHENTICATED") {
-      router.push("/sign-in");
+      router.replace(buildSignInUrl(pathname));
     }
-  }, [authState, role, router]);
+  }, [authState, pathname, role, router]);
 
   if (authState === "ERROR") {
     return (

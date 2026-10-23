@@ -1,22 +1,99 @@
 "use client";
 
 import React, { createContext, useContext, useState } from "react";
+import dynamic from "next/dynamic";
 import { Id } from "@/convex/_generated/dataModel";
-import { QuickCallOutcome } from "@/types";
+import { CompanyContact, ContactVerificationLevel, LeadStage, PhoneType, PriorityLevel, QuickCallOutcome } from "@/types";
 import { Dialog } from "@/components/ui/dialog";
-import { CallModeOverlay } from "@/components/volunteer/CallModeOverlay";
-import { CallReportModal } from "@/components/volunteer/CallReportModal";
-import { CompanyDossierDrawer } from "@/components/admin/CompanyDossierDrawer";
-import { EventInfoModal } from "@/components/volunteer/EventInfoModal";
-import { LeaderboardPodium } from "@/components/volunteer/LeaderboardPodium";
+
+// Dynamically code-split heavy overlays so initial /workspace load is instant
+const CompanyDossierDrawer = dynamic(
+  () => import("@/components/admin/CompanyDossierDrawer").then((mod) => mod.CompanyDossierDrawer),
+  { ssr: false }
+);
+
+const CallModeOverlay = dynamic(
+  () => import("@/components/volunteer/CallModeOverlay").then((mod) => mod.CallModeOverlay),
+  { ssr: false }
+);
+
+const CallReportModal = dynamic(
+  () => import("@/components/volunteer/CallReportModal").then((mod) => mod.CallReportModal),
+  { ssr: false }
+);
+
+const EventInfoModal = dynamic(
+  () => import("@/components/volunteer/EventInfoModal").then((mod) => mod.EventInfoModal),
+  { ssr: false }
+);
+
+const LeaderboardPodium = dynamic(
+  () => import("@/components/volunteer/LeaderboardPodium").then((mod) => mod.LeaderboardPodium),
+  { ssr: false }
+);
 
 interface WorkspaceContextType {
   openCompanyDossier: (companyId: Id<"companies">) => void;
   closeCompanyDossier: () => void;
-  startCallMode: (lead: any) => void;
-  openDebriefModal: (lead: any, callData?: any) => void;
+  startCallMode: (lead: WorkspaceLeadInput) => void;
+  openDebriefModal: (lead: WorkspaceLeadInput, callData?: CallData) => void;
   openEventInfo: () => void;
   openLeaderboard: () => void;
+}
+
+export interface WorkspaceLeadInput {
+  _id?: Id<"companies">;
+  companyId?: Id<"companies">;
+  companyName?: string;
+  industry?: string;
+  niche?: string;
+  priority?: PriorityLevel;
+  leadStatus?: LeadStage;
+  location?: string;
+  keralaPresence?: string;
+  sponsorshipHistory?: string;
+  whyGoodLead?: string;
+  whyCompanyBenefits?: string;
+  alternativeSupport?: string;
+  phone?: string;
+  phoneType?: PhoneType;
+  contactName?: string;
+  contactDesignation?: string;
+  designation?: string;
+  contactVerification?: ContactVerificationLevel;
+  email?: string;
+  primaryContact?: Partial<CompanyContact> | null;
+  contacts?: CompanyContact[];
+}
+
+interface WorkspaceLead {
+  _id: Id<"companies">;
+  companyName: string;
+  industry: string;
+  niche: string;
+  priority: PriorityLevel;
+  leadStatus: LeadStage;
+  location?: string;
+  keralaPresence?: string;
+  sponsorshipHistory?: string;
+  whyGoodLead?: string;
+  whyCompanyBenefits?: string;
+  alternativeSupport?: string;
+  primaryContact: {
+    contactName: string;
+    designation: string;
+    phone: string;
+    phoneType: PhoneType;
+    contactVerification: ContactVerificationLevel;
+    email?: string;
+  } | null;
+}
+
+interface CallData {
+  outcome: QuickCallOutcome;
+  durationSeconds: number;
+  startedAt: number;
+  endedAt: number;
 }
 
 const WorkspaceContext = createContext<WorkspaceContextType | undefined>(undefined);
@@ -27,7 +104,7 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
   const [isLeaderboardOpen, setIsLeaderboardOpen] = useState(false);
 
   // Call Mode & Debrief state
-  const [callLead, setCallLead] = useState<any | null>(null);
+  const [callLead, setCallLead] = useState<WorkspaceLead | null>(null);
   const [isCallModeOpen, setIsCallModeOpen] = useState(false);
   const [isDebriefModalOpen, setIsDebriefModalOpen] = useState(false);
   const [debriefCallData, setDebriefCallData] = useState<{
@@ -38,8 +115,8 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
   }>({
     outcome: "Interested",
     durationSeconds: 0,
-    startedAt: Date.now(),
-    endedAt: Date.now(),
+    startedAt: 0,
+    endedAt: 0,
   });
 
   const openCompanyDossier = (companyId: Id<"companies">) => {
@@ -50,22 +127,34 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
     setSelectedCompanyId(null);
   };
 
-  const normalizeLead = (lead: any) => {
+  const normalizeLead = (lead: WorkspaceLeadInput | null): WorkspaceLead | null => {
     if (!lead) return null;
+    const companyId = lead._id || lead.companyId;
+    if (!companyId) return null;
+    const contact = lead.primaryContact || (lead.contacts && (lead.contacts.find((item) => item.isPrimary) || lead.contacts[0]));
     return {
-      ...lead,
-      _id: lead._id || lead.companyId,
+      _id: companyId,
       companyName: lead.companyName || "",
       industry: lead.industry || "",
       niche: lead.niche || "",
       priority: lead.priority || "Normal",
       leadStatus: lead.leadStatus || "CONTACTED",
-      primaryContact:
-        lead.primaryContact ||
-        (lead.contacts
-          ? lead.contacts.find((c: any) => c.isPrimary) || lead.contacts[0]
-          : null) ||
-        (lead.contactName
+      location: lead.location,
+      keralaPresence: lead.keralaPresence,
+      sponsorshipHistory: lead.sponsorshipHistory,
+      whyGoodLead: lead.whyGoodLead,
+      whyCompanyBenefits: lead.whyCompanyBenefits,
+      alternativeSupport: lead.alternativeSupport,
+      primaryContact: contact
+        ? {
+            contactName: contact.contactName || "",
+            designation: contact.designation || "",
+            phone: contact.phone || "",
+            phoneType: contact.phoneType || "unknown",
+            contactVerification: contact.contactVerification || "UNVERIFIED",
+            email: contact.email,
+          }
+        : lead.contactName
           ? {
               contactName: lead.contactName,
               designation: lead.contactDesignation || lead.designation || "",
@@ -74,16 +163,16 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
               contactVerification: lead.contactVerification || "UNVERIFIED",
               email: lead.email || undefined,
             }
-          : null),
+          : null,
     };
   };
 
-  const startCallMode = (lead: any) => {
+  const startCallMode = (lead: WorkspaceLeadInput) => {
     setCallLead(normalizeLead(lead));
     setIsCallModeOpen(true);
   };
 
-  const openDebriefModal = (lead: any, callData?: any) => {
+  const openDebriefModal = (lead: WorkspaceLeadInput, callData?: CallData) => {
     setCallLead(normalizeLead(lead));
     if (callData) {
       setDebriefCallData(callData);
@@ -120,16 +209,18 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
     >
       {children}
 
-      {/* Slide-over Company & Contact Dossier Drawer */}
-      <CompanyDossierDrawer
-        companyId={selectedCompanyId}
-        isOpen={Boolean(selectedCompanyId)}
-        onClose={closeCompanyDossier}
-        onStartCall={startCallMode}
-      />
+      {/* Slide-over Company & Contact Dossier Drawer: Loaded on demand */}
+      {selectedCompanyId && (
+        <CompanyDossierDrawer
+          companyId={selectedCompanyId}
+          isOpen={Boolean(selectedCompanyId)}
+          onClose={closeCompanyDossier}
+          onStartCall={startCallMode}
+        />
+      )}
 
-      {/* Live Minimal In-Call Stopwatch & Quick Outcome Overlay */}
-      {callLead && (
+      {/* Live Minimal In-Call Stopwatch & Quick Outcome Overlay: Loaded on demand */}
+      {callLead && isCallModeOpen && (
         <CallModeOverlay
           isOpen={isCallModeOpen}
           lead={callLead}
@@ -138,8 +229,8 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
         />
       )}
 
-      {/* Qualitative Call Debrief Modal with Voice Recording & Transcription */}
-      {callLead && (
+      {/* Qualitative Call Debrief Modal with Voice Recording & Transcription: Loaded on demand */}
+      {callLead && isDebriefModalOpen && (
         <CallReportModal
           isOpen={isDebriefModalOpen}
           lead={callLead}
@@ -158,23 +249,27 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
         />
       )}
 
-      {/* PRAROHA'26 Event Info & Pitch Deliverables Modal */}
-      <EventInfoModal
-        isOpen={isEventInfoOpen}
-        onClose={() => setIsEventInfoOpen(false)}
-      />
+      {/* PRAROHA'26 Event Info & Pitch Deliverables Modal: Loaded on demand */}
+      {isEventInfoOpen && (
+        <EventInfoModal
+          isOpen={isEventInfoOpen}
+          onClose={() => setIsEventInfoOpen(false)}
+        />
+      )}
 
-      {/* Real-Time Honors Leaderboard Podium Modal */}
-      <Dialog
-        isOpen={isLeaderboardOpen}
-        onClose={() => setIsLeaderboardOpen(false)}
-        title="Outreach Leaderboard & Points"
-        maxWidth="lg"
-      >
-        <div className="p-4 max-h-[80vh] overflow-y-auto">
-          <LeaderboardPodium />
-        </div>
-      </Dialog>
+      {/* Real-Time Honors Leaderboard Podium Modal: Loaded on demand */}
+      {isLeaderboardOpen && (
+        <Dialog
+          isOpen={isLeaderboardOpen}
+          onClose={() => setIsLeaderboardOpen(false)}
+          title="Outreach Leaderboard & Points"
+          maxWidth="lg"
+        >
+          <div className="p-4 max-h-[80vh] overflow-y-auto">
+            <LeaderboardPodium />
+          </div>
+        </Dialog>
+      )}
     </WorkspaceContext.Provider>
   );
 }

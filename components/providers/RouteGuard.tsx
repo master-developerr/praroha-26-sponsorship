@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import { usePathname, useRouter } from "next/navigation";
+import React, { useEffect } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useAuthUser, devLog } from "@/components/providers/AuthProvider";
 import { AuthErrorFallback } from "@/components/ui/error-boundary";
+import { buildSignInUrl } from "@/lib/authRedirect";
 
 interface RouteGuardProps {
   children: React.ReactNode;
@@ -18,6 +19,7 @@ interface RouteGuardProps {
 export function RouteGuard({ children, requiredRole }: RouteGuardProps) {
   const router = useRouter();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const {
     authState,
     authError,
@@ -25,47 +27,38 @@ export function RouteGuard({ children, requiredRole }: RouteGuardProps) {
     signOut,
     role,
   } = useAuthUser();
-  const [guardElapsed, setGuardElapsed] = useState(false);
-
-  // Safety timer for route guard verification
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setGuardElapsed(true);
-    }, 6000);
-    return () => clearTimeout(timer);
-  }, []);
-
   useEffect(() => {
     devLog("AUTH", `RouteGuard on "${pathname}": Current authState = ${authState}`);
+    const requestedPath = `${pathname}${searchParams.toString() ? `?${searchParams.toString()}` : ""}`;
 
     switch (authState) {
       case "UNAUTHENTICATED":
         if (pathname !== "/sign-in" && pathname !== "/sign-up" && pathname !== "/") {
-          router.push("/sign-in");
+          router.replace(buildSignInUrl(requestedPath));
         }
         break;
 
       case "PROFILE_MISSING":
         if (pathname !== "/register/profile") {
-          router.push("/register/profile");
+          router.replace("/register/profile");
         }
         break;
 
       case "PENDING":
         if (pathname !== "/pending") {
-          router.push("/pending");
+          router.replace("/pending");
         }
         break;
 
       case "REJECTED":
         if (pathname !== "/rejected") {
-          router.push("/rejected");
+          router.replace("/rejected");
         }
         break;
 
       case "SUSPENDED":
         if (pathname !== "/suspended") {
-          router.push("/suspended");
+          router.replace("/suspended");
         }
         break;
 
@@ -78,13 +71,13 @@ export function RouteGuard({ children, requiredRole }: RouteGuardProps) {
           pathname === "/register/profile" ||
           pathname === "/"
         ) {
-          router.push("/workspace");
+          router.replace("/workspace");
           return;
         }
 
         // Lock out non-admins from admin routes
         if (requiredRole === "admin") {
-          router.push("/workspace");
+          router.replace("/workspace");
         }
         break;
 
@@ -97,7 +90,7 @@ export function RouteGuard({ children, requiredRole }: RouteGuardProps) {
           pathname === "/register/profile" ||
           pathname === "/"
         ) {
-          router.push("/admin");
+          router.replace("/admin");
         }
         break;
 
@@ -107,7 +100,7 @@ export function RouteGuard({ children, requiredRole }: RouteGuardProps) {
       default:
         break;
     }
-  }, [authState, pathname, requiredRole, router]);
+  }, [authState, pathname, requiredRole, router, searchParams]);
 
   // If in an explicit error state, render recovery UI
   if (authState === "ERROR") {
@@ -117,20 +110,7 @@ export function RouteGuard({ children, requiredRole }: RouteGuardProps) {
         onRetry={retryAuth}
         onSignOut={signOut}
         title="Unable to verify credentials"
-        description="A connection error occurred while loading your profile from the PRAROHA'26 database."
-      />
-    );
-  }
-
-  // If loading exceeds 6 seconds, show safety fallback
-  if (guardElapsed && (authState === "AUTH_LOADING" || authState === "PROFILE_LOADING")) {
-    return (
-      <AuthErrorFallback
-        error="Verification request is taking longer than expected."
-        onRetry={retryAuth}
-        onSignOut={signOut}
-        title="Verifying PRAROHA'26 credentials..."
-        description="Still attempting to reach the database. You can retry the connection or sign out."
+        description="A connection error occurred while loading your profile from the PRAROHA&apos;26 database."
       />
     );
   }
@@ -142,7 +122,7 @@ export function RouteGuard({ children, requiredRole }: RouteGuardProps) {
         <div className="flex flex-col items-center gap-3">
           <div className="h-8 w-8 animate-spin rounded-full border-3 border-primary border-t-transparent" />
           <p className="text-xs font-medium text-text-secondary">
-            Verifying PRAROHA'26 credentials...
+            Verifying PRAROHA&apos;26 credentials...
           </p>
         </div>
       </div>

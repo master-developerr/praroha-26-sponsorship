@@ -9,6 +9,7 @@ import { ThemeProvider } from "@/components/providers/ThemeProvider";
 const inter = Inter({
   subsets: ["latin"],
   variable: "--font-sans",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -17,9 +18,14 @@ export const metadata: Metadata = {
     "Internal sponsorship operational cockpit for PRAROHA'26, Division of Civil Engineering, SOE CUSAT.",
 };
 
-const clerkPublishableKey =
-  process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY ||
-  "pk_test_bGl2ZS1naXJhZmZlLTIxOTAuY2xlcmsuYWNjb3VudHMuZGV2JA";
+const clerkPublishableKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
+
+if (!clerkPublishableKey) {
+  throw new Error(
+    "Missing NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY environment variable. " +
+    "Please configure NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY in .env.local"
+  );
+}
 
 export default function RootLayout({
   children,
@@ -27,7 +33,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <ClerkProvider publishableKey={clerkPublishableKey}>
+    <ClerkProvider
+      publishableKey={clerkPublishableKey}
+      signInUrl="/sign-in"
+      signUpUrl="/sign-up"
+      signInFallbackRedirectUrl="/workspace"
+      signUpFallbackRedirectUrl="/workspace"
+      afterSignOutUrl="/sign-in"
+    >
       <html lang="en" className={`${inter.variable} h-full antialiased`} suppressHydrationWarning>
         <head>
           <script

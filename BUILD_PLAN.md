@@ -1,5 +1,51 @@
 # PRAROHA'26 Sponsorship Outreach & Volunteer Execution System — Master Build Plan
 
+## Current implementation status — redesign sprint
+
+**Overall completion: 68%**
+
+| Area | Status | Notes |
+|---|---:|---|
+| P0 Foundation & outreach execution | 82% | Core auth, lead assignment, call mode, debriefs, and follow-up persistence exist. Follow-up reschedule/cancel controls were added in this sprint. |
+| P1 Sponsorship operations | 76% | Pipeline, packages, proposals, commitments, and in-kind valuation are present; cross-route QA remains. |
+| P2 AI assistance | 70% | Server-side AI routes and deterministic fallbacks exist; production credential/degraded-service QA remains. |
+| P3 Team management | 68% | Admin overview, verification, points, leaderboard, and workload views exist; responsive/theme QA remains. |
+| P4 Supporting features | 72% | Search, filters, exports, audit logs, notifications, and data management exist; baseline lint debt remains. |
+| Security and quality assurance | 46% | TypeScript and production build pass. Full route, role, responsive, empty-state, and Light/Dark matrix is not yet complete. |
+
+### Redesign sprint changes
+
+- **[COMPLETED]** Product-led landing experience using real sponsorship-workspace UI preview.
+- **[COMPLETED]** Focused split authentication frame for sign-in and sign-up without oversized decorative artwork.
+- **[COMPLETED]** Semantic Light/Dark token contract for surfaces, borders, text, input states, focus, and status colors.
+- **[COMPLETED]** Shared primitive updates for buttons, cards, badges, inputs, selects, and theme toggle.
+- **[COMPLETED]** Volunteer workspace header reframed around next action, assigned leads, priority, and points.
+- **[COMPLETED]** Removed fake generic lead payload from the workspace shell call action; it now starts only from an actual assigned lead.
+- **[COMPLETED]** Follow-up reschedule and cancel mutations with volunteer ownership checks and an accessible reschedule dialog.
+- **[COMPLETED]** Removed misleading Active/Live navigation badges and changed visible admin states to semantic tokens.
+- **[IN PROGRESS]** Full visual pass across every existing admin, volunteer, dialog, chart, and mobile surface.
+- **[IN PROGRESS]** Strict lint cleanup across legacy modules containing pre-existing `any` usage and JSX escaping issues.
+- **[NOT STARTED]** Complete manual Light/Dark × desktop/tablet/mobile QA matrix for every major route.
+
+### Remaining blockers
+
+- Full lint currently reports pre-existing errors across legacy admin, AI, Convex, and form modules; targeted changed files pass lint.
+- Manual browser verification still needs to cover authenticated Clerk/Convex states and real populated data.
+- The repository still contains a few development/security-test seed mutations; these are not rendered by production views but require an explicit deployment policy review.
+
+### Known limitations
+
+- The new public root landing page no longer acts as the authenticated central dispatcher; authenticated users should enter through the workspace/admin routes after sign-in.
+- Full visual pass across every legacy admin, volunteer, dialog, chart, and mobile surface is still pending; the highest-traffic workspace and entry surfaces have been addressed first.
+
+### QA status
+
+- TypeScript: **PASS**
+- Production build: **PASS**
+- Targeted lint on changed files: **PASS**
+- Full repository lint: **NOT PASSING** due to pre-existing legacy errors and warnings
+- Manual route/theme QA: **PENDING**
+
 **Document Version:** 2.0 (Post-Audit & Admin Operational Hardening)  
 **Classification:** Internal Operational Cockpit — School of Engineering, CUSAT (Civil Engineering Dept)  
 **Architectural Baseline:** Convex Real-Time Database + Next.js App Router (TypeScript Strict) + Clerk Auth + Tailwind CSS v4

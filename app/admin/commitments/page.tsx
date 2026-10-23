@@ -19,6 +19,8 @@ import { OpportunityApprovalModal } from "@/components/admin/OpportunityApproval
 import { CompanyDossierDrawer } from "@/components/admin/CompanyDossierDrawer";
 import { CreateCommitmentModal } from "@/components/forms/CreateCommitmentModal";
 import { EditCommitmentModal } from "@/components/forms/EditCommitmentModal";
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
+import { AdminKpiStrip } from "@/components/admin/AdminKpiStrip";
 import {
   Coins,
   Trophy,
@@ -70,14 +72,14 @@ const NEXT_STAGE_MAP: Partial<Record<LeadStage, LeadStage>> = {
 };
 
 const COMMITMENT_STATUS_STYLES: Record<string, { label: string; bg: string; text: string; border: string }> = {
-  PROSPECT: { label: "Prospect", bg: "bg-slate-50", text: "text-slate-700", border: "border-slate-200" },
-  NEGOTIATING: { label: "Negotiating", bg: "bg-purple-50", text: "text-purple-800", border: "border-purple-200" },
-  PROPOSED: { label: "Proposed", bg: "bg-blue-50", text: "text-blue-800", border: "border-blue-200" },
-  VERBAL_COMMITMENT: { label: "Verbal Agreement", bg: "bg-amber-50", text: "text-amber-800", border: "border-amber-200" },
-  CONFIRMED: { label: "Confirmed / Signed", bg: "bg-emerald-50", text: "text-emerald-800", border: "border-emerald-200" },
-  DELIVERABLES_PENDING: { label: "Deliverables Pending", bg: "bg-orange-50", text: "text-orange-800", border: "border-orange-200" },
-  COMPLETED: { label: "Completed", bg: "bg-teal-50", text: "text-teal-800", border: "border-teal-200" },
-  CANCELLED: { label: "Cancelled", bg: "bg-rose-50", text: "text-rose-800", border: "border-rose-200" },
+  PROSPECT: { label: "Prospect", bg: "bg-surface-subtle", text: "text-text-secondary", border: "border-border" },
+  NEGOTIATING: { label: "Negotiating", bg: "bg-accent-blue", text: "text-accent-blue-text", border: "border-sky-500/25" },
+  PROPOSED: { label: "Proposed", bg: "bg-accent-blue", text: "text-accent-blue-text", border: "border-sky-500/25" },
+  VERBAL_COMMITMENT: { label: "Verbal Agreement", bg: "bg-accent-yellow", text: "text-accent-yellow-text", border: "border-amber-500/25" },
+  CONFIRMED: { label: "Confirmed / Signed", bg: "bg-accent-mint", text: "text-success", border: "border-primary/20" },
+  DELIVERABLES_PENDING: { label: "Deliverables Pending", bg: "bg-accent-yellow", text: "text-accent-yellow-text", border: "border-amber-500/25" },
+  COMPLETED: { label: "Completed", bg: "bg-accent-mint", text: "text-success", border: "border-primary/20" },
+  CANCELLED: { label: "Cancelled", bg: "bg-accent-coral", text: "text-accent-coral-text", border: "border-red-500/25" },
 };
 
 export default function SponsorshipCommitmentsPage() {
@@ -174,109 +176,105 @@ export default function SponsorshipCommitmentsPage() {
     negotiationCount: 0,
   };
 
+  const kpiItems = [
+    {
+      label: "Confirmed Revenue",
+      value: formatCurrencyINR(safeMetrics.totalConfirmedRevenue),
+      subtext: `${safeMetrics.wonCount} Confirmed Sponsors`,
+      icon: Trophy,
+      variant: "success" as const,
+    },
+    {
+      label: "Confirmed Cash",
+      value: formatCurrencyINR(safeMetrics.confirmedCash),
+      subtext: "Liquid sponsorship intake",
+      icon: Coins,
+      variant: "primary" as const,
+    },
+    {
+      label: "In-Kind Valuation",
+      value: formatCurrencyINR(safeMetrics.confirmedInKind),
+      subtext: "Non-cash operational savings",
+      icon: Gift,
+      variant: "info" as const,
+    },
+    {
+      label: "In Negotiation",
+      value: safeMetrics.negotiationCount,
+      subtext: "Pending ratification",
+      icon: Building2,
+      variant: (safeMetrics.negotiationCount > 0 ? "warning" : "neutral") as "warning" | "neutral",
+    },
+    {
+      label: "Pipeline Potential",
+      value: formatCurrencyINR(safeMetrics.pipelinePotentialValue),
+      subtext: `${safeMetrics.activeOpportunities} Active Leads`,
+      icon: TrendingUp,
+      variant: "neutral" as const,
+    },
+    {
+      label: "Sourced Leads",
+      value: safeMetrics.totalLeads,
+      subtext: "Across 10 lifecycle stages",
+      icon: CheckCircle2,
+      variant: "neutral" as const,
+    },
+  ];
+
   return (
-    <div className="space-y-6">
-      {/* 1. Header Banner */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2">
-            <span className="rounded-full bg-emerald-100 text-emerald-900 border border-emerald-300 px-2.5 py-0.5 text-[10px] font-bold">
-              P1 SPONSORSHIP OPERATIONS
-            </span>
-            <span className="text-xs text-text-muted">PRAROHA'26 SOE CUSAT</span>
-          </div>
-          <h1 className="text-2xl font-bold tracking-tight text-text-primary mt-1">
-            Sponsorship Commitments & Pipeline Management
-          </h1>
-          <p className="text-xs text-text-secondary mt-0.5">
-            Manage legally ratified corporate commitments, monitor non-cash valuations, and oversee the 10-stage outreach pipeline.
-          </p>
-        </div>
+    <div className="space-y-8">
+      {/* 1. Header Bar */}
+      <AdminPageHeader
+        category="SPONSORSHIP COMMITMENTS"
+        title="Track confirmed sponsorship value, commitments and deliverables."
+        description="Manage legally ratified corporate commitments, monitor non-cash valuations, and oversee the 10-stage outreach pipeline."
+        actions={
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-4 border-b border-border-subtle pb-1">
+              <button
+                onClick={() => setActiveTab("contracts")}
+                className={`border-b-2 pb-2 text-xs font-semibold transition-colors cursor-pointer flex items-center gap-1.5 ${
+                  activeTab === "contracts"
+                    ? "border-primary text-primary"
+                    : "border-transparent text-text-muted hover:text-text-primary"
+                }`}
+              >
+                <FileCheck className="h-3.5 w-3.5" />
+                Commitments & Contracts
+              </button>
+              <button
+                onClick={() => setActiveTab("pipeline")}
+                className={`border-b-2 pb-2 text-xs font-semibold transition-colors cursor-pointer flex items-center gap-1.5 ${
+                  activeTab === "pipeline"
+                    ? "border-primary text-primary"
+                    : "border-transparent text-text-muted hover:text-text-primary"
+                }`}
+              >
+                <Kanban className="h-3.5 w-3.5" />
+                10-Stage Pipeline
+              </button>
+            </div>
 
-        <div className="flex items-center gap-2.5 flex-wrap">
-          {/* Main Tab Switcher */}
-          <div className="flex rounded-xl border border-border bg-surface p-1 shadow-2xs">
-            <button
-              onClick={() => setActiveTab("contracts")}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
-                activeTab === "contracts"
-                  ? "bg-primary text-white shadow-xs"
-                  : "text-text-secondary hover:text-text-primary"
-              }`}
+            <Button
+              onClick={() => setIsCreateModalOpen(true)}
+              size="sm"
+              className="gap-1.5 bg-primary hover:bg-primary-hover text-white font-bold text-xs"
             >
-              <FileCheck className="h-3.5 w-3.5" />
-              Commitments & Contracts
-            </button>
-            <button
-              onClick={() => setActiveTab("pipeline")}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
-                activeTab === "pipeline"
-                  ? "bg-primary text-white shadow-xs"
-                  : "text-text-secondary hover:text-text-primary"
-              }`}
-            >
-              <Kanban className="h-3.5 w-3.5" />
-              10-Stage Pipeline
-            </button>
+              <Plus className="h-3.5 w-3.5" />
+              New Commitment
+            </Button>
           </div>
+        }
+      />
 
-          {/* New Commitment Button */}
-          <Button
-            onClick={() => setIsCreateModalOpen(true)}
-            size="sm"
-            className="gap-1.5 bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs"
-          >
-            <Plus className="h-3.5 w-3.5" />
-            New Commitment
-          </Button>
-        </div>
-      </div>
-
-      {/* 2. High-Level Financial KPI Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
-        <StatCard
-          title="Total Confirmed Revenue"
-          value={formatCurrencyINR(safeMetrics.totalConfirmedRevenue)}
-          change={`${safeMetrics.wonCount} Confirmed Sponsors`}
-          icon={Trophy}
-        />
-        <StatCard
-          title="Confirmed Cash"
-          value={formatCurrencyINR(safeMetrics.confirmedCash)}
-          change="Liquid sponsorship intake"
-          icon={Coins}
-        />
-        <StatCard
-          title="In-Kind Valuation"
-          value={formatCurrencyINR(safeMetrics.confirmedInKind)}
-          change="Non-cash operational savings"
-          icon={Gift}
-        />
-        <StatCard
-          title="In Negotiation"
-          value={safeMetrics.negotiationCount}
-          change="Pending ratification"
-          icon={Building2}
-        />
-        <StatCard
-          title="Pipeline Potential"
-          value={formatCurrencyINR(safeMetrics.pipelinePotentialValue)}
-          change={`${safeMetrics.activeOpportunities} Active Leads`}
-          icon={TrendingUp}
-        />
-        <StatCard
-          title="Total Sourced Leads"
-          value={safeMetrics.totalLeads}
-          change="Across 10 lifecycle stages"
-          icon={CheckCircle2}
-        />
-      </div>
+      {/* 2. High-Level Financial KPI Strip */}
+      <AdminKpiStrip items={kpiItems} columns={6} />
 
       {/* 3. TAB 1: COMMITMENTS & CONTRACTS TABLE */}
       {activeTab === "contracts" && (
-        <div className="space-y-4">
+        <div className="border border-border bg-surface overflow-hidden">
           {/* Commitments Toolbar */}
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 rounded-2xl border border-border bg-surface p-3.5 shadow-xs">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 p-4 border-b border-border-subtle bg-surface-subtle/30">
             <div className="flex items-center gap-3 w-full sm:w-auto flex-1">
               <div className="relative flex-1 max-w-md">
                 <Search className="absolute left-3 top-2.5 h-4 w-4 text-text-muted" />
@@ -285,7 +283,7 @@ export default function SponsorshipCommitmentsPage() {
                   placeholder="Search commitments by company, volunteer, MoU, or in-kind..."
                   value={commitmentSearch}
                   onChange={(e) => setCommitmentSearch(e.target.value)}
-                  className="pl-9 text-xs"
+                  className="pl-9 text-xs border-border bg-background"
                 />
               </div>
 
@@ -294,7 +292,7 @@ export default function SponsorshipCommitmentsPage() {
                 <select
                   value={commitmentStatusFilter}
                   onChange={(e) => setCommitmentStatusFilter(e.target.value)}
-                  className="rounded-lg border border-border bg-surface px-2.5 py-1.5 text-xs text-text-primary focus:border-primary focus:outline-hidden"
+                  className="border border-border bg-background px-2.5 py-1.5 text-xs text-text-primary focus:border-primary focus:outline-hidden cursor-pointer"
                 >
                   <option value="all">All Statuses</option>
                   <option value="PROSPECT">Prospect</option>
@@ -315,7 +313,7 @@ export default function SponsorshipCommitmentsPage() {
           </div>
 
           {/* Commitments Table */}
-          <div className="rounded-2xl border border-border bg-surface overflow-hidden shadow-xs">
+          <div className="overflow-x-auto">
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs border-collapse">
                 <thead>
@@ -568,11 +566,11 @@ export default function SponsorshipCommitmentsPage() {
                 return (
                   <div
                     key={stage}
-                    className={`flex-shrink-0 w-80 rounded-2xl border border-border bg-surface-subtle/40 p-3 flex flex-col max-h-[70vh] shadow-xs ${
+                    className={`flex-shrink-0 w-80 border border-border bg-surface-subtle/40 p-3 flex flex-col max-h-[70vh] shadow-xs ${
                       stage === "WON"
-                        ? "bg-emerald-50/30 border-emerald-200"
+                        ? "border-l-2 border-l-success"
                         : stage === "NEGOTIATION"
-                        ? "bg-purple-50/30 border-purple-200"
+                        ? "border-l-2 border-l-primary"
                         : ""
                     }`}
                   >

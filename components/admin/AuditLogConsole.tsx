@@ -4,16 +4,10 @@ import React, { useState } from "react";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import {
-  ShieldAlert,
   Search,
-  Filter,
   ChevronDown,
   ChevronUp,
-  Clock,
   User,
-  Activity,
-  FileCode,
-  CheckCircle2,
 } from "lucide-react";
 
 export function AuditLogConsole() {
@@ -29,19 +23,6 @@ export function AuditLogConsole() {
     search: searchTerm.trim() ? searchTerm.trim() : undefined,
     limit: 100,
   });
-
-  const getActionBadge = (action: string) => {
-    if (action.includes("authorize") || action.includes("approved")) {
-      return "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800/50";
-    }
-    if (action.includes("reassign") || action.includes("adjust")) {
-      return "bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800/50";
-    }
-    if (action.includes("rejected") || action.includes("suspend")) {
-      return "bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 border-rose-200 dark:border-rose-900/50";
-    }
-    return "bg-sky-50 dark:bg-sky-950/40 text-sky-700 dark:text-sky-300 border-sky-200 dark:border-sky-800/50";
-  };
 
   const formatTimestamp = (ts: number) => {
     const d = new Date(ts);
@@ -65,9 +46,9 @@ export function AuditLogConsole() {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       {/* Header & Filter Controls */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-surface p-4 rounded-xl border border-border shadow-xs">
+      <div className="flex flex-col items-stretch justify-between gap-4 border-y border-border bg-surface py-4 sm:flex-row sm:items-center">
         {/* Search */}
         <div className="relative flex-1 max-w-md">
           <Search className="absolute left-3 top-2.5 h-4 w-4 text-text-muted" />
@@ -76,7 +57,7 @@ export function AuditLogConsole() {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder="Search action, actor, or ID..."
-            className="h-9 w-full rounded-lg border border-border bg-surface-subtle/50 pl-9 pr-3 text-xs text-text-primary placeholder:text-text-muted focus:border-primary focus:bg-surface focus:outline-none"
+            className="h-9 w-full border border-border bg-surface-subtle/50 pl-9 pr-3 text-xs text-text-primary placeholder:text-text-muted focus:border-primary focus:bg-surface focus:outline-none"
           />
         </div>
 
@@ -85,7 +66,7 @@ export function AuditLogConsole() {
           <select
             value={actionFilter}
             onChange={(e) => setActionFilter(e.target.value)}
-            className="h-9 rounded-lg border border-border bg-surface px-3 text-xs text-text-secondary focus:border-primary focus:outline-none cursor-pointer"
+            className="h-9 border border-border bg-surface px-3 text-xs text-text-secondary focus:border-primary focus:outline-none cursor-pointer"
           >
             <option value="all">All Actions</option>
             <option value="commitments:">Commitments & Ratifications</option>
@@ -100,7 +81,7 @@ export function AuditLogConsole() {
           <select
             value={entityFilter}
             onChange={(e) => setEntityFilter(e.target.value)}
-            className="h-9 rounded-lg border border-border bg-surface px-3 text-xs text-text-secondary focus:border-primary focus:outline-none cursor-pointer"
+            className="h-9 border border-border bg-surface px-3 text-xs text-text-secondary focus:border-primary focus:outline-none cursor-pointer"
           >
             <option value="all">All Entities</option>
             <option value="companies">Companies</option>
@@ -113,11 +94,11 @@ export function AuditLogConsole() {
       </div>
 
       {/* Audit Log Table */}
-      <div className="rounded-xl border border-border bg-surface overflow-hidden shadow-xs">
+      <div className="overflow-hidden border border-border bg-surface">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="border-b border-border bg-surface-subtle/80 text-[11px] font-bold uppercase tracking-wider text-text-muted">
+              <tr className="border-b border-border bg-surface-subtle/80 text-[10px] font-bold uppercase tracking-[0.14em] text-text-muted">
                 <th className="py-3 px-4">Timestamp</th>
                 <th className="py-3 px-4">Actor</th>
                 <th className="py-3 px-4">Action</th>
@@ -143,7 +124,7 @@ export function AuditLogConsole() {
                   const isExpanded = expandedLogId === log._id;
                   return (
                     <React.Fragment key={log._id}>
-                      <tr className="hover:bg-surface-subtle/40 transition-colors">
+                      <tr className="hover:bg-surface-subtle/50 transition-colors">
                         {/* Timestamp */}
                         <td className="py-3 px-4 text-text-muted font-mono whitespace-nowrap">
                           {formatTimestamp(log.timestamp)}
@@ -152,7 +133,7 @@ export function AuditLogConsole() {
                         {/* Actor */}
                         <td className="py-3 px-4 whitespace-nowrap">
                           <div className="flex items-center gap-2">
-                            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-slate-100 text-[10px] font-bold text-slate-700">
+                            <div className="flex h-6 w-6 items-center justify-center border border-border bg-surface-subtle text-[10px] font-bold text-text-secondary">
                               <User className="h-3 w-3" />
                             </div>
                             <div>
@@ -168,11 +149,7 @@ export function AuditLogConsole() {
 
                         {/* Action Badge */}
                         <td className="py-3 px-4 whitespace-nowrap">
-                          <span
-                            className={`inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${getActionBadge(
-                              log.action
-                            )}`}
-                          >
+                          <span className="font-mono text-[11px] font-semibold tracking-tight text-primary">
                             {log.action}
                           </span>
                         </td>
@@ -193,7 +170,7 @@ export function AuditLogConsole() {
                             onClick={() =>
                               setExpandedLogId(isExpanded ? null : log._id)
                             }
-                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md border border-border bg-surface hover:bg-surface-subtle text-text-secondary text-[11px] font-medium transition-colors cursor-pointer"
+                            className="inline-flex items-center gap-1 border-b border-border-strong px-0.5 py-1 text-[11px] font-medium text-text-secondary transition-colors hover:border-primary hover:text-primary cursor-pointer"
                           >
                             <span>Diff</span>
                             {isExpanded ? (
@@ -209,8 +186,8 @@ export function AuditLogConsole() {
                       {isExpanded && (
                         <tr className="bg-surface-subtle/70">
                           <td colSpan={5} className="p-4 border-b border-border">
-                            <div className="rounded-lg border border-border bg-slate-950 p-3 text-slate-100 font-mono text-[11px] overflow-x-auto">
-                              <div className="flex items-center justify-between pb-2 mb-2 border-b border-slate-800 text-[10px] text-slate-400">
+                            <div className="border border-border bg-[#101816] p-3 font-mono text-[11px] text-slate-100 overflow-x-auto">
+                              <div className="mb-2 flex items-center justify-between border-b border-slate-700 pb-2 text-[10px] text-slate-400">
                                 <span>Changes Payload / Mutation Context:</span>
                                 <span>Action: {log.action}</span>
                               </div>

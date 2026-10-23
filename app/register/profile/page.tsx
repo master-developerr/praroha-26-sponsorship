@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
@@ -9,23 +8,41 @@ import { useAuthUser } from "@/components/providers/AuthProvider";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Sparkles, CheckCircle2, LogOut, ShieldCheck, ArrowRight } from "lucide-react";
+import {
+  CheckCircle2,
+  LogOut,
+  ShieldCheck,
+  ArrowRight,
+  ArrowLeft,
+  User,
+  GraduationCap,
+  Phone,
+  Building2,
+  FileCheck,
+  AlertCircle,
+} from "lucide-react";
+import { ThemeToggle } from "@/components/ui/ThemeToggle";
 
 export default function RegisterProfilePage() {
   const router = useRouter();
   const { user, authState, signOut } = useAuthUser();
   const registerProfile = useMutation(api.users.registerVolunteerProfile);
 
+  // Stepped Form State: Step 1 (Identity), Step 2 (Academic), Step 3 (Contact & Declaration)
+  const [currentStep, setCurrentStep] = useState<1 | 2 | 3>(1);
+
   const [fullName, setFullName] = useState("");
   const [phone, setPhone] = useState("");
   const [semester, setSemester] = useState("S6");
   const [department, setDepartment] = useState("Civil Engineering");
+  const [declarationChecked, setDeclarationChecked] = useState(true);
+
   const [errors, setErrors] = useState<{
     fullName?: string;
     phone?: string;
     semester?: string;
     department?: string;
+    declaration?: string;
   }>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -40,22 +57,22 @@ export default function RegisterProfilePage() {
   useEffect(() => {
     switch (authState) {
       case "APPROVED_VOLUNTEER":
-        router.push("/workspace");
+        router.replace("/workspace");
         break;
       case "ADMIN":
-        router.push("/admin");
+        router.replace("/admin");
         break;
       case "PENDING":
-        router.push("/pending");
+        router.replace("/pending");
         break;
       case "REJECTED":
-        router.push("/rejected");
+        router.replace("/rejected");
         break;
       case "SUSPENDED":
-        router.push("/suspended");
+        router.replace("/suspended");
         break;
       case "UNAUTHENTICATED":
-        router.push("/sign-in");
+        router.replace("/sign-in");
         break;
       default:
         break;
@@ -83,27 +100,56 @@ export default function RegisterProfilePage() {
     { label: "Safety & Fire Engineering", value: "Safety & Fire Engineering" },
   ];
 
-  const validate = () => {
+  const validateStep1 = () => {
     const errs: typeof errors = {};
     if (!fullName.trim()) errs.fullName = "Full name is required";
-    const cleanPhone = phone.replace(/\D/g, "");
-    if (!cleanPhone) {
-      errs.phone = "Phone number is required";
-    } else if (cleanPhone.length !== 10) {
-      errs.phone = "Enter a valid 10-digit mobile number";
-    }
-    if (!semester) errs.semester = "Select your academic semester";
-    if (!department) errs.department = "Select your department";
     setErrors(errs);
     return Object.keys(errs).length === 0;
   };
 
+  const validateStep2 = () => {
+    const errs: typeof errors = {};
+    if (!department) errs.department = "Please select your department";
+    if (!semester) errs.semester = "Please select your current semester";
+    setErrors(errs);
+    return Object.keys(errs).length === 0;
+  };
+
+  const validateStep3 = () => {
+    const errs: typeof errors = {};
+    const cleanPhone = phone.replace(/\D/g, "");
+    if (!cleanPhone) {
+      errs.phone = "Phone number is required";
+    } else if (cleanPhone.length !== 10) {
+      errs.phone = "Enter a valid 10-digit Indian mobile number";
+    }
+    if (!declarationChecked) {
+      errs.declaration = "You must acknowledge the outreach clearance requirement";
+    }
+    setErrors(errs);
+    return Object.keys(errs).length === 0;
+  };
+
+  const handleNext = () => {
+    if (currentStep === 1 && validateStep1()) {
+      setCurrentStep(2);
+    } else if (currentStep === 2 && validateStep2()) {
+      setCurrentStep(3);
+    }
+  };
+
+  const handleBack = () => {
+    if (currentStep > 1) {
+      setCurrentStep((prev) => (prev - 1) as 1 | 2);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!validate()) return;
+    if (!validateStep3()) return;
 
     if (!user?.id || !user?.email) {
-      setErrors({ fullName: "Authentication required. Please sign in with your student account first." });
+      setErrors({ fullName: "Authentication required. Please sign in with your student account." });
       return;
     }
 
@@ -120,189 +166,295 @@ export default function RegisterProfilePage() {
 
       setIsSuccess(true);
       setTimeout(() => {
-        router.push("/pending");
+        router.replace("/pending");
       }, 1000);
     } catch (err: unknown) {
       console.error(err);
-      setErrors({ fullName: "Failed to submit profile. Please try again." });
+      setErrors({ fullName: "Failed to submit profile. Please verify your connection." });
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col justify-between p-4 sm:p-8">
-      {/* Top Bar */}
-      <header className="max-w-4xl w-full mx-auto flex items-center justify-between pb-6 border-b border-border-subtle">
+    <div className="min-h-screen bg-background text-text-primary flex flex-col justify-between p-4 sm:p-8">
+      {/* Top Header */}
+      <header className="max-w-4xl w-full mx-auto flex items-center justify-between pb-6 border-b border-border">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent-mint/70 text-primary">
-            <svg
-              className="h-6 w-6"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.75"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M12 2C6.5 6 4 10 4 15a8 8 0 0 0 16 0c0-5-2.5-9-8-13z" />
-              <path d="M12 2c2.5 4 4 8 4 12a4 4 0 0 1-8 0c0-4 1.5-8 4-12z" />
-            </svg>
+          <div className="flex h-9 w-9 items-center justify-center rounded-sm bg-primary text-primary-foreground font-black text-sm">
+            P
           </div>
           <div>
-            <h1 className="text-sm font-bold tracking-tight text-text-primary">
-              PRAROHA'26
+            <h1 className="text-sm font-bold tracking-tight text-text-primary uppercase">
+              PRAROHA&apos;26 // ONBOARDING
             </h1>
-            <p className="text-[11px] text-text-secondary">
-              Division of Civil Engineering • SOE CUSAT
+            <p className="text-[11px] font-mono text-text-muted">
+              Division of Civil Engineering · SOE CUSAT
             </p>
           </div>
         </div>
 
-        <button
-          onClick={() => signOut()}
-          className="flex items-center gap-1.5 text-xs text-text-muted hover:text-rose-600 transition-colors"
-        >
-          <LogOut className="h-3.5 w-3.5" />
-          <span>Sign out</span>
-        </button>
+        <div className="flex items-center gap-3">
+          <ThemeToggle className="h-8 w-8 rounded-sm" />
+          <button
+            onClick={() => signOut()}
+            className="flex items-center gap-1.5 text-xs text-text-muted hover:text-rose-600 transition-colors px-2 py-1"
+          >
+            <LogOut className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">Sign out</span>
+          </button>
+        </div>
       </header>
 
-      {/* Main Container */}
-      <main className="max-w-4xl w-full mx-auto my-auto py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-          {/* Left Column: Strategic Banner & Context */}
-          <div className="lg:col-span-5 space-y-5">
-            <div className="relative overflow-hidden rounded-2xl border border-border bg-surface shadow-xs">
-              <div className="relative h-44 w-full bg-accent-mint/20">
-                <Image
-                  src="/images/praroha26-sponsorship-hero.png"
-                  alt="PRAROHA'26 Sponsorship Outreach Team"
-                  fill
-                  className="object-cover object-center"
-                  priority
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-surface via-surface/40 to-transparent" />
-              </div>
-
-              <div className="p-5 space-y-2">
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-accent-mint px-2.5 py-0.5 text-[10px] font-bold text-accent-mint-text">
-                  <ShieldCheck className="h-3 w-3 text-primary" />
-                  Official Student SDR Onboarding
-                </span>
-                <h2 className="text-base font-bold text-text-primary">
-                  Join the Sponsorship Committee
-                </h2>
-                <p className="text-xs text-text-secondary leading-relaxed">
-                  Connect directly with top corporate infrastructure, tech, and engineering partners for South India's premier civil-tech symposium.
-                </p>
-              </div>
+      {/* Main Registration Experience */}
+      <main className="max-w-xl w-full mx-auto my-auto py-8">
+        <div className="rounded-lg border border-border bg-surface shadow-xs p-6 sm:p-8 space-y-6">
+          {/* Header & Step Counter */}
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase tracking-wider bg-primary/10 text-primary">
+                <ShieldCheck className="h-3.5 w-3.5" />
+                Student SDR Registration
+              </span>
+              <span className="text-xs font-mono text-text-muted">
+                Step {currentStep} of 3
+              </span>
             </div>
 
-            <div className="rounded-xl border border-border-subtle bg-surface-subtle p-4 space-y-2">
-              <div className="flex items-center gap-2 text-xs font-semibold text-text-primary">
-                <Sparkles className="h-4 w-4 text-primary shrink-0" />
-                <span>Verification standard</span>
+            <h2 className="text-xl sm:text-2xl font-bold text-text-primary tracking-tight">
+              {currentStep === 1
+                ? "Identity & Credentials"
+                : currentStep === 2
+                ? "Academic Standing"
+                : "Contact Clearance & Review"}
+            </h2>
+            <p className="text-xs text-text-secondary mt-1">
+              {currentStep === 1
+                ? "Confirm your full legal name as it appears on your CUSAT student ID."
+                : currentStep === 2
+                ? "Select your engineering discipline and current academic semester."
+                : "Provide your primary calling mobile number for corporate outreach allocations."}
+            </p>
+          </div>
+
+          {/* Stepped Progress Bar */}
+          <div className="grid grid-cols-3 gap-2">
+            <div className={`h-1.5 rounded-full transition-all ${currentStep >= 1 ? "bg-primary" : "bg-border"}`} />
+            <div className={`h-1.5 rounded-full transition-all ${currentStep >= 2 ? "bg-primary" : "bg-border"}`} />
+            <div className={`h-1.5 rounded-full transition-all ${currentStep >= 3 ? "bg-primary" : "bg-border"}`} />
+          </div>
+
+          {/* Success Screen */}
+          {isSuccess ? (
+            <div className="py-12 flex flex-col items-center justify-center text-center space-y-3">
+              <div className="h-12 w-12 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+                <CheckCircle2 className="h-7 w-7" />
               </div>
-              <p className="text-[11px] text-text-secondary leading-relaxed">
-                All volunteer accounts require verification by the Sponsorship Head before lead allocation to maintain corporate communication standards.
+              <h3 className="text-lg font-bold text-text-primary">Profile Submitted</h3>
+              <p className="text-xs text-text-secondary max-w-sm">
+                Forwarding your application to the Sponsorship Head verification queue...
               </p>
             </div>
-          </div>
-
-          {/* Right Column: Registration Card */}
-          <div className="lg:col-span-7">
-            <Card className="border-border bg-surface shadow-xs">
-              <CardContent className="p-6 sm:p-8">
-                {isSuccess ? (
-                  <div className="flex flex-col items-center justify-center py-12 text-center animate-in zoom-in-95">
-                    <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600">
-                      <CheckCircle2 className="h-8 w-8" />
-                    </div>
-                    <h3 className="mt-4 text-lg font-bold text-text-primary">
-                      Profile submitted!
-                    </h3>
-                    <p className="mt-1.5 text-xs text-text-secondary max-w-sm">
-                      Your details have been submitted. Forwarding you to the verification status holding screen...
-                    </p>
-                  </div>
-                ) : (
-                  <form onSubmit={handleSubmit} className="space-y-4">
-                    <div className="space-y-1">
-                      <h3 className="text-base font-bold text-text-primary">
-                        Complete your volunteer credentials
-                      </h3>
-                      <p className="text-xs text-text-secondary">
-                        Please provide your institutional details as registered at SOE CUSAT.
-                      </p>
-                    </div>
-
+          ) : (
+            <form onSubmit={handleSubmit} className="space-y-5">
+              {/* Step 1: Personal Identification */}
+              {currentStep === 1 && (
+                <div className="space-y-4">
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold text-text-primary">
+                      Full Name (as per Student ID)
+                    </label>
                     <Input
-                      id="fullName"
-                      label="Full Name"
-                      placeholder="e.g. Arjun Nair"
+                      type="text"
                       value={fullName}
                       onChange={(e) => setFullName(e.target.value)}
-                      error={errors.fullName}
-                      disabled={isSubmitting}
+                      placeholder="e.g. Ananya Krishna"
+                      className="h-10 text-xs"
+                      autoFocus
                     />
+                    {errors.fullName && (
+                      <p className="text-[11px] text-rose-600 flex items-center gap-1 mt-1">
+                        <AlertCircle className="h-3 w-3" />
+                        {errors.fullName}
+                      </p>
+                    )}
+                  </div>
 
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold text-text-primary">
+                      Authenticated Student Email
+                    </label>
                     <Input
-                      id="phone"
-                      label="10-Digit Mobile Number"
-                      type="tel"
-                      placeholder="e.g. 9876543210"
-                      value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
-                      error={errors.phone}
-                      disabled={isSubmitting}
+                      type="email"
+                      value={user?.email || ""}
+                      disabled
+                      className="h-10 text-xs bg-surface-subtle text-text-muted cursor-not-allowed"
                     />
+                    <p className="text-[10px] text-text-muted">
+                      Locked to your Clerk authenticated session.
+                    </p>
+                  </div>
+                </div>
+              )}
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      <Select
-                        id="semester"
-                        label="Academic Semester"
-                        options={semesterOptions}
-                        value={semester}
-                        onChange={(e) => setSemester(e.target.value)}
-                        error={errors.semester}
-                        disabled={isSubmitting}
-                      />
+              {/* Step 2: Academic Standing */}
+              {currentStep === 2 && (
+                <div className="space-y-4">
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold text-text-primary">
+                      Engineering Department
+                    </label>
+                    <Select
+                      value={department}
+                      onChange={(e) => setDepartment(e.target.value)}
+                      options={departmentOptions}
+                      className="h-10 text-xs"
+                    />
+                    {errors.department && (
+                      <p className="text-[11px] text-rose-600 flex items-center gap-1 mt-1">
+                        <AlertCircle className="h-3 w-3" />
+                        {errors.department}
+                      </p>
+                    )}
+                  </div>
 
-                      <Select
-                        id="department"
-                        label="Department"
-                        options={departmentOptions}
-                        value={department}
-                        onChange={(e) => setDepartment(e.target.value)}
-                        error={errors.department}
-                        disabled={isSubmitting}
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold text-text-primary">
+                      Current Academic Semester
+                    </label>
+                    <Select
+                      value={semester}
+                      onChange={(e) => setSemester(e.target.value)}
+                      options={semesterOptions}
+                      className="h-10 text-xs"
+                    />
+                    {errors.semester && (
+                      <p className="text-[11px] text-rose-600 flex items-center gap-1 mt-1">
+                        <AlertCircle className="h-3 w-3" />
+                        {errors.semester}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Step 3: Contact & Verification Declaration */}
+              {currentStep === 3 && (
+                <div className="space-y-4">
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold text-text-primary">
+                      Calling Mobile Number (10 Digits)
+                    </label>
+                    <div className="relative">
+                      <span className="absolute left-3 top-2.5 text-xs font-mono text-text-muted">
+                        +91
+                      </span>
+                      <Input
+                        type="tel"
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value)}
+                        placeholder="98470 12345"
+                        className="h-10 text-xs pl-12 font-mono"
+                        maxLength={10}
+                        autoFocus
                       />
                     </div>
+                    {errors.phone && (
+                      <p className="text-[11px] text-rose-600 flex items-center gap-1 mt-1">
+                        <AlertCircle className="h-3 w-3" />
+                        {errors.phone}
+                      </p>
+                    )}
+                    <p className="text-[10px] text-text-muted">
+                      Used by the Sponsorship Head for internal coordination and lead dispatches.
+                    </p>
+                  </div>
 
-                    <div className="pt-3">
-                      <Button
-                        type="submit"
-                        variant="primary"
-                        size="lg"
-                        className="w-full font-semibold bg-primary hover:bg-primary-hover shadow-xs"
-                        isLoading={isSubmitting}
-                      >
-                        <span>Submit for Verification</span>
-                        <ArrowRight className="h-4 w-4 ml-2" />
-                      </Button>
-                    </div>
-                  </form>
+                  {/* Summary Confirmation Card */}
+                  <div className="p-3.5 rounded border border-border bg-surface-subtle/50 space-y-1 text-xs">
+                    <p className="font-mono text-[10px] uppercase text-text-muted font-bold">
+                      Registration Summary
+                    </p>
+                    <p className="font-semibold text-text-primary">{fullName}</p>
+                    <p className="text-text-secondary text-[11px]">
+                      {department} · {semester}
+                    </p>
+                  </div>
+
+                  {/* Declaration Checkbox */}
+                  <label className="flex items-start gap-2.5 cursor-pointer pt-1">
+                    <input
+                      type="checkbox"
+                      checked={declarationChecked}
+                      onChange={(e) => setDeclarationChecked(e.target.checked)}
+                      className="mt-0.5 rounded border-border text-primary focus:ring-primary h-4 w-4"
+                    />
+                    <span className="text-[11px] text-text-secondary leading-snug">
+                      I understand that volunteer accounts require administrative clearance by the Sponsorship Head before corporate leads are assigned.
+                    </span>
+                  </label>
+                  {errors.declaration && (
+                    <p className="text-[11px] text-rose-600 flex items-center gap-1">
+                      <AlertCircle className="h-3 w-3" />
+                      {errors.declaration}
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {/* Navigation Actions */}
+              <div className="pt-4 border-t border-border flex items-center justify-between">
+                {currentStep > 1 ? (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={handleBack}
+                    className="text-xs gap-1.5"
+                  >
+                    <ArrowLeft className="h-3.5 w-3.5" />
+                    Back
+                  </Button>
+                ) : (
+                  <div />
                 )}
-              </CardContent>
-            </Card>
-          </div>
+
+                {currentStep < 3 ? (
+                  <Button
+                    type="button"
+                    size="sm"
+                    onClick={handleNext}
+                    className="text-xs gap-1.5 bg-primary text-primary-foreground hover:bg-primary-hover font-semibold"
+                  >
+                    <span>Continue</span>
+                    <ArrowRight className="h-3.5 w-3.5" />
+                  </Button>
+                ) : (
+                  <Button
+                    type="submit"
+                    size="sm"
+                    disabled={isSubmitting}
+                    className="text-xs gap-1.5 bg-primary text-primary-foreground hover:bg-primary-hover font-semibold"
+                  >
+                    {isSubmitting ? (
+                      <span>Submitting Profile...</span>
+                    ) : (
+                      <>
+                        <span>Submit for Clearance</span>
+                        <ArrowRight className="h-3.5 w-3.5" />
+                      </>
+                    )}
+                  </Button>
+                )}
+              </div>
+            </form>
+          )}
         </div>
       </main>
 
       {/* Footer */}
-      <footer className="max-w-4xl w-full mx-auto text-center pt-6 border-t border-border-subtle text-[11px] text-text-muted">
-        PRAROHA'26 • School of Engineering, Cochin University of Science and Technology
+      <footer className="max-w-4xl w-full mx-auto text-center text-[11px] font-mono text-text-muted pt-4">
+        PRAROHA&apos;26 Sponsorship Operations Committee · CUSAT
       </footer>
     </div>
   );
