@@ -4,6 +4,25 @@ This document tracks all stable checkpoints, milestones, and feature branches fo
 
 ---
 
+## Feature / Fix: Clerk Handshake Resilience & Proxy Guard
+
+- **Date:** 2026-10-23
+- **Branch:** `feature/fix-clerk-handshake-resilience`
+- **Commit:** `6e2e495`
+- **Feature:** Proxy error resilience against missing secret keys and unhandled Clerk handshake crashes.
+
+### Changes:
+- `proxy.ts`:
+  - Added `hasValidClerkSecret` conditional gate preventing `clerkMiddleware()` initialization if `CLERK_SECRET_KEY` is not populated.
+  - Wrapped request handling in `try...catch` so runtime handshake/decryption exceptions gracefully pass through to `NextResponse.next()` rather than throwing HTTP 500 `Internal Server Error`.
+  - Guaranteed client-side auth guards continue to protect sensitive routes without breaking public or callback paths.
+
+### Verified:
+- `npx tsc --noEmit` — 0 errors.
+- `npm run build` — 30/30 routes compiled cleanly in 2.1s.
+
+---
+
 ## Baseline Checkpoint: Enterprise Admin Redesign & Public Landing Suite
 
 - **Date:** 2026-10-23
