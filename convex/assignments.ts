@@ -349,29 +349,30 @@ export const unassignLead = mutation({
 
     const now = Date.now();
 
-    // Mark all active assignments for this company as unassigned
+    // Mark all active assignments for this company as released
     const activeAssignments = await ctx.db
       .query("leadAssignments")
       .withIndex("by_company_id", (q) => q.eq("companyId", args.companyId))
       .filter((q) => q.eq(q.field("status"), "active"))
       .collect();
 
+    let previousVolunteerName = "Unknown";
     for (const a of activeAssignments) {
+      const prevVol = await ctx.db.get(a.volunteerId);
+      if (prevVol) previousVolunteerName = prevVol.name;
       await ctx.db.patch(a._id, {
         status: "released",
         updatedAt: now,
       });
     }
 
-    // Revert company lead status to UNASSIGNED if it was ASSIGNED
-    if (company.leadStatus === "ASSIGNED") {
-      await ctx.db.patch(args.companyId, {
-        leadStatus: "UNASSIGNED",
-        updatedAt: now,
-      });
-    }
+    // Always revert company lead status to UNASSIGNED when unassigned from a volunteer
+    await ctx.db.patch(args.companyId, {
+      leadStatus: "UNASSIGNED",
+      updatedAt: now,
+    });
 
-    // Audit log
+    // Immutable audit log
     await ctx.db.insert("auditLogs", {
       actorId: admin._id,
       action: "lead_unassigned",
@@ -379,6 +380,7 @@ export const unassignLead = mutation({
       entityId: args.companyId,
       changes: JSON.stringify({
         companyName: company.companyName,
+        previousVolunteer: previousVolunteerName,
         reason: args.reason || "Unassigned by Admin",
         unassignedAt: now,
       }),
@@ -386,6 +388,150 @@ export const unassignLead = mutation({
     });
 
     return { success: true };
+  },
+});
+
+/**
+ * Admin action: Assign a single lead directly to an approved volunteer or admin
+ */
+export const assignLeadSingle = mutation({
+  args: {
+    adminClerkId: v.string(),
+    companyId: v.id("companies"),
+    volunteerId: v.id("users"),
+    priority: v.optional(
+      v.union(
+        v.literal("High"),
+        v.literal("Medium"),
+        v.literal("Normal"),
+        v.literal("Low")
+      )
+    ),
+    instructions: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const admin = await ctx.db
+      .query("users")
+      .withIndex("by_clerk_id", (q) => q.eq("clerkId", args.adminClerkId))
+      .unique();
+
+    if (!admin || admin.role !== "admin") {
+      throw new Error("Unauthorized: Only administrators can assign leads");
+    }
+
+    const volunteer = await ctx.db.get(args.volunteerId);
+    if (!volunteer) {
+      throw new Error("Target assignee user not found");
+    }
+    if (volunteer.verificationStatus === "suspended" || volunteer.verificationStatus === "rejected") {
+      throw new Error("Target assignee is suspended or rejected");
+    }
+    if (volunteer.role === "volunteer" && volunteer.verificationStatus !== "approved") {
+      throw new Error("Target volunteer is not verified or approved");
+    }
+
+    const company = await ctx.db.get(args.companyId);
+    if (!company) {
+      throw new Error("Company lead not found");
+    }
+
+    const now = Date.now();
+
+    // Release any existing active assignment for this company
+    const existingActive = await ctx.db
+      .query("leadAssignments")
+      .withIndex("by_company_id", (q) => q.eq("companyId", args.companyId))
+      .filter((q) => q.eq(q.field("status"), "active"))
+      .collect();
+
+    for (const a of existingActive) {
+      await ctx.db.patch(a._id, {
+        status: "reassigned",
+        updatedAt: now,
+      });
+    }
+
+    // Insert new active assignment
+    await ctx.db.insert("leadAssignments", {
+      companyId: args.companyId,
+      volunteerId: args.volunteerId,
+      assignedBy: admin._id,
+      status: "active",
+      priority: args.priority || company.priority,
+      instructions: args.instructions,
+      assignedAt: now,
+      updatedAt: now,
+    });
+
+    // Advance leadStatus to ASSIGNED if currently UNASSIGNED
+    await ctx.db.patch(args.companyId, {
+      leadStatus: company.leadStatus === "UNASSIGNED" ? "ASSIGNED" : company.leadStatus,
+      ...(args.priority ? { priority: args.priority } : {}),
+      updatedAt: now,
+    });
+
+    // Immutable audit log
+    await ctx.db.insert("auditLogs", {
+      actorId: admin._id,
+      action: "lead_assigned",
+      entityType: "companies",
+      entityId: args.companyId,
+      changes: JSON.stringify({
+        companyName: company.companyName,
+        assignedTo: volunteer.name,
+        volunteerId: volunteer._id,
+        assignedAt: now,
+      }),
+      timestamp: now,
+    });
+
+    return {
+      success: true,
+      volunteerName: volunteer.name,
+    };
+  },
+});
+
+/**
+ * Admin query: Get active assigned leads for a specific volunteer (or admin)
+ */
+export const getVolunteerAssignedLeads = query({
+  args: {
+    volunteerId: v.id("users"),
+  },
+  handler: async (ctx, args) => {
+    const assignments = await ctx.db
+      .query("leadAssignments")
+      .withIndex("by_volunteer_and_status", (q) =>
+        q.eq("volunteerId", args.volunteerId).eq("status", "active")
+      )
+      .order("desc")
+      .collect();
+
+    const enriched = await Promise.all(
+      assignments.map(async (assignment) => {
+        const company = await ctx.db.get(assignment.companyId);
+        if (!company) return null;
+
+        const contacts = await ctx.db
+          .query("contacts")
+          .withIndex("by_company_id", (q) => q.eq("companyId", company._id))
+          .collect();
+
+        const primaryContact =
+          contacts.find((ct) => ct.isPrimary) || contacts[0] || null;
+
+        return {
+          ...company,
+          primaryContact,
+          totalContacts: contacts.length,
+          assignmentId: assignment._id,
+          assignedAt: assignment.assignedAt,
+        };
+      })
+    );
+
+    return enriched.filter((item): item is NonNullable<typeof item> => item !== null);
   },
 });
 
@@ -635,7 +781,7 @@ export const getMyWorkstationMetrics = query({
 });
 
 /**
- * Get assignment history for a company lead
+ * Get assignment history for a company lead (all historical assignments + audit trail)
  */
 export const getCompanyAssignmentHistory = query({
   args: {
@@ -648,7 +794,19 @@ export const getCompanyAssignmentHistory = query({
       .order("desc")
       .collect();
 
-    return await Promise.all(
+    const auditLogs = await ctx.db
+      .query("auditLogs")
+      .withIndex("by_entity", (q) =>
+        q.eq("entityType", "companies").eq("entityId", args.companyId)
+      )
+      .order("desc")
+      .collect();
+
+    const assignmentAuditLogs = auditLogs.filter((log) =>
+      ["lead_assigned", "lead_reassigned", "lead_unassigned"].includes(log.action)
+    );
+
+    const enrichedAssignments = await Promise.all(
       assignments.map(async (a) => {
         const volunteer = await ctx.db.get(a.volunteerId);
         const assigner = await ctx.db.get(a.assignedBy);
@@ -662,5 +820,37 @@ export const getCompanyAssignmentHistory = query({
         };
       })
     );
+
+    const enrichedAuditLogs = await Promise.all(
+      assignmentAuditLogs.map(async (log) => {
+        let actorName = "Admin";
+        try {
+          const actor = await ctx.db.get(log.actorId as Id<"users">);
+          if (actor && "name" in actor) actorName = actor.name;
+        } catch {
+          // Fallback if actorId is Clerk ID string
+        }
+
+        let parsedChanges: any = {};
+        try {
+          parsedChanges = JSON.parse(log.changes);
+        } catch {
+          parsedChanges = {};
+        }
+
+        return {
+          _id: log._id,
+          action: log.action,
+          timestamp: log.timestamp,
+          actorName,
+          details: parsedChanges,
+        };
+      })
+    );
+
+    return {
+      assignments: enrichedAssignments,
+      auditTrail: enrichedAuditLogs,
+    };
   },
 });

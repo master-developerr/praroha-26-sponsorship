@@ -1,5 +1,6 @@
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
+import { Id } from "./_generated/dataModel";
 import { LeadStage } from "../types";
 
 const ALL_10_STAGES: LeadStage[] = [
@@ -411,7 +412,7 @@ export const getCompanyRelationshipTimeline = query({
   handler: async (ctx, args) => {
     const timeline: Array<{
       id: string;
-      type: "call" | "debrief" | "follow_up" | "proposal" | "commitment" | "stage_change";
+      type: "call" | "debrief" | "follow_up" | "proposal" | "commitment" | "stage_change" | "assignment";
       title: string;
       description: string;
       timestamp: number;
@@ -544,6 +545,65 @@ export const getCompanyRelationshipTimeline = query({
           totalValuation: com.totalValuation,
           packageTier: com.packageTier,
         },
+      });
+    }
+
+    // 6. Fetch Assignment & Ownership Events
+    const assignmentLogs = await ctx.db
+      .query("auditLogs")
+      .withIndex("by_entity", (q) =>
+        q.eq("entityType", "companies").eq("entityId", args.companyId)
+      )
+      .collect();
+
+    for (const log of assignmentLogs) {
+      if (!["lead_assigned", "lead_reassigned", "lead_unassigned"].includes(log.action)) {
+        continue;
+      }
+
+      let parsed: any = {};
+      try {
+        parsed = JSON.parse(log.changes);
+      } catch {
+        parsed = {};
+      }
+
+      let actorName = "Admin";
+      try {
+        const actor = await ctx.db.get(log.actorId as Id<"users">);
+        if (actor && "name" in actor) actorName = actor.name;
+      } catch {
+        // Fallback
+      }
+
+      let title = "Lead Assignment Event";
+      let badgeLabel = "ASSIGNMENT";
+      let badgeClass = "bg-purple-50 dark:bg-purple-950/40 text-purple-800 dark:text-purple-300 border-purple-200 dark:border-purple-800/50";
+
+      if (log.action === "lead_assigned") {
+        title = `Assigned to ${parsed.assignedTo || "Volunteer"}`;
+        badgeLabel = "ASSIGNED";
+        badgeClass = "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800/50";
+      } else if (log.action === "lead_reassigned") {
+        title = `Reassigned to ${parsed.reassignedTo || "New Volunteer"}`;
+        badgeLabel = "REASSIGNED";
+        badgeClass = "bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 border-amber-200 dark:border-amber-800/50";
+      } else if (log.action === "lead_unassigned") {
+        title = `Unassigned from ${parsed.previousVolunteer || "Volunteer"}`;
+        badgeLabel = "UNASSIGNED";
+        badgeClass = "bg-rose-50 dark:bg-rose-950/40 text-rose-800 dark:text-rose-300 border-rose-200 dark:border-rose-800/50";
+      }
+
+      timeline.push({
+        id: `audit-${log._id}`,
+        type: "assignment",
+        title,
+        description: parsed.reason ? `Reason: ${parsed.reason}` : `Executed by ${actorName}`,
+        timestamp: log.timestamp,
+        actorName,
+        badgeLabel,
+        badgeClass,
+        metadata: parsed,
       });
     }
 

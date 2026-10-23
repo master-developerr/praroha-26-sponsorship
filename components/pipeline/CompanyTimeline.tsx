@@ -58,28 +58,32 @@ export function CompanyTimeline({ companyId }: CompanyTimelineProps) {
       case "follow_up":
         return <Calendar className="h-3.5 w-3.5 text-yellow-700" />;
       case "proposal":
-        return <Trophy className="h-3.5 w-3.5 text-sky-700" />;
+        return <Trophy className="h-3.5 w-3.5 text-sky-700 dark:text-sky-400" />;
       case "commitment":
-        return <Award className="h-3.5 w-3.5 text-emerald-700" />;
+        return <Award className="h-3.5 w-3.5 text-emerald-700 dark:text-emerald-400" />;
+      case "assignment":
+        return <User className="h-3.5 w-3.5 text-purple-700 dark:text-purple-400" />;
       default:
-        return <ArrowRightLeft className="h-3.5 w-3.5 text-zinc-600" />;
+        return <ArrowRightLeft className="h-3.5 w-3.5 text-zinc-600 dark:text-zinc-400" />;
     }
   };
 
   const getEventBadge = (type: string) => {
     switch (type) {
       case "call":
-        return "bg-teal-50 text-teal-800 border-teal-200";
+        return "bg-teal-50 dark:bg-teal-950/40 text-teal-800 dark:text-teal-300 border-teal-200 dark:border-teal-800/50";
       case "debrief":
-        return "bg-indigo-50 text-indigo-800 border-indigo-200";
+        return "bg-indigo-50 dark:bg-indigo-950/40 text-indigo-800 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800/50";
       case "follow_up":
-        return "bg-yellow-50 text-yellow-800 border-yellow-200";
+        return "bg-yellow-50 dark:bg-yellow-950/40 text-yellow-800 dark:text-yellow-300 border-yellow-200 dark:border-yellow-800/50";
       case "proposal":
-        return "bg-sky-50 text-sky-800 border-sky-200";
+        return "bg-sky-50 dark:bg-sky-950/40 text-sky-800 dark:text-sky-300 border-sky-200 dark:border-sky-800/50";
       case "commitment":
-        return "bg-emerald-100 text-emerald-900 border-emerald-300";
+        return "bg-emerald-100 dark:bg-emerald-950/40 text-emerald-900 dark:text-emerald-300 border-emerald-300 dark:border-emerald-800/50";
+      case "assignment":
+        return "bg-purple-50 dark:bg-purple-950/40 text-purple-800 dark:text-purple-300 border-purple-200 dark:border-purple-800/50";
       default:
-        return "bg-zinc-50 text-zinc-700 border-zinc-200";
+        return "bg-zinc-50 dark:bg-zinc-950/40 text-zinc-700 dark:text-zinc-300 border-zinc-200 dark:border-zinc-800/50";
     }
   };
 
