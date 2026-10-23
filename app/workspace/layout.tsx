@@ -10,17 +10,7 @@ import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 
 function WorkspaceShellInner({ children }: { children: React.ReactNode }) {
-  const { openEventInfo, openLeaderboard, startCallMode } = useWorkspace();
-  const { user } = useAuthUser();
-  const assignedLeads = useQuery(
-    api.assignments.getMyAssignedLeads,
-    user?.id ? { volunteerClerkId: user.id, tab: "all" } : "skip"
-  );
-
-  const handleLogCallClick = () => {
-    const nextLead = assignedLeads?.find((lead) => lead.leadStatus !== "WON" && lead.leadStatus !== "LOST");
-    if (nextLead) startCallMode(nextLead);
-  };
+  const { openEventInfo, openLeaderboard, openGlobalLogCall } = useWorkspace();
 
   return (
     <div className="flex min-h-screen bg-background">
@@ -32,7 +22,7 @@ function WorkspaceShellInner({ children }: { children: React.ReactNode }) {
       {/* Main Content Workspace Column */}
       <div className="flex flex-1 flex-col overflow-y-auto min-w-0">
         <Navbar
-          onLogCallClick={handleLogCallClick}
+          onLogCallClick={openGlobalLogCall}
           onOpenEventInfo={openEventInfo}
           onOpenLeaderboard={openLeaderboard}
         />

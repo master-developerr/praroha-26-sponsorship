@@ -16,26 +16,34 @@ import {
   MapPin,
   Users,
   Coins,
-  History,
   Lightbulb,
   Phone,
   Mail,
   ShieldCheck,
   CheckCircle2,
   ExternalLink,
-  Briefcase,
   Trophy,
   Gift,
   Clock,
   PhoneCall,
+  PhoneOff,
   Plus,
-  Send,
   FileText,
   Sparkles,
+  UserCheck,
+  UserX,
+  AlertTriangle,
+  Lock,
+  Tag,
+  ChevronRight,
+  X,
+  Target,
+  FileSpreadsheet,
 } from "lucide-react";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
+import { useAuthUser } from "@/components/providers/AuthProvider";
 import { ConciseTalkingPoints } from "@/components/volunteer/ConciseTalkingPoints";
 import { CompanyTimeline } from "@/components/pipeline/CompanyTimeline";
 import { CreateProposalModal } from "@/components/pipeline/CreateProposalModal";
@@ -48,7 +56,15 @@ import {
 
 function LinkedInIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      {...props}
+    >
       <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" />
       <rect x="2" y="9" width="4" height="12" />
       <circle cx="4" cy="4" r="2" />
@@ -69,9 +85,12 @@ export function CompanyDossierDrawer({
   onClose: () => void;
   onStartCall?: (lead: any) => void;
 }) {
-  const [activeTab, setActiveTab] = useState<"overview" | "ai" | "prep" | "proposals" | "timeline">(
-    "overview"
-  );
+  const { user, profile, role } = useAuthUser();
+  const isAdmin = role === "admin";
+
+  const [activeTab, setActiveTab] = useState<
+    "overview" | "prep" | "ai" | "proposals" | "timeline"
+  >("overview");
   const [isProposalModalOpen, setIsProposalModalOpen] = useState(false);
 
   const targetId = propCompany?._id || companyId;
@@ -89,305 +108,659 @@ export function CompanyDossierDrawer({
 
   if (!company) return null;
 
+  // Determine active assignment status and ownership
+  const activeAssignment = company.activeAssignment;
+  const isAssignedToCurrentUser = Boolean(
+    (profile && activeAssignment && activeAssignment.volunteerId === profile._id) ||
+    (user && activeAssignment?.assignedVolunteer?.clerkId === user.id)
+  );
+  const assignedVolunteerName =
+    activeAssignment?.assignedVolunteer?.name || "Assigned Volunteer";
+  const isUnassigned =
+    !activeAssignment || company.leadStatus === "UNASSIGNED";
+
+  // Corporate Contacts resolution
+  const contacts: any[] = company.contacts || [];
+  const primaryContact =
+    contacts.find((c: any) => c.isPrimary) || contacts[0] || null;
+  const hasPhone = Boolean(primaryContact?.phone && primaryContact.phone.trim());
+
+  // Call permissions resolution
+  const canVolunteerCall = isAssignedToCurrentUser || isAdmin;
+  const isCallDisabled = isUnassigned || (!canVolunteerCall && !isAdmin) || !hasPhone;
+
+  let callDisabledReason = "";
+  if (isUnassigned) {
+    callDisabledReason = "Unassigned Lead — Assign to yourself before starting a call.";
+  } else if (!canVolunteerCall) {
+    callDisabledReason = `Assigned to ${assignedVolunteerName} — Only assigned volunteer can call.`;
+  } else if (!hasPhone) {
+    callDisabledReason = "No Contact Phone Available — Add or verify phone number.";
+  }
+
+  const handleTriggerCall = (specificContact?: any) => {
+    if (!onStartCall) return;
+    const targetContact = specificContact || primaryContact;
+    if (!targetContact || !targetContact.phone) return;
+
+    // Create a normalized lead payload with target contact set as primaryContact
+    const callPayload = {
+      ...company,
+      companyName: company.companyName,
+      leadStatus: company.leadStatus,
+      primaryContact: targetContact,
+      contacts: company.contacts,
+      activeAssignment: company.activeAssignment,
+    };
+
+    onClose();
+    onStartCall(callPayload);
+  };
+
   return (
     <>
       <Dialog
         isOpen={isOpen}
         onClose={onClose}
-        maxWidth="xl"
-        title={company.companyName}
-        description={`${company.industry} • ${company.niche}`}
+        maxWidth="4xl"
+        hideHeader={true}
+        className="max-h-[92vh] sm:max-h-[88vh] flex flex-col p-0 overflow-hidden rounded-xl border border-border bg-surface shadow-2xl"
       >
-        <div className="space-y-4 pt-1 max-h-[78vh] overflow-y-auto pr-1">
-          {/* Header Badges & Target Ask */}
-          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border-subtle pb-3">
-            <div className="flex flex-wrap items-center gap-2">
-              <LeadStatusBadge status={company.leadStatus} />
-              <PriorityBadge priority={company.priority} />
-              {company.leadScore && (
-                <span className="rounded-md border border-primary/20 bg-accent-mint px-2 py-0.5 text-[11px] font-bold text-accent-mint-text">
-                  Score: {company.leadScore}
-                </span>
-              )}
-              <LeadPriorityExplainer company={company} />
-            </div>
-
-            {(company.recommendedAskMin || company.recommendedAskMax) && (
-              <div className="text-right">
-                <span className="text-[10px] text-text-muted font-medium uppercase tracking-wider block">
-                  Target Ask ({company.recommendedSponsorshipType || "CASH"})
-                </span>
-                <span className="text-sm font-bold text-primary">
-                  {company.recommendedAskMin
-                    ? formatCurrencyINR(company.recommendedAskMin)
-                    : "—"}{" "}
-                  –{" "}
-                  {company.recommendedAskMax
-                    ? formatCurrencyINR(company.recommendedAskMax)
-                    : "—"}
-                </span>
-              </div>
-            )}
-          </div>
-
-          {/* Navigation Tabs */}
-          <div className="flex border-b border-border text-xs font-medium overflow-x-auto no-scrollbar">
-            <button
-              onClick={() => setActiveTab("overview")}
-              className={`flex items-center gap-1.5 px-3 py-2 border-b-2 transition-colors ${
-                activeTab === "overview"
-                  ? "border-primary text-primary font-bold"
-                  : "border-transparent text-text-secondary hover:text-text-primary"
-              }`}
-            >
-              <Building2 className="h-3.5 w-3.5" />
-              Overview & Contacts
-            </button>
-            <button
-              onClick={() => setActiveTab("ai")}
-              className={`flex items-center gap-1.5 px-3 py-2 border-b-2 transition-colors ${
-                activeTab === "ai"
-                  ? "border-teal-600 text-teal-600 dark:text-teal-400 font-bold"
-                  : "border-transparent text-text-secondary hover:text-text-primary"
-              }`}
-            >
-              <Sparkles className="h-3.5 w-3.5 text-teal-600 dark:text-teal-400" />
-              AI Strategic Intelligence
-            </button>
-            <button
-              onClick={() => setActiveTab("prep")}
-              className={`flex items-center gap-1.5 px-3 py-2 border-b-2 transition-colors ${
-                activeTab === "prep"
-                  ? "border-primary text-primary font-bold"
-                  : "border-transparent text-text-secondary hover:text-text-primary"
-              }`}
-            >
-              <Lightbulb className="h-3.5 w-3.5" />
-              Call Prep Battlecards
-            </button>
-            <button
-              onClick={() => setActiveTab("proposals")}
-              className={`flex items-center gap-1.5 px-3 py-2 border-b-2 transition-colors ${
-                activeTab === "proposals"
-                  ? "border-primary text-primary font-bold"
-                  : "border-transparent text-text-secondary hover:text-text-primary"
-              }`}
-            >
-              <Trophy className="h-3.5 w-3.5" />
-              Proposals & In-Kind ({proposals?.length || 0})
-            </button>
-            <button
-              onClick={() => setActiveTab("timeline")}
-              className={`flex items-center gap-1.5 px-3 py-2 border-b-2 transition-colors ${
-                activeTab === "timeline"
-                  ? "border-primary text-primary font-bold"
-                  : "border-transparent text-text-secondary hover:text-text-primary"
-              }`}
-            >
-              <Clock className="h-3.5 w-3.5" />
-              Activity Timeline
-            </button>
-          </div>
-
-          {/* TAB 1: OVERVIEW & CONTACTS */}
-          {activeTab === "overview" && (
-            <div className="space-y-4">
-              {/* Corporate Profile Card */}
-              <div className="rounded-xl border border-border bg-surface-subtle/50 p-4 space-y-3">
-                <h4 className="text-xs font-bold text-text-primary uppercase tracking-wider flex items-center gap-1.5">
-                  <Building2 className="h-4 w-4 text-primary" />
-                  Corporate Profile & Footprint
-                </h4>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-                  {company.location && (
-                    <div className="flex items-center gap-2 text-text-secondary">
-                      <MapPin className="h-3.5 w-3.5 text-text-muted shrink-0" />
-                      <span>{company.location}</span>
-                    </div>
-                  )}
-                  {company.website && (
-                    <div className="flex items-center gap-2 text-text-secondary">
-                      <Globe className="h-3.5 w-3.5 text-text-muted shrink-0" />
-                      <a
-                        href={company.website.startsWith("http") ? company.website : `https://${company.website}`}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="text-primary hover:underline flex items-center gap-1 truncate"
-                      >
-                        {company.website}
-                        <ExternalLink className="h-3 w-3 inline" />
-                      </a>
-                    </div>
-                  )}
-                  {company.companySize && (
-                    <div className="flex items-center gap-2 text-text-secondary">
-                      <Users className="h-3.5 w-3.5 text-text-muted shrink-0" />
-                      <span>Size: {company.companySize} employees</span>
-                    </div>
-                  )}
-                  {company.annualRevenue && (
-                    <div className="flex items-center gap-2 text-text-secondary">
-                      <Coins className="h-3.5 w-3.5 text-text-muted shrink-0" />
-                      <span>Annual Revenue: {company.annualRevenue}</span>
-                    </div>
-                  )}
-                </div>
-
-                {company.keralaPresence && (
-                  <div className="pt-2 border-t border-border-subtle text-xs text-text-secondary">
-                    <strong className="text-text-primary font-semibold block mb-0.5">
-                      Kerala Footprint:
-                    </strong>
-                    {company.keralaPresence}
-                  </div>
+        {/* ==================================================================== */}
+        {/* STICKY DOSSIER HEADER (PART 2)                                       */}
+        {/* ==================================================================== */}
+        <div className="shrink-0 border-b border-border bg-surface p-4 sm:px-6 sm:py-5">
+          <div className="flex items-start justify-between gap-4">
+            <div className="min-w-0 flex-1 space-y-1.5">
+              {/* Dominant Company Name */}
+              <div className="flex items-center gap-2">
+                <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-text-primary truncate">
+                  {company.companyName}
+                </h2>
+                {company.website && (
+                  <a
+                    href={
+                      company.website.startsWith("http")
+                        ? company.website
+                        : `https://${company.website}`
+                    }
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-text-muted hover:text-primary transition-colors p-1"
+                    title={`Visit ${company.website}`}
+                  >
+                    <ExternalLink className="h-4 w-4" />
+                  </a>
                 )}
               </div>
 
-              {/* AI Strategic Intelligence Quick Trigger */}
-              <div className="rounded-xl border border-teal-500/20 bg-teal-500/5 p-3 flex flex-wrap items-center justify-between gap-2">
-                <div className="flex items-center gap-2">
-                  <div className="p-1 rounded-md bg-teal-500/10 text-teal-600 dark:text-teal-400">
-                    <Sparkles className="h-3.5 w-3.5" />
-                  </div>
-                  <div>
-                    <span className="text-xs font-bold text-text-primary block">
-                      AI Sponsorship Intelligence & Fit Analysis
+              {/* Sector / Category Subtitle */}
+              <p className="text-xs font-medium text-text-secondary flex items-center gap-2 flex-wrap">
+                <span>{company.industry}</span>
+                <span className="text-border-subtle">•</span>
+                <span>{company.niche}</span>
+                {company.location && (
+                  <>
+                    <span className="text-border-subtle">•</span>
+                    <span className="flex items-center gap-1 text-text-muted">
+                      <MapPin className="h-3 w-3" />
+                      {company.location}
                     </span>
-                    <span className="text-[11px] text-text-muted">
-                      Synthesize civil engineering synergy, regional Kerala presence, and ask range.
-                    </span>
-                  </div>
-                </div>
-                <button
-                  onClick={() => setActiveTab("ai")}
-                  className="px-3 py-1.5 rounded-lg bg-teal-600 hover:bg-teal-700 text-white font-semibold text-xs flex items-center gap-1.5 shadow-2xs transition-all cursor-pointer"
-                >
-                  <Sparkles className="h-3 w-3" />
-                  View AI Dossier
-                </button>
+                  </>
+                )}
+              </p>
+
+              {/* Status, Assignment & Priority Indicators */}
+              <div className="flex flex-wrap items-center gap-2 pt-1">
+                {/* Assignment Status */}
+                {isAssignedToCurrentUser ? (
+                  <span className="inline-flex items-center gap-1 rounded-md border border-emerald-500/20 bg-emerald-50/70 dark:bg-emerald-950/30 px-2 py-0.5 text-[11px] font-semibold text-emerald-800 dark:text-emerald-300">
+                    <UserCheck className="h-3 w-3" />
+                    Assigned to You
+                  </span>
+                ) : activeAssignment ? (
+                  <span className="inline-flex items-center gap-1 rounded-md border border-border bg-surface-subtle px-2 py-0.5 text-[11px] font-medium text-text-secondary">
+                    <Users className="h-3 w-3 text-text-muted" />
+                    Assigned: {assignedVolunteerName}
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1 rounded-md border border-amber-500/20 bg-amber-50/70 dark:bg-amber-950/30 px-2 py-0.5 text-[11px] font-semibold text-amber-800 dark:text-amber-300">
+                    <UserX className="h-3 w-3" />
+                    Unassigned
+                  </span>
+                )}
+
+                <LeadStatusBadge status={company.leadStatus} />
+                <PriorityBadge priority={company.priority} />
+
+                {company.leadScore !== undefined && company.leadScore !== null && (
+                  <span className="inline-flex items-center gap-1 rounded-md border border-primary/20 bg-accent-mint px-2 py-0.5 text-[11px] font-mono font-bold text-accent-mint-text">
+                    Score: {company.leadScore}
+                  </span>
+                )}
+
+                <LeadPriorityExplainer company={company} />
               </div>
+            </div>
 
-              {/* Strategic Angle & Sponsorship Pitch Points */}
-              {(company.whyGoodLead || company.whyCompanyBenefits) && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-                  {company.whyGoodLead && (
-                    <div className="rounded-xl border border-border bg-emerald-50/40 dark:bg-emerald-950/20 p-3.5 space-y-1">
-                      <span className="font-semibold text-emerald-950 dark:text-emerald-200 flex items-center gap-1.5">
-                        <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
-                        Why This Lead Matters
-                      </span>
-                      <p className="text-emerald-900/80 dark:text-emerald-200/80 leading-relaxed">
-                        {company.whyGoodLead}
-                      </p>
-                    </div>
-                  )}
-
-                  {company.whyCompanyBenefits && (
-                    <div className="rounded-xl border border-border bg-sky-50/40 dark:bg-sky-950/20 p-3.5 space-y-1">
-                      <span className="font-semibold text-sky-950 dark:text-sky-200 flex items-center gap-1.5">
-                        <Lightbulb className="h-3.5 w-3.5 text-sky-600 dark:text-sky-400" />
-                        Value for the Sponsor
-                      </span>
-                      <p className="text-sky-900/80 dark:text-sky-200/80 leading-relaxed">
-                        {company.whyCompanyBenefits}
-                      </p>
-                    </div>
-                  )}
+            {/* Target Ask & Close Button */}
+            <div className="flex items-start gap-3 shrink-0">
+              {(company.recommendedAskMin || company.recommendedAskMax) && (
+                <div className="text-right hidden sm:block p-2 rounded-lg bg-surface-subtle border border-border-subtle">
+                  <span className="text-[10px] text-text-muted font-semibold uppercase tracking-wider block">
+                    Target Ask ({company.recommendedSponsorshipType || "CASH"})
+                  </span>
+                  <span className="text-sm font-bold font-mono text-primary">
+                    {company.recommendedAskMin
+                      ? formatCurrencyINR(company.recommendedAskMin)
+                      : "—"}{" "}
+                    –{" "}
+                    {company.recommendedAskMax
+                      ? formatCurrencyINR(company.recommendedAskMax)
+                      : "—"}
+                  </span>
                 </div>
               )}
 
-              {/* Key Decision Makers & Contacts */}
-              <div className="space-y-3">
-                <h4 className="text-xs font-bold text-text-primary uppercase tracking-wider flex items-center gap-1.5">
-                  <ShieldCheck className="h-4 w-4 text-primary" />
-                  Key Corporate Contacts
-                </h4>
+              <button
+                onClick={onClose}
+                className="rounded-lg p-1.5 text-text-muted hover:bg-surface-subtle hover:text-text-primary transition-colors cursor-pointer border border-transparent hover:border-border"
+                aria-label="Close dossier"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
+        </div>
 
-                {company.contacts && company.contacts.length > 0 ? (
-                  <div className="space-y-2">
-                    {company.contacts.map((ct: any) => (
-                      <div
-                        key={ct._id}
-                        className="rounded-xl border border-border bg-surface p-3 text-xs space-y-2 shadow-2xs"
-                      >
-                        <div className="flex flex-wrap items-center justify-between gap-2">
-                          <div className="flex items-center gap-2">
-                            <span className="font-bold text-text-primary">
-                              {ct.contactName}
-                            </span>
-                            <span className="text-text-muted">•</span>
-                            <span className="text-text-secondary">{ct.designation}</span>
-                            {ct.isPrimary && (
-                              <span className="rounded-full bg-primary/10 text-primary border border-primary/20 px-1.5 py-0.2 text-[10px] font-bold">
-                                Primary
+        {/* ==================================================================== */}
+        {/* DOSSIER NAVIGATION TABS                                              */}
+        {/* ==================================================================== */}
+        <div className="shrink-0 flex border-b border-border bg-surface-subtle/30 px-4 sm:px-6 text-xs font-medium overflow-x-auto no-scrollbar gap-1">
+          <button
+            onClick={() => setActiveTab("overview")}
+            className={`flex items-center gap-1.5 px-3 py-2.5 border-b-2 font-semibold transition-colors cursor-pointer whitespace-nowrap ${
+              activeTab === "overview"
+                ? "border-primary text-primary"
+                : "border-transparent text-text-secondary hover:text-text-primary"
+            }`}
+          >
+            <Building2 className="h-3.5 w-3.5" />
+            Overview & Intelligence
+          </button>
+          <button
+            onClick={() => setActiveTab("prep")}
+            className={`flex items-center gap-1.5 px-3 py-2.5 border-b-2 font-semibold transition-colors cursor-pointer whitespace-nowrap ${
+              activeTab === "prep"
+                ? "border-primary text-primary"
+                : "border-transparent text-text-secondary hover:text-text-primary"
+            }`}
+          >
+            <Lightbulb className="h-3.5 w-3.5" />
+            Call Prep Battlecards
+          </button>
+          <button
+            onClick={() => setActiveTab("ai")}
+            className={`flex items-center gap-1.5 px-3 py-2.5 border-b-2 font-semibold transition-colors cursor-pointer whitespace-nowrap ${
+              activeTab === "ai"
+                ? "border-teal-600 text-teal-600 dark:text-teal-400"
+                : "border-transparent text-text-secondary hover:text-text-primary"
+            }`}
+          >
+            <Sparkles className="h-3.5 w-3.5 text-teal-600 dark:text-teal-400" />
+            AI Strategic Dossier
+          </button>
+          <button
+            onClick={() => setActiveTab("proposals")}
+            className={`flex items-center gap-1.5 px-3 py-2.5 border-b-2 font-semibold transition-colors cursor-pointer whitespace-nowrap ${
+              activeTab === "proposals"
+                ? "border-primary text-primary"
+                : "border-transparent text-text-secondary hover:text-text-primary"
+            }`}
+          >
+            <Trophy className="h-3.5 w-3.5" />
+            Proposals & In-Kind ({proposals?.length || 0})
+          </button>
+          <button
+            onClick={() => setActiveTab("timeline")}
+            className={`flex items-center gap-1.5 px-3 py-2.5 border-b-2 font-semibold transition-colors cursor-pointer whitespace-nowrap ${
+              activeTab === "timeline"
+                ? "border-primary text-primary"
+                : "border-transparent text-text-secondary hover:text-text-primary"
+            }`}
+          >
+            <Clock className="h-3.5 w-3.5" />
+            Activity Timeline
+          </button>
+        </div>
+
+        {/* ==================================================================== */}
+        {/* SCROLLABLE DOSSIER CONTENT                                           */}
+        {/* ==================================================================== */}
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6 overscroll-contain">
+          {/* TAB 1: OVERVIEW & INTELLIGENCE */}
+          {activeTab === "overview" && (
+            <div className="space-y-6">
+              {/* -------------------------------------------------------------- */}
+              {/* 01 — COMPANY SNAPSHOT (PART 3)                                */}
+              {/* -------------------------------------------------------------- */}
+              <section className="space-y-3">
+                <div className="flex items-center justify-between border-b border-border pb-1.5">
+                  <h3 className="text-[11px] font-bold text-text-secondary uppercase tracking-wider flex items-center gap-1.5">
+                    <Building2 className="h-3.5 w-3.5 text-primary" />
+                    01 · Company Snapshot
+                  </h3>
+                  <span className="text-[10px] text-text-muted">
+                    ID: {company._id}
+                  </span>
+                </div>
+
+                <div className="rounded-xl border border-border bg-surface p-4 shadow-2xs">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 text-xs">
+                    <div>
+                      <span className="text-[10px] text-text-muted font-medium uppercase tracking-wider block mb-0.5">
+                        Location / Headquarter
+                      </span>
+                      <span className="font-medium text-text-primary flex items-center gap-1.5">
+                        <MapPin className="h-3.5 w-3.5 text-text-muted shrink-0" />
+                        {company.location || "Not specified"}
+                      </span>
+                    </div>
+
+                    <div>
+                      <span className="text-[10px] text-text-muted font-medium uppercase tracking-wider block mb-0.5">
+                        Industry & Sector
+                      </span>
+                      <span className="font-medium text-text-primary">
+                        {company.industry} — {company.niche}
+                      </span>
+                    </div>
+
+                    <div>
+                      <span className="text-[10px] text-text-muted font-medium uppercase tracking-wider block mb-0.5">
+                        Company Scale
+                      </span>
+                      <span className="font-medium text-text-primary flex items-center gap-1.5">
+                        <Users className="h-3.5 w-3.5 text-text-muted shrink-0" />
+                        {company.companySize
+                          ? `${company.companySize} employees`
+                          : "Scale unknown"}
+                      </span>
+                    </div>
+
+                    <div>
+                      <span className="text-[10px] text-text-muted font-medium uppercase tracking-wider block mb-0.5">
+                        Annual Revenue
+                      </span>
+                      <span className="font-medium text-text-primary flex items-center gap-1.5">
+                        <Coins className="h-3.5 w-3.5 text-text-muted shrink-0" />
+                        {company.annualRevenue || "Revenue not disclosed"}
+                      </span>
+                    </div>
+
+                    <div>
+                      <span className="text-[10px] text-text-muted font-medium uppercase tracking-wider block mb-0.5">
+                        Website & Digital
+                      </span>
+                      {company.website ? (
+                        <a
+                          href={
+                            company.website.startsWith("http")
+                              ? company.website
+                              : `https://${company.website}`
+                          }
+                          target="_blank"
+                          rel="noreferrer"
+                          className="text-primary hover:underline font-medium flex items-center gap-1 truncate"
+                        >
+                          <Globe className="h-3.5 w-3.5 text-text-muted shrink-0" />
+                          <span className="truncate">{company.website}</span>
+                          <ExternalLink className="h-3 w-3 shrink-0" />
+                        </a>
+                      ) : (
+                        <span className="text-text-muted">No website recorded</span>
+                      )}
+                    </div>
+
+                    <div>
+                      <span className="text-[10px] text-text-muted font-medium uppercase tracking-wider block mb-0.5">
+                        Lead Source & Origin
+                      </span>
+                      <span className="font-medium text-text-primary flex items-center gap-1.5">
+                        <Tag className="h-3.5 w-3.5 text-text-muted shrink-0" />
+                        {company.source || "Manual Ingestion"}
+                      </span>
+                    </div>
+                  </div>
+
+                  {company.keralaPresence && (
+                    <div className="mt-3.5 pt-3 border-t border-border-subtle text-xs">
+                      <span className="text-[10px] text-text-muted font-medium uppercase tracking-wider block mb-1">
+                        Regional Kerala Presence & Footprint
+                      </span>
+                      <p className="text-text-secondary leading-relaxed bg-surface-subtle/50 p-2.5 rounded-lg border border-border-subtle">
+                        {company.keralaPresence}
+                      </p>
+                    </div>
+                  )}
+
+                  {company.sponsorshipHistory && (
+                    <div className="mt-3 pt-3 border-t border-border-subtle text-xs">
+                      <span className="text-[10px] text-text-muted font-medium uppercase tracking-wider block mb-1">
+                        Past Sponsorship History & Evidence
+                      </span>
+                      <p className="text-text-secondary leading-relaxed">
+                        {company.sponsorshipHistory}
+                        {company.sponsorshipEvidence && (
+                          <span className="block mt-0.5 text-text-muted italic">
+                            Evidence: {company.sponsorshipEvidence}
+                          </span>
+                        )}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </section>
+
+              {/* -------------------------------------------------------------- */}
+              {/* 02 — SPONSORSHIP FIT (PART 3)                                  */}
+              {/* -------------------------------------------------------------- */}
+              <section className="space-y-3">
+                <div className="flex items-center justify-between border-b border-border pb-1.5">
+                  <h3 className="text-[11px] font-bold text-text-secondary uppercase tracking-wider flex items-center gap-1.5">
+                    <Target className="h-3.5 w-3.5 text-primary" />
+                    02 · Sponsorship Fit & Positioning
+                  </h3>
+                  <span className="text-[10px] text-text-muted font-mono">
+                    Tier Target: {company.recommendedSponsorshipType || "CASH"}
+                  </span>
+                </div>
+
+                {/* Target Ask and Clean Fit Score Row */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="rounded-xl border border-border bg-surface p-3.5 space-y-1">
+                    <span className="text-[10px] font-semibold uppercase tracking-wider text-text-muted block">
+                      Target Sponsorship Ask ({company.recommendedSponsorshipType || "CASH"})
+                    </span>
+                    <div className="text-base font-bold font-mono text-primary">
+                      {company.recommendedAskMin
+                        ? formatCurrencyINR(company.recommendedAskMin)
+                        : "—"}{" "}
+                      –{" "}
+                      {company.recommendedAskMax
+                        ? formatCurrencyINR(company.recommendedAskMax)
+                        : "—"}
+                    </div>
+                    {company.alternativeSupport && (
+                      <div className="text-[11px] text-text-secondary pt-1 border-t border-border-subtle">
+                        <strong className="text-text-primary">Alternative: </strong>
+                        {company.alternativeSupport}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="rounded-xl border border-border bg-surface p-3.5 space-y-1.5 flex flex-col justify-between">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-semibold uppercase tracking-wider text-text-muted block">
+                        Algorithm Fit Score
+                      </span>
+                      <span className="text-xs font-mono font-bold text-text-primary">
+                        {company.leadScore ?? "—"}/100
+                      </span>
+                    </div>
+
+                    {/* Clean visual fit score gauge */}
+                    <div className="space-y-1">
+                      <div className="h-2 w-full rounded-full bg-surface-subtle border border-border overflow-hidden">
+                        <div
+                          className="h-full rounded-full bg-primary transition-all duration-300"
+                          style={{
+                            width: `${Math.min(100, Math.max(0, company.leadScore || 50))}%`,
+                          }}
+                        />
+                      </div>
+                      <span className="text-[10px] text-text-muted block">
+                        Calculated from sector alignment, campus footprint & collegiate spend history
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Why Lead Matters & Potential Sponsor Value */}
+                {(company.whyGoodLead || company.whyCompanyBenefits) && (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                    {company.whyGoodLead && (
+                      <div className="rounded-xl border-l-2 border-l-emerald-600 border border-border bg-emerald-50/20 dark:bg-emerald-950/10 p-3.5 space-y-1.5">
+                        <span className="font-bold text-emerald-950 dark:text-emerald-200 flex items-center gap-1.5">
+                          <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
+                          Why This Lead Matters
+                        </span>
+                        <p className="text-emerald-900/90 dark:text-emerald-200/90 leading-relaxed">
+                          {company.whyGoodLead}
+                        </p>
+                      </div>
+                    )}
+
+                    {company.whyCompanyBenefits && (
+                      <div className="rounded-xl border-l-2 border-l-sky-600 border border-border bg-sky-50/20 dark:bg-sky-950/10 p-3.5 space-y-1.5">
+                        <span className="font-bold text-sky-950 dark:text-sky-200 flex items-center gap-1.5">
+                          <Lightbulb className="h-3.5 w-3.5 text-sky-600 shrink-0" />
+                          Potential Sponsor Value & ROI
+                        </span>
+                        <p className="text-sky-900/90 dark:text-sky-200/90 leading-relaxed">
+                          {company.whyCompanyBenefits}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </section>
+
+              {/* -------------------------------------------------------------- */}
+              {/* 03 — AI SPONSORSHIP INTELLIGENCE (PART 3)                      */}
+              {/* -------------------------------------------------------------- */}
+              <section className="space-y-3">
+                <div className="flex items-center justify-between border-b border-border pb-1.5">
+                  <h3 className="text-[11px] font-bold text-text-secondary uppercase tracking-wider flex items-center gap-1.5">
+                    <Sparkles className="h-3.5 w-3.5 text-teal-600 dark:text-teal-400" />
+                    03 · AI Sponsorship Intelligence
+                  </h3>
+                  <span className="text-[10px] text-text-muted">
+                    Operational Intelligence Layer
+                  </span>
+                </div>
+
+                <div className="rounded-xl border border-teal-500/20 bg-teal-500/5 p-4 space-y-3">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="space-y-1">
+                      <span className="text-xs font-bold text-text-primary block">
+                        Why this company fits PRAROHA'26
+                      </span>
+                      <p className="text-xs text-text-secondary leading-relaxed">
+                        {company.whyGoodLead ||
+                          `Strong operational alignment with Civil Engineering and tech-managerial initiatives at SOE CUSAT. Contextual pitch ready for corporate brand teams.`}
+                      </p>
+                    </div>
+
+                    <button
+                      onClick={() => setActiveTab("ai")}
+                      className="px-3 py-1.5 rounded-lg bg-teal-600 hover:bg-teal-700 text-white font-semibold text-xs flex items-center gap-1.5 shadow-2xs transition-all cursor-pointer shrink-0"
+                    >
+                      <Sparkles className="h-3.5 w-3.5" />
+                      View AI Dossier
+                      <ChevronRight className="h-3 w-3" />
+                    </button>
+                  </div>
+                </div>
+              </section>
+
+              {/* -------------------------------------------------------------- */}
+              {/* 04 — CONTACTS (PART 3)                                         */}
+              {/* -------------------------------------------------------------- */}
+              <section className="space-y-3">
+                <div className="flex items-center justify-between border-b border-border pb-1.5">
+                  <h3 className="text-[11px] font-bold text-text-secondary uppercase tracking-wider flex items-center gap-1.5">
+                    <ShieldCheck className="h-3.5 w-3.5 text-primary" />
+                    04 · Corporate Decision Makers & Contacts ({contacts.length})
+                  </h3>
+                  <span className="text-[10px] text-text-muted">
+                    Zero Blind Calling Policy
+                  </span>
+                </div>
+
+                {contacts.length > 0 ? (
+                  <div className="space-y-2.5">
+                    {contacts.map((ct: any) => {
+                      const isContactUnverified =
+                        ct.contactVerification === "UNVERIFIED";
+
+                      return (
+                        <div
+                          key={ct._id}
+                          className="rounded-xl border border-border bg-surface p-4 text-xs space-y-3 shadow-2xs"
+                        >
+                          {/* Name, Designation & Primary Pill */}
+                          <div className="flex flex-wrap items-start justify-between gap-2">
+                            <div className="space-y-0.5">
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <span className="font-bold text-text-primary text-sm">
+                                  {ct.contactName}
+                                </span>
+                                {ct.isPrimary && (
+                                  <span className="rounded-full bg-primary/10 text-primary border border-primary/20 px-2 py-0.2 text-[10px] font-bold">
+                                    Primary Contact
+                                  </span>
+                                )}
+                              </div>
+                              <span className="text-text-secondary block font-medium">
+                                {ct.designation || "Representative"}
+                                {company.location ? ` • ${company.location}` : ""}
                               </span>
-                            )}
-                          </div>
-                          <ContactVerificationBadge level={ct.contactVerification} />
-                        </div>
+                            </div>
 
-                        <div className="flex flex-wrap items-center gap-4 text-text-secondary pt-1 border-t border-border-subtle">
-                          <div className="flex items-center gap-1.5 font-mono">
-                            <Phone className="h-3.5 w-3.5 text-text-muted" />
-                            <a href={`tel:${ct.phone}`} className="hover:text-primary">
-                              {ct.phone}
-                            </a>
-                            <PhoneTypeBadge type={ct.phoneType || "unknown"} />
+                            {/* Contact Verification Badge */}
+                            <div>
+                              <ContactVerificationBadge
+                                level={ct.contactVerification}
+                              />
+                            </div>
                           </div>
 
-                          {ct.email && (
-                            <div className="flex items-center gap-1.5">
-                              <Mail className="h-3.5 w-3.5 text-text-muted" />
-                              <a href={`mailto:${ct.email}`} className="hover:text-primary">
-                                {ct.email}
-                              </a>
+                          {/* Verification Warning Banner if Unverified */}
+                          {isContactUnverified && (
+                            <div className="rounded-lg border border-amber-500/20 bg-amber-50/60 dark:bg-amber-950/20 px-2.5 py-1.5 text-[11px] flex items-center gap-2 text-amber-800 dark:text-amber-300">
+                              <AlertTriangle className="h-3.5 w-3.5 shrink-0 text-amber-600" />
+                              <span>
+                                <strong>Unverified contact:</strong> Origin is unconfirmed. Verify authorization before promising packages. (Source:{" "}
+                                {ct.contactSource || "Unknown source"})
+                              </span>
                             </div>
                           )}
 
-                          {ct.linkedin && (
-                            <a
-                              href={ct.linkedin}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="text-sky-700 hover:underline inline-flex items-center gap-1"
-                            >
-                              <LinkedInIcon className="h-3.5 w-3.5" />
-                              Profile
-                            </a>
-                          )}
+                          {/* Phone, Email & Action Trigger */}
+                          <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-border-subtle">
+                            <div className="flex flex-wrap items-center gap-4 text-text-secondary">
+                              <div className="flex items-center gap-1.5 font-mono">
+                                <Phone className="h-3.5 w-3.5 text-text-muted" />
+                                <span className="font-semibold text-text-primary text-xs">
+                                  {ct.phone || "No phone recorded"}
+                                </span>
+                                <PhoneTypeBadge
+                                  type={ct.phoneType || "unknown"}
+                                />
+                              </div>
+
+                              {ct.email && (
+                                <div className="flex items-center gap-1.5">
+                                  <Mail className="h-3.5 w-3.5 text-text-muted" />
+                                  <a
+                                    href={`mailto:${ct.email}`}
+                                    className="hover:text-primary transition-colors truncate max-w-[180px]"
+                                  >
+                                    {ct.email}
+                                  </a>
+                                </div>
+                              )}
+
+                              {ct.linkedin && (
+                                <a
+                                  href={ct.linkedin}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="text-sky-700 dark:text-sky-400 hover:underline inline-flex items-center gap-1"
+                                >
+                                  <LinkedInIcon className="h-3.5 w-3.5" />
+                                  Profile
+                                </a>
+                              )}
+                            </div>
+
+                            {/* Per-Contact Call Button */}
+                            {onStartCall && ct.phone && (
+                              <Button
+                                size="sm"
+                                variant={canVolunteerCall ? "primary" : "outline"}
+                                disabled={!canVolunteerCall}
+                                onClick={() => handleTriggerCall(ct)}
+                                className="text-xs h-7 px-2.5"
+                                title={
+                                  canVolunteerCall
+                                    ? `Call ${ct.contactName} (${ct.phone})`
+                                    : callDisabledReason
+                                }
+                              >
+                                <PhoneCall className="h-3 w-3 mr-1" />
+                                Call Contact
+                              </Button>
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 ) : (
-                  <div className="rounded-xl border border-dashed border-border p-4 text-center text-xs text-text-muted">
-                    No individual contacts added for this company.
+                  <div className="rounded-xl border border-dashed border-border p-6 text-center space-y-2 bg-surface-subtle/30">
+                    <PhoneOff className="h-6 w-6 text-text-muted mx-auto opacity-50" />
+                    <p className="text-xs font-semibold text-text-primary">
+                      No Contacts Available
+                    </p>
+                    <p className="text-[11px] text-text-muted max-w-sm mx-auto">
+                      This company does not have an assigned contact number yet. Add or verify a contact before starting outreach.
+                    </p>
                   </div>
                 )}
-              </div>
+              </section>
 
-              {company.notes && (
-                <div className="rounded-xl border border-border bg-amber-50/40 dark:bg-amber-950/20 p-3.5 text-xs">
-                  <span className="font-semibold text-amber-900 dark:text-amber-200 block mb-1">
-                    Internal Outreach Notes:
+              {/* -------------------------------------------------------------- */}
+              {/* 05 — OUTREACH NOTES (PART 3)                                   */}
+              {/* -------------------------------------------------------------- */}
+              <section className="space-y-3">
+                <div className="flex items-center justify-between border-b border-border pb-1.5">
+                  <h3 className="text-[11px] font-bold text-text-secondary uppercase tracking-wider flex items-center gap-1.5">
+                    <Lock className="h-3.5 w-3.5 text-amber-600" />
+                    05 · Internal Outreach Notes
+                  </h3>
+                  <span className="text-[10px] text-amber-700 dark:text-amber-400 font-medium">
+                    Strictly Confidential • PRAROHA'26 Committee Only
                   </span>
-                  <p className="text-amber-800 dark:text-amber-200/80 leading-relaxed">{company.notes}</p>
                 </div>
-              )}
-            </div>
-          )}
 
-          {/* TAB: AI STRATEGIC INTELLIGENCE */}
-          {activeTab === "ai" && (
-            <div className="space-y-4">
-              <CompanyAIAnalysisCard company={company} />
-              <AlternativeAskCard
-                company={company}
-                onSelectAlternative={() => {
-                  setIsProposalModalOpen(true);
-                }}
-              />
+                <div className="rounded-xl border border-amber-500/20 bg-amber-50/30 dark:bg-amber-950/20 p-4 text-xs space-y-2">
+                  <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-amber-800 dark:text-amber-300">
+                    <Lock className="h-3 w-3 text-amber-600" />
+                    Internal Outreach Notes (Not shared with corporate sponsor)
+                  </div>
+                  {company.notes ? (
+                    <p className="text-text-primary leading-relaxed whitespace-pre-wrap">
+                      {company.notes}
+                    </p>
+                  ) : (
+                    <p className="text-text-muted italic">
+                      No internal notes recorded for this lead yet. Update notes during post-call debriefs.
+                    </p>
+                  )}
+                </div>
+              </section>
             </div>
           )}
 
@@ -408,14 +781,23 @@ export function CompanyDossierDrawer({
             </div>
           )}
 
-          {/* TAB 3: PROPOSALS & IN-KIND */}
+          {/* TAB 3: AI STRATEGIC INTELLIGENCE */}
+          {activeTab === "ai" && (
+            <div className="space-y-4">
+              <CompanyAIAnalysisCard company={company} />
+              <AlternativeAskCard
+                company={company}
+                onSelectAlternative={() => setIsProposalModalOpen(true)}
+              />
+            </div>
+          )}
+
+          {/* TAB 4: PROPOSALS & IN-KIND */}
           {activeTab === "proposals" && (
             <div className="space-y-4">
               <AlternativeAskCard
                 company={company}
-                onSelectAlternative={() => {
-                  setIsProposalModalOpen(true);
-                }}
+                onSelectAlternative={() => setIsProposalModalOpen(true)}
               />
 
               <div className="flex items-center justify-between pb-2 border-b border-border-subtle pt-2">
@@ -502,7 +884,8 @@ export function CompanyDossierDrawer({
                         <div className="rounded-lg bg-purple-50/50 dark:bg-purple-950/20 border border-purple-200 dark:border-purple-800/50 p-2 text-[11px] text-purple-950 dark:text-purple-200 flex items-center justify-between">
                           <span className="flex items-center gap-1 font-semibold">
                             <Gift className="h-3.5 w-3.5 text-purple-700 dark:text-purple-400" />
-                            Non-Cash: {p.inKindCategory} ({formatCurrencyINR(p.inKindEstimatedValue)})
+                            Non-Cash: {p.inKindCategory} (
+                            {formatCurrencyINR(p.inKindEstimatedValue)})
                           </span>
                           {p.inKindDescription && (
                             <span className="text-purple-900 dark:text-purple-300 truncate max-w-xs">
@@ -541,45 +924,86 @@ export function CompanyDossierDrawer({
             </div>
           )}
 
-          {/* TAB 4: RELATIONSHIP TIMELINE */}
+          {/* TAB 5: RELATIONSHIP TIMELINE */}
           {activeTab === "timeline" && (
             <div className="space-y-3">
               <CompanyTimeline companyId={company._id} />
             </div>
           )}
+        </div>
 
-          {/* Sticky Drawer Footer */}
-          <div className="flex items-center justify-between pt-3 border-t border-border-subtle">
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setIsProposalModalOpen(true)}
-                className="text-xs"
-              >
-                <Plus className="h-3.5 w-3.5 mr-1" />
-                Draft Proposal
-              </Button>
-              {onStartCall && (
+        {/* ==================================================================== */}
+        {/* STICKY FOOTER ACTIONS (PART 4 & 7)                                   */}
+        {/* ==================================================================== */}
+        <div className="shrink-0 border-t border-border bg-surface p-4 sm:px-6 sm:py-3.5 flex flex-wrap items-center justify-between gap-3">
+          <div className="flex flex-wrap items-center gap-2">
+            {/* Start Call Button with Strict Assignment Safety */}
+            {onStartCall && (
+              <div className="relative group">
                 <Button
                   variant="primary"
                   size="sm"
-                  onClick={() => {
-                    onClose();
-                    onStartCall(company);
-                  }}
-                  className="text-xs"
+                  disabled={isCallDisabled}
+                  onClick={() => handleTriggerCall()}
+                  className={`text-xs ${
+                    isCallDisabled
+                      ? "opacity-60 cursor-not-allowed bg-muted text-muted-foreground"
+                      : ""
+                  }`}
                 >
-                  <PhoneCall className="h-3.5 w-3.5 mr-1.5" />
-                  Start Call
+                  {isUnassigned ? (
+                    <>
+                      <Lock className="h-3.5 w-3.5 mr-1.5" />
+                      Unassigned Lead
+                    </>
+                  ) : !canVolunteerCall ? (
+                    <>
+                      <UserX className="h-3.5 w-3.5 mr-1.5" />
+                      Assigned to Another
+                    </>
+                  ) : !hasPhone ? (
+                    <>
+                      <PhoneOff className="h-3.5 w-3.5 mr-1.5" />
+                      No Contact Phone
+                    </>
+                  ) : (
+                    <>
+                      <PhoneCall className="h-3.5 w-3.5 mr-1.5" />
+                      Start Call ({primaryContact.contactName})
+                    </>
+                  )}
                 </Button>
-              )}
-            </div>
 
-            <Button variant="outline" size="sm" onClick={onClose} className="text-xs">
-              Close Dossier
+                {/* Explanatory Tooltip when Disabled */}
+                {isCallDisabled && (
+                  <div className="absolute bottom-full left-0 mb-1.5 hidden group-hover:block z-50 w-64 rounded-md border border-border bg-popover p-2 text-[11px] text-popover-foreground shadow-md animate-in fade-in-50">
+                    <p className="font-semibold">{callDisabledReason}</p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Secondary: Draft Proposal */}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsProposalModalOpen(true)}
+              className="text-xs"
+            >
+              <FileSpreadsheet className="h-3.5 w-3.5 mr-1.5" />
+              Draft Proposal
             </Button>
           </div>
+
+          {/* Tertiary: Close Dossier */}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onClose}
+            className="text-xs text-text-secondary"
+          >
+            Close Dossier
+          </Button>
         </div>
       </Dialog>
 
@@ -590,7 +1014,11 @@ export function CompanyDossierDrawer({
           onClose={() => setIsProposalModalOpen(false)}
           companyId={company._id}
           companyName={company.companyName}
-          defaultTier={company.recommendedSponsorshipType === "Title" ? "Title" : "Associate"}
+          defaultTier={
+            company.recommendedSponsorshipType === "Title"
+              ? "Title"
+              : "Associate"
+          }
         />
       )}
     </>

@@ -17,9 +17,10 @@ import { AdjustPointsModal } from "@/components/admin/AdjustPointsModal";
 
 interface LeaderboardPodiumProps {
   compact?: boolean;
+  onClose?: () => void;
 }
 
-export function LeaderboardPodium({ compact = false }: LeaderboardPodiumProps) {
+export function LeaderboardPodium({ compact = false, onClose }: LeaderboardPodiumProps) {
   const { user, profile, role } = useAuthUser();
   const leaderboard = useQuery(api.gamification.getLeaderboard, {});
   const [searchQuery, setSearchQuery] = useState("");

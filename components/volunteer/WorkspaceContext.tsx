@@ -4,7 +4,6 @@ import React, { createContext, useContext, useState } from "react";
 import dynamic from "next/dynamic";
 import { Id } from "@/convex/_generated/dataModel";
 import { CompanyContact, ContactVerificationLevel, LeadStage, PhoneType, PriorityLevel, QuickCallOutcome } from "@/types";
-import { Dialog } from "@/components/ui/dialog";
 
 // Dynamically code-split heavy overlays so initial /workspace load is instant
 const CompanyDossierDrawer = dynamic(
@@ -14,6 +13,16 @@ const CompanyDossierDrawer = dynamic(
 
 const CallModeOverlay = dynamic(
   () => import("@/components/volunteer/CallModeOverlay").then((mod) => mod.CallModeOverlay),
+  { ssr: false }
+);
+
+const CallConfirmationDialog = dynamic(
+  () => import("@/components/volunteer/CallConfirmationDialog").then((mod) => mod.CallConfirmationDialog),
+  { ssr: false }
+);
+
+const SelectLeadToCallModal = dynamic(
+  () => import("@/components/volunteer/SelectLeadToCallModal").then((mod) => mod.SelectLeadToCallModal),
   { ssr: false }
 );
 
@@ -36,6 +45,7 @@ interface WorkspaceContextType {
   openCompanyDossier: (companyId: Id<"companies">) => void;
   closeCompanyDossier: () => void;
   startCallMode: (lead: WorkspaceLeadInput) => void;
+  openGlobalLogCall: () => void;
   openDebriefModal: (lead: WorkspaceLeadInput, callData?: CallData) => void;
   openEventInfo: () => void;
   openLeaderboard: () => void;
@@ -64,9 +74,11 @@ export interface WorkspaceLeadInput {
   email?: string;
   primaryContact?: Partial<CompanyContact> | null;
   contacts?: CompanyContact[];
+  isAssignedToCurrentUser?: boolean;
+  assignedVolunteerName?: string;
 }
 
-interface WorkspaceLead {
+export interface WorkspaceLead {
   _id: Id<"companies">;
   companyName: string;
   industry: string;
@@ -87,6 +99,8 @@ interface WorkspaceLead {
     contactVerification: ContactVerificationLevel;
     email?: string;
   } | null;
+  isAssignedToCurrentUser?: boolean;
+  assignedVolunteerName?: string;
 }
 
 interface CallData {
@@ -103,7 +117,14 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
   const [isEventInfoOpen, setIsEventInfoOpen] = useState(false);
   const [isLeaderboardOpen, setIsLeaderboardOpen] = useState(false);
 
-  // Call Mode & Debrief state
+  // Call Confirmation State (Pre-Call Verification Gate)
+  const [isCallConfirmationOpen, setIsCallConfirmationOpen] = useState(false);
+  const [pendingCallLead, setPendingCallLead] = useState<WorkspaceLead | null>(null);
+
+  // Global "Select Lead to Call" Modal
+  const [isSelectLeadModalOpen, setIsSelectLeadModalOpen] = useState(false);
+
+  // Active Call Mode & Debrief state
   const [callLead, setCallLead] = useState<WorkspaceLead | null>(null);
   const [isCallModeOpen, setIsCallModeOpen] = useState(false);
   const [isDebriefModalOpen, setIsDebriefModalOpen] = useState(false);
@@ -131,7 +152,12 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
     if (!lead) return null;
     const companyId = lead._id || lead.companyId;
     if (!companyId) return null;
-    const contact = lead.primaryContact || (lead.contacts && (lead.contacts.find((item) => item.isPrimary) || lead.contacts[0]));
+    const contact =
+      lead.primaryContact ||
+      (lead.contacts && (lead.contacts.find((item) => item.isPrimary) || lead.contacts[0]));
+
+    const phone = (contact?.phone || lead.phone || "").trim();
+
     return {
       _id: companyId,
       companyName: lead.companyName || "",
@@ -149,27 +175,69 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
         ? {
             contactName: contact.contactName || "",
             designation: contact.designation || "",
-            phone: contact.phone || "",
+            phone,
             phoneType: contact.phoneType || "unknown",
             contactVerification: contact.contactVerification || "UNVERIFIED",
             email: contact.email,
           }
-        : lead.contactName
+        : lead.contactName || phone
           ? {
-              contactName: lead.contactName,
-              designation: lead.contactDesignation || lead.designation || "",
-              phone: lead.phone || "",
+              contactName: lead.contactName || "Main Switchboard / Officer",
+              designation: lead.contactDesignation || lead.designation || "Corporate Contact",
+              phone,
               phoneType: lead.phoneType || "unknown",
               contactVerification: lead.contactVerification || "UNVERIFIED",
               email: lead.email || undefined,
             }
           : null,
+      isAssignedToCurrentUser: lead.isAssignedToCurrentUser,
+      assignedVolunteerName: lead.assignedVolunteerName,
     };
   };
 
-  const startCallMode = (lead: WorkspaceLeadInput) => {
-    setCallLead(normalizeLead(lead));
+  /**
+   * Pre-Call Validation & Gate:
+   * NEVER opens CallMode directly. Instead validates contact and presents CallConfirmationDialog.
+   */
+  const startCallMode = (leadInput: WorkspaceLeadInput) => {
+    const normalized = normalizeLead(leadInput);
+    if (!normalized) {
+      alert("Call Error: Invalid lead data. Please select an assigned lead.");
+      return;
+    }
+
+    const phone = normalized.primaryContact?.phone?.trim();
+    if (!phone) {
+      alert(
+        `No contact available: "${normalized.companyName}" does not have a valid phone number recorded. Please add or verify a contact in the dossier first.`
+      );
+      return;
+    }
+
+    // Set pending confirmation state
+    setPendingCallLead(normalized);
+    setIsCallConfirmationOpen(true);
+  };
+
+  /**
+   * Confirmed Call Action from CallConfirmationDialog:
+   * Transfers verified lead into active CallModeOverlay.
+   */
+  const handleConfirmCall = () => {
+    if (!pendingCallLead) return;
+    setCallLead(pendingCallLead);
+    setIsCallConfirmationOpen(false);
     setIsCallModeOpen(true);
+  };
+
+  /**
+   * Context-Aware Global "Log a Call" Action from Top Navbar:
+   * Never dials random or stale numbers. Opens controlled selection interface if no lead is active.
+   */
+  const openGlobalLogCall = () => {
+    // If a dossier is currently open, we cannot assume the user wants to call without confirming.
+    // Instead, open the controlled lead selector to let them pick or verify.
+    setIsSelectLeadModalOpen(true);
   };
 
   const openDebriefModal = (lead: WorkspaceLeadInput, callData?: CallData) => {
@@ -202,6 +270,7 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
         openCompanyDossier,
         closeCompanyDossier,
         startCallMode,
+        openGlobalLogCall,
         openDebriefModal,
         openEventInfo: () => setIsEventInfoOpen(true),
         openLeaderboard: () => setIsLeaderboardOpen(true),
@@ -219,6 +288,38 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
         />
       )}
 
+      {/* Context-Aware Global "Select Lead to Call" Interface: Loaded on demand */}
+      {isSelectLeadModalOpen && (
+        <SelectLeadToCallModal
+          isOpen={isSelectLeadModalOpen}
+          onClose={() => setIsSelectLeadModalOpen(false)}
+          onSelectLead={(lead) => startCallMode(lead)}
+        />
+      )}
+
+      {/* Lightweight Pre-Call Confirmation Modal: Validates WHO, Company, and Phone before dialing */}
+      {isCallConfirmationOpen && pendingCallLead && pendingCallLead.primaryContact && (
+        <CallConfirmationDialog
+          isOpen={isCallConfirmationOpen}
+          onClose={() => {
+            setIsCallConfirmationOpen(false);
+            setPendingCallLead(null);
+          }}
+          onConfirm={handleConfirmCall}
+          data={{
+            companyName: pendingCallLead.companyName,
+            industry: pendingCallLead.industry,
+            contactName: pendingCallLead.primaryContact.contactName,
+            designation: pendingCallLead.primaryContact.designation,
+            phone: pendingCallLead.primaryContact.phone,
+            phoneType: pendingCallLead.primaryContact.phoneType,
+            contactVerification: pendingCallLead.primaryContact.contactVerification,
+            isAssignedToCurrentUser: pendingCallLead.isAssignedToCurrentUser,
+            assignedVolunteerName: pendingCallLead.assignedVolunteerName,
+          }}
+        />
+      )}
+
       {/* Live Minimal In-Call Stopwatch & Quick Outcome Overlay: Loaded on demand */}
       {callLead && isCallModeOpen && (
         <CallModeOverlay
@@ -233,23 +334,19 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
       {callLead && isDebriefModalOpen && (
         <CallReportModal
           isOpen={isDebriefModalOpen}
+          onClose={() => {
+            setIsDebriefModalOpen(false);
+            setCallLead(null);
+          }}
           lead={callLead}
           initialOutcome={debriefCallData.outcome}
           durationSeconds={debriefCallData.durationSeconds}
           startedAt={debriefCallData.startedAt}
           endedAt={debriefCallData.endedAt}
-          onClose={() => {
-            setIsDebriefModalOpen(false);
-            setCallLead(null);
-          }}
-          onSuccess={() => {
-            setIsDebriefModalOpen(false);
-            setCallLead(null);
-          }}
         />
       )}
 
-      {/* PRAROHA'26 Event Info & Pitch Deliverables Modal: Loaded on demand */}
+      {/* PRAROHA'26 Deliverables & Demographic Deck: Loaded on demand */}
       {isEventInfoOpen && (
         <EventInfoModal
           isOpen={isEventInfoOpen}
@@ -257,18 +354,13 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
         />
       )}
 
-      {/* Real-Time Honors Leaderboard Podium Modal: Loaded on demand */}
+      {/* Live Gamification Leaderboard Podium Drawer: Loaded on demand */}
       {isLeaderboardOpen && (
-        <Dialog
-          isOpen={isLeaderboardOpen}
-          onClose={() => setIsLeaderboardOpen(false)}
-          title="Outreach Leaderboard & Points"
-          maxWidth="lg"
-        >
-          <div className="p-4 max-h-[80vh] overflow-y-auto">
-            <LeaderboardPodium />
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
+          <div className="relative w-full max-w-2xl bg-surface border border-border rounded-xl p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
+            <LeaderboardPodium onClose={() => setIsLeaderboardOpen(false)} />
           </div>
-        </Dialog>
+        </div>
       )}
     </WorkspaceContext.Provider>
   );

@@ -17,7 +17,7 @@ import {
 
 export default function VolunteerDashboardPage() {
   const { user, profile } = useAuthUser();
-  const { openCompanyDossier, startCallMode, openEventInfo, openLeaderboard } = useWorkspace();
+  const { openCompanyDossier, startCallMode, openGlobalLogCall, openEventInfo, openLeaderboard } = useWorkspace();
   const [activeTab, setActiveTab] = useState("all");
 
   const clerkId = user?.id || "";
@@ -95,11 +95,20 @@ export default function VolunteerDashboardPage() {
   }, [metrics, leads]);
 
   const handleStartNextCall = useCallback(() => {
-    if (prioritizedLeads.length > 0) {
-      const topLead = prioritizedLeads[0];
-      startCallMode(topLead);
+    // Only pick a lead that has a valid phone and is not in terminal stage
+    const nextCallableLead = prioritizedLeads.find(
+      (lead) =>
+        lead.leadStatus !== "WON" &&
+        lead.leadStatus !== "LOST" &&
+        Boolean(lead.primaryContact?.phone?.trim())
+    );
+
+    if (nextCallableLead) {
+      startCallMode(nextCallableLead);
+    } else {
+      openGlobalLogCall();
     }
-  }, [prioritizedLeads, startCallMode]);
+  }, [prioritizedLeads, startCallMode, openGlobalLogCall]);
 
   return (
     <div className="space-y-8">

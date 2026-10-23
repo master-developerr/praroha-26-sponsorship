@@ -138,9 +138,45 @@ export const getCompanyDetails = query({
       .withIndex("by_company_id", (q) => q.eq("companyId", args.companyId))
       .collect();
 
+    // Check active assignment
+    const activeAssignment = await ctx.db
+      .query("leadAssignments")
+      .withIndex("by_company_id", (q) => q.eq("companyId", args.companyId))
+      .filter((q) => q.eq(q.field("status"), "active"))
+      .first();
+
+    let assignedVolunteer: {
+      _id: Id<"users">;
+      name: string;
+      clerkId: string;
+      role: string;
+      email?: string;
+    } | null = null;
+
+    if (activeAssignment) {
+      const volunteer = await ctx.db.get(activeAssignment.volunteerId);
+      if (volunteer) {
+        assignedVolunteer = {
+          _id: volunteer._id,
+          name: volunteer.name,
+          clerkId: volunteer.clerkId,
+          role: volunteer.role,
+          email: volunteer.email,
+        };
+      }
+    }
+
     return {
       ...company,
       contacts,
+      activeAssignment: activeAssignment
+        ? {
+            _id: activeAssignment._id,
+            volunteerId: activeAssignment.volunteerId,
+            assignedAt: activeAssignment.assignedAt,
+            assignedVolunteer,
+          }
+        : null,
     };
   },
 });

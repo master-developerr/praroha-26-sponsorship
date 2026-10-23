@@ -4,6 +4,39 @@ This document tracks all stable checkpoints, milestones, and feature branches fo
 
 ---
 
+## Feature / Fix: Lead Dossier Redesign & Call Assignment Safety Engine
+
+- **Date:** 2026-10-23
+- **Branch:** `feature/lead-dossier-and-call-safety`
+- **Feature:** Enterprise B2B CRM record view redesign for `CompanyDossierDrawer` and complete resolution of random phone dialing and call assignment safety across the volunteer workspace.
+
+### Changes:
+- **Lead Dossier Modal Redesign (`components/admin/CompanyDossierDrawer.tsx`):**
+  - Restructured as a premium B2B CRM record view (Attio/Linear/Salesforce standards, editorial layout, clean typography, zero AI-slop gradients).
+  - Sticky header with dominant company name, sector/category subtitle, status badges row (`Assigned to You` / `Assigned: {name}` / `Unassigned`, stage, priority, score gauge, and INR target ask pill).
+  - Section 01 (Company Snapshot): Location, industry, size, annual revenue, website link, Kerala footprint, and lead source in a high-density key-value grid.
+  - Section 02 (Sponsorship Fit): Target ask range, visual fit score meter (0-100), alternative support, why this lead matters (green subtle accent), and potential sponsor ROI (blue subtle accent).
+  - Section 03 (AI Sponsorship Intelligence): Integrated intelligence card with synthesized reasoning and "View AI Dossier" action.
+  - Section 04 (Corporate Contacts): Actionable contact cards with designation, phone, phone type badge, verification badge, unverified warning banner, email, LinkedIn, and per-contact call trigger.
+  - Section 05 (Internal Outreach Notes): Confidential outreach notes clearly separated from external corporate information.
+  - Sticky footer with contextual "Start Call" (disabled if unassigned or missing phone), "Draft Proposal", and "Close Dossier".
+- **Call Safety & Confirmation Gate:**
+  - Created `components/volunteer/CallConfirmationDialog.tsx`: Lightweight pre-call confirmation dialog displaying exact company name, contact name, designation, phone in large monospace, phone type, verification level, and amber warning if unverified.
+  - Created `components/volunteer/SelectLeadToCallModal.tsx`: Controlled search-and-filter dialog listing assigned leads for top-navbar call triggers when no lead is currently selected.
+  - Updated `components/volunteer/WorkspaceContext.tsx`: `startCallMode` validates lead ownership and non-empty phone, strictly opening `CallConfirmationDialog` rather than dialing blindly. `openGlobalLogCall` launches `SelectLeadToCallModal`.
+  - Updated `app/workspace/layout.tsx`: Replaced blind `assignedLeads.find(...)` with `openGlobalLogCall`.
+  - Updated `app/workspace/page.tsx`: Fixed `handleStartNextCall` to validate phone presence and route through confirmation gate.
+  - Updated `components/volunteer/LeadsTable.tsx`: Disabled "Call" action if contact phone is missing.
+  - Updated `convex/companies.ts`: `getCompanyDetails` queries `leadAssignments` to return `activeAssignment` with volunteer details.
+  - Updated `components/ui/dialog.tsx`: Added support for bespoke modal layouts (`hideHeader`, `className`, `contentClassName`, `"4xl"`, `"5xl"`).
+
+### Verified:
+- `npx tsc --noEmit` — 0 errors (Strict TypeScript passed).
+- `npm run build` — All 30 routes built cleanly in production mode.
+- Zero random calls: dial actions are strictly bound to explicit leads and contacts with pre-call verification.
+
+---
+
 ## Feature / Fix: Clerk Handshake Resilience & Proxy Guard
 
 - **Date:** 2026-10-23

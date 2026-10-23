@@ -651,16 +651,29 @@ export function LeadsTable({
                         Dossier
                       </Button>
 
-                      <Button
-                        size="sm"
-                        onClick={() => {
-                          if (onStartCall) onStartCall(lead);
-                        }}
-                        className="h-7 px-2.5 bg-primary hover:bg-primary-hover text-white text-xs font-semibold shadow-2xs"
-                      >
-                        <PhoneCall className="h-3 w-3 mr-1" />
-                        Call
-                      </Button>
+                      {lead.primaryContact?.phone?.trim() ? (
+                        <Button
+                          size="sm"
+                          onClick={() => {
+                            if (onStartCall) onStartCall(lead);
+                          }}
+                          className="h-7 px-2.5 bg-primary hover:bg-primary-hover text-white text-xs font-semibold shadow-2xs cursor-pointer"
+                          title={`Call ${lead.primaryContact.contactName} (${lead.primaryContact.phone})`}
+                        >
+                          <PhoneCall className="h-3 w-3 mr-1" />
+                          Call
+                        </Button>
+                      ) : (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          disabled
+                          className="h-7 px-2 text-[11px] text-text-muted border-border/60 opacity-60 cursor-not-allowed"
+                          title="No contact phone recorded for this company"
+                        >
+                          No Phone
+                        </Button>
+                      )}
                     </div>
                   </td>
                 </tr>
