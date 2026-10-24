@@ -1,96 +1,65 @@
-# Memory — Complete Admin Panel Enterprise Redesign & Public Landing + Auth Suite
+# Memory — Leaderboard Administrative Permissions & P2 Audio Debrief Pipeline
 
-Last updated: October 17, 2026 (13:32 IST)
+Last updated: October 24, 2026 (11:10 IST)
 
 ## What was built
 
-- **Complete Admin Panel Enterprise Redesign:**
-  - **Shared Design Primitives:**
-    - `components/admin/AdminPageHeader.tsx`: Reusable editorial page header (`category`, `title`, `description`, `meta` with festival dates/location, and `actions`).
-    - `components/admin/AdminKpiStrip.tsx`: Horizontal enterprise KPI strip with `border-l-2` colored indicator accents (`primary`, `success`, `warning`, `error`, `info`, `neutral`).
-    - `components/layout/AdminSidebar.tsx`: Persistent left navigation with mint/teal highlight active state and admin profile menu.
-  - **Admin Route Pages:**
-    - `/admin` (`components/admin/ExecutiveDashboardView.tsx`): Executive overview reference design with portfolio at a glance and velocity telemetry.
-    - `/admin/verifications` (`components/admin/AdminVerificationView.tsx`): Volunteer verification queue with 4-metric KPI strip, tab badges, and inspection/rejection modals.
-    - `/admin/leads` (`components/admin/MasterLeadDirectoryView.tsx`): Enterprise CRM data table with 29 canonical fields, toolbar actions, and filter controls.
-    - `/admin/assignments` (`components/admin/LeadAssignmentMatrixView.tsx`): Workload allocation matrix with dual panels (`Unassigned Leads Pool` and `Target Assignee Roster`), with **Admins explicitly featured as selectable allocation targets** alongside student SDRs.
-    - `/admin/commitments` (`app/admin/commitments/page.tsx`): Ratified commitments table, 6-metric financial KPI strip, and pipeline view.
-    - `/admin/analytics` (`app/admin/analytics/page.tsx`, `components/admin/DataExportHub.tsx`, `components/admin/AuditLogConsole.tsx`): Audit log console with diff drawers and RFC-4180 CSV exports.
-    - `/admin/leaderboard` (`app/admin/leaderboard/page.tsx`): Executive honors leaderboard with top-3 cards, timeframe filter, point rules drawer, and point adjustment dialog.
-    - `/admin/data-management` (`components/admin/DataManagementView.tsx`): Administrative control center with storage volume KPIs, certified CSV archives, selective collection purge controls, and Danger Zone system resets with strict phrase confirmation modals.
+- **Leaderboard Administrative Permissions & Role Separation:**
+  - `components/volunteer/LeaderboardPodium.tsx`:
+    - Added `isAdminView?: boolean` prop and route-aware detection via `usePathname()` (`isAdminContext = isAdminView ?? pathname.startsWith("/admin")`).
+    - Derived `canAdjust = Boolean(isAdminContext && role === "admin" && profile?.verificationStatus === "approved")`.
+    - Made the volunteer leaderboard strictly read-only with exactly 7 columns: `Rank | Volunteer | Calls | Connected | Interested | Deals | Points`.
+    - Completely removed the `Admin` column header, `[Adjust]` button, and `AdjustPointsModal` mount from volunteer workspace views (`/workspace`, `/workspace/leaderboard`, and workspace modals).
+  - `app/admin/leaderboard/page.tsx`:
+    - Preserved `Action` column and `[Adjust Pts]` button for verified admins in the Admin Control Room.
+  - `components/admin/AdjustPointsModal.tsx`:
+    - Added `role === "admin" && profile?.verificationStatus === "approved"` guards to both component rendering (`return null;`) and form submission handler.
+  - `convex/gamification.ts`:
+    - Hardened `adminAdjustPoints` mutation to strictly verify `admin.role === "admin" && admin.verificationStatus === "approved"`.
+    - Throws `Unauthorized: Only verified administrators can adjust volunteer points.` if invoked by volunteers or unverified accounts.
+    - Added security check in `awardPoints` preventing direct invocation with category `admin_adjustment`.
+    - Added non-zero point validation and single-transaction limit (10,000 pts max).
 
-- **Complete Public Landing & Auth Experience Redesign:**
-  - `components/landing/LandingNavbar.tsx`: Sticky backdrop-blur navigation with event pill (`SOE CUSAT · DEC 04–05`), section anchors, ThemeToggle, and session-aware CTA routing.
-  - `components/landing/HeroSection.tsx`: Product-first hero with architectural headline, live lead terminal preview with view toggles (`Lead Queue`, `Contact Dossier`, `Call Mode`).
-  - `components/landing/InteractiveRelaySimulator.tsx`: 5-step automated and scrubbable relay simulation (`SIGNAL` → `ALLOCATION` → `CALL MODE` → `DEBRIEF` → `COMMITMENT`) with real corporate dossier data.
-  - `components/landing/DualWorkspaceShowcase.tsx`: Interactive role-aware showcase contrasting the Student SDR Cockpit (`/workspace`) with the Admin Control Room (`/admin`).
-  - `components/landing/LifecycleWorkflowGrid.tsx`: 6 operational pillars detailing technical architecture (29-field parser, contact verification, single-page cockpit, voice debrief, dual cash/in-kind valuation, signing authority).
-  - `components/landing/EventIdentitySection.tsx`: Institutional symposium credentials (SOE CUSAT, Civil Engineering Division, 3,500+ delegates) and official sponsorship tiers.
-  - `components/landing/LandingFooter.tsx`: Enterprise footer with status beacon, campus location, quick routes, and copyright.
-  - `components/auth/AuthFrame.tsx`: Reusable 2-column authentication shell featuring system telemetry, zero-trust notices, and semantic Clerk styling.
-  - `app/(auth)/sign-in/[[...sign-in]]/page.tsx` & `app/(auth)/sign-up/[[...sign-up]]/page.tsx`: Embedded Clerk components with safe return path handling (`sanitizeReturnPath`).
-  - `app/register/profile/page.tsx`: 3-step progressive onboarding form (`Identity & Credentials` → `Academic Standing` → `Contact Clearance`) with client validation.
-  - `app/pending/page.tsx`: Live-listening verification holding lounge with downloadable brochure and pitch battlecards.
+- **Audio Debrief & Whisper STT Pipeline (P2 Completed):**
+  - `components/volunteer/VoiceDebriefRecorder.tsx`: In-browser post-call voice debrief recorder with waveform telemetry, pause/resume, and audio playback.
+  - `convex/calls.ts`: Audio storage upload URL generation (`generateUploadUrl`) and debrief commitment with Convex File Storage.
+  - Server-side Whisper transcription and structured AI extraction of outcome, decision-maker status, objections, and next action.
+  - Volunteer review gate ensuring volunteers inspect and edit transcription/extracted fields before committing to database.
+
+- **Lead Directory Workload Alignment:**
+  - Resolved assigned metric discrepancy in `convex/companies.ts` to reflect active assignments (50 assigned, 87 unassigned, 137 total).
+  - Purged ephemeral test assignment fixtures.
 
 ## Decisions made
 
-- **Unified Admin Design Language:** Eliminated fragmented floating cards, neon AI styling, and purple gradients across all admin routes. Standardized on a white/warm off-white canvas, ink/navy text, subtle 1px borders, and PRAROHA teal/green accents.
-- **Product-First Marketing Storytelling:** The landing page features real application interfaces and interactive lifecycle simulators instead of generic SaaS illustrations or stock marketing copy.
-- **Role Clearance & Auth Routing:** Preserved all Clerk authentication, Convex authorization, role-based guards, and redirect safety (`sanitizeReturnPath`) to prevent redirect loops.
-- **Full Semantic Theme Support:** Every admin and public component consumes semantic tokens (`bg-background`, `bg-surface`, `border-border`, `text-text-primary`, `var(--brand-primary)`), looking intentional in both light and dark modes.
+- **Defense-in-Depth Authorization:** Never rely solely on client-side conditional UI rendering (`{role === "admin" && ...}`). The Convex backend mutation (`adminAdjustPoints`) independently validates the caller's role and verification status directly in the database.
+- **Context-Aware Leaderboard Rendering:** In `LeaderboardPodium.tsx`, even if an administrator navigates to `/workspace` or `/workspace/leaderboard`, `isAdminContext` evaluates to `false` because they are in the volunteer panel. Administrative modification actions exist strictly within `/admin/*`.
+- **Preserved Dual Leaderboard Architecture:**
+  - `/admin/leaderboard`: Executive honors board with aggregate KPIs, timeframe filtering, Point Rules drawer, and Discretionary Points Adjustment.
+  - `/workspace/leaderboard`: Read-only team ranking podium displaying SDR volume, calls, deals, and points without administrative controls.
 
 ## Problems solved
 
-- **Duplicate Divs & Syntax Errors in Admin Views:** Resolved syntax errors in `app/admin/commitments/page.tsx`, `app/admin/leaderboard/page.tsx`, and `components/admin/MasterLeadDirectoryView.tsx` where duplicate header blocks and extra `return (` statements caused TypeScript errors.
-- **Sponsorship Package Types:** Fixed property accesses in `components/landing/EventIdentitySection.tsx` to strictly match `SponsorshipPackageConfig` (`tier`, `formattedAmount`, `benefits`, `displayBadge`).
-- **Redirect Loop Prevention:** Confirmed unauthenticated requests to `/register/profile` and `/pending` safely redirect to `/sign-in` without cyclical navigation.
+- **Admin Control Leakage in Volunteer Dashboard:** Previously, `LeaderboardPodium` rendered the `Admin` column and `[Adjust]` button whenever `role === "admin"`. When admins logged into or tested the volunteer workspace, administrative controls leaked into the volunteer UI. Resolved by combining route context (`isAdminContext`) with admin role checking.
+- **Direct API Invocations:** Verified via direct Convex client tests that arbitrary volunteer Clerk IDs cannot invoke `adminAdjustPoints` or bypass via `awardPoints`.
+- **PowerShell JSON Parameter Quoting:** Fixed issues when invoking Convex functions with JSON arguments from Windows shell by utilizing programmatic `ConvexHttpClient` queries and mutations.
 
 ## Current state
 
-- **Complete Lead Assign, Reassign, and Unassign Workflows (October 24, 2026):**
-  - **Backend Mutations & Queries (`convex/`):**
-    - `convex/assignments.ts`:
-      - `reassignLead`: Validates duplicate assignment (`if (assignment.volunteerId === args.newVolunteerId) throw Error`), logs old owner name and new owner in `lead_reassigned` audit log event with reason.
-      - `unassignLead`: Sets active assignment status to `released`, reverts company status to `UNASSIGNED`, captures previous volunteer name in `lead_unassigned` audit log.
-    - `convex/companies.ts`:
-      - `getCompanyMetrics`: Added `assigned` count alongside `total` and `unassigned`.
-      - `getAllCompanies`: Added `ownership` (`"all" | "assigned" | "unassigned"`) and `volunteerId` filter support with indexing.
-    - `convex/pipeline.ts`:
-      - `getCompanyRelationshipTimeline`: Formats `lead_assigned`, `lead_reassigned`, and `lead_unassigned` audit events with actor names, volunteer transitions (`From: ... → To: ...`), and distinct badges.
-  - **Admin User Interface:**
-    - `components/admin/MasterLeadDirectoryView.tsx`:
-      - Segmented ownership tabs: `All Leads (${metrics.total})`, `Assigned (${metrics.assigned})`, and `Unassigned Pool (${metrics.unassigned})`.
-      - Volunteer dropdown filter (`Assigned to: All Volunteers` | specific volunteer).
-      - Table row actions: If unassigned (`[ Assign ]`, `[ Dossier ]`, `[ Edit ]`), if assigned (`[ Reassign ]`, `[ Unassign ]`, `[ Dossier ]`, `[ Edit ]`).
-      - Dismissible feedback alert banner showing successful operations.
-    - `components/admin/ReassignLeadModal.tsx`:
-      - Updated copy ("Reassign Lead" / "Move this sponsorship lead to another volunteer.").
-      - Warning banner if selecting current owner: "This lead is already assigned to this volunteer.", disabling the submit button.
-    - `components/admin/UnassignConfirmationModal.tsx`:
-      - Displays target company, previous owner, and non-destructive assurance.
-    - `components/admin/CompanyDossierDrawer.tsx`:
-      - Header buttons for Admins: `[ Assign Lead ]` for unassigned leads, `[ Reassign ]` and `[ Unassign ]` for assigned leads.
-  - **Call Safety Measures:**
-    - `components/volunteer/TodayWorkBar.tsx`: Disabled `Start next call` button when `metrics.totalAssigned === 0` with tooltip guidance.
-    - `app/workspace/page.tsx`: Prevents dialer activation if 0 assigned leads exist or if primary contact phone is missing.
-
-- **Lead Dossier Modal Viewport Fix (`components/admin/CompanyDossierDrawer.tsx` & `components/ui/dialog.tsx`):**
-  - Resolved vertical overflow issue where modal content exceeded viewport without internal scrolling.
-  - Updated `components/ui/dialog.tsx` to directly render children when `hideHeader={true}` to avoid breaking flex-grow and overflow properties.
-  - Added custom `.dossier-scroll` utility in `app/globals.css` with smooth, styled thin scrollbars.
-
-## Current state
-
+- **Git Branch:** `fix/leaderboard-admin-only` (Commit: `b537b2786c5746c5057298b4014b2ad64d366dff`).
+- **Remote Status:** Synchronized with `origin/fix/leaderboard-admin-only`. Working tree clean.
 - **TypeScript Compilation:** Strict check passes with 0 errors (`npx tsc --noEmit`).
 - **Development Server:** Active and running smoothly on port 3000.
-- **Git Status:** Working tree clean, changes verified.
+- **Leaderboard Views:**
+  - `/workspace` and `/workspace/leaderboard`: Verified 7 columns, 0 admin controls.
+  - `/admin/leaderboard`: Verified Action column and `[Adjust Pts]` modal working.
 
 ## Next session starts with
 
-1. **Test End-to-End Auth & Onboarding Flow:** Complete a live signup with a test student account, submit the 3-step profile, verify in `/admin/verifications`, and confirm instant unlock to `/workspace`.
-2. **P2 Audio Debrief & Whisper STT Pipeline:** Test in-browser voice debrief recording and server-side Whisper transcription action in Convex.
+1. **Pull Request & Merge:** Review and merge `fix/leaderboard-admin-only` into `main` on GitHub when ready.
+2. **P1 Sponsorship Package Management & Proposals:** Verify end-to-end proposal generation and deliverable commitment logging in `/admin/commitments` and `/workspace` dossier modals.
+3. **P3 Team Intelligence & Gamification Rules:** Test point rule configuration modifications via `PointConfigDrawer` and verify real-time leaderboard recalculations.
 
 ## Open questions
 
-- For the voice debrief audio upload to Convex File Storage, what is the maximum recording duration limit (e.g., 60 seconds vs 120 seconds)?
-
+- Should student SDRs have a personal audit view of their own points transaction history in `/workspace`, or keep points limited to the current total and recent 10 transactions in `getUserPointsSummary`?
