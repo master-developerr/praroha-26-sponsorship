@@ -189,6 +189,31 @@ textarea {
   background: var(--text-muted);
 }
 
+/* Dossier dedicated smooth scroll container */
+.dossier-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-strong) transparent;
+  overscroll-behavior: contain;
+}
+
+.dossier-scroll::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.dossier-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.dossier-scroll::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: 9999px;
+}
+
+.dossier-scroll::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
 /* Accessibility: Respect Reduced Motion Preferences */
 @media (prefers-reduced-motion: reduce) {
   *,

@@ -577,28 +577,34 @@ export const getCompanyRelationshipTimeline = query({
       }
 
       let title = "Lead Assignment Event";
+      let description = parsed.reason ? `Reason: ${parsed.reason}` : `Executed by ${actorName}`;
       let badgeLabel = "ASSIGNMENT";
-      let badgeClass = "bg-purple-50 dark:bg-purple-950/40 text-purple-800 dark:text-purple-300 border-purple-200 dark:border-purple-800/50";
+      let badgeClass = "bg-surface-subtle text-text-secondary border-border";
 
       if (log.action === "lead_assigned") {
-        title = `Assigned to ${parsed.assignedTo || "Volunteer"}`;
+        title = `Lead Assigned: ${parsed.assignedTo || "Volunteer"}`;
         badgeLabel = "ASSIGNED";
         badgeClass = "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800/50";
+        description = parsed.instructions
+          ? `Directives: ${parsed.instructions} (Assigned by ${actorName})`
+          : `Assigned to ${parsed.assignedTo || "Volunteer"} by ${actorName}`;
       } else if (log.action === "lead_reassigned") {
-        title = `Reassigned to ${parsed.reassignedTo || "New Volunteer"}`;
+        title = `Lead Reassigned: ${parsed.fromVolunteer || "Previous"} → ${parsed.reassignedTo || "New Owner"}`;
         badgeLabel = "REASSIGNED";
         badgeClass = "bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 border-amber-200 dark:border-amber-800/50";
+        description = `From: ${parsed.fromVolunteer || "Unknown"} → To: ${parsed.reassignedTo || "New Volunteer"}.${parsed.reason ? ` Reason: ${parsed.reason}` : ""} (Executed by ${actorName})`;
       } else if (log.action === "lead_unassigned") {
-        title = `Unassigned from ${parsed.previousVolunteer || "Volunteer"}`;
+        title = `Lead Unassigned: Returned to Pool`;
         badgeLabel = "UNASSIGNED";
         badgeClass = "bg-rose-50 dark:bg-rose-950/40 text-rose-800 dark:text-rose-300 border-rose-200 dark:border-rose-800/50";
+        description = `Previous owner: ${parsed.previousVolunteer || parsed.fromVolunteer || "Unknown"}.${parsed.reason ? ` Reason: ${parsed.reason}` : ""} (Executed by ${actorName})`;
       }
 
       timeline.push({
         id: `audit-${log._id}`,
         type: "assignment",
         title,
-        description: parsed.reason ? `Reason: ${parsed.reason}` : `Executed by ${actorName}`,
+        description,
         timestamp: log.timestamp,
         actorName,
         badgeLabel,

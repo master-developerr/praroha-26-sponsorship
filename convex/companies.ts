@@ -11,12 +11,14 @@ export const getCompanyMetrics = query({
     const all = await ctx.db.query("companies").collect();
     const total = all.length;
     const unassigned = all.filter((c) => c.leadStatus === "UNASSIGNED").length;
+    const assigned = total - unassigned;
     const won = all.filter((c) => c.leadStatus === "WON").length;
     const lost = all.filter((c) => c.leadStatus === "LOST").length;
     const inPipeline = total - unassigned - won - lost;
 
     return {
       total,
+      assigned,
       unassigned,
       inPipeline,
       won,
@@ -35,6 +37,8 @@ export const getAllCompanies = query({
     status: v.optional(v.string()),
     priority: v.optional(v.string()),
     includeArchived: v.optional(v.boolean()),
+    ownership: v.optional(v.string()),
+    volunteerId: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     let companies = await ctx.db.query("companies").order("desc").collect();
@@ -66,7 +70,7 @@ export const getAllCompanies = query({
     }
 
     // Attach primary contact and active assigned volunteer for each company
-    const results = await Promise.all(
+    let results = await Promise.all(
       companies.map(async (company) => {
         const contacts = await ctx.db
           .query("contacts")
@@ -104,6 +108,19 @@ export const getAllCompanies = query({
       })
     );
 
+    // Apply ownership filtering (all, assigned, unassigned)
+    if (args.ownership && args.ownership !== "all") {
+      if (args.ownership === "assigned") {
+        results = results.filter((c) => c.assignedVolunteer !== null);
+      } else if (args.ownership === "unassigned") {
+        results = results.filter((c) => c.assignedVolunteer === null);
+      }
+    }
+
+    // Apply specific volunteer filter
+    if (args.volunteerId && args.volunteerId !== "all") {
+      results = results.filter((c) => c.assignedVolunteer?._id === args.volunteerId);
+    }
 
     return results;
   },

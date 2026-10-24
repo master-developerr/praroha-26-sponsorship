@@ -47,9 +47,43 @@ Last updated: October 17, 2026 (13:32 IST)
 
 ## Current state
 
+- **Complete Lead Assign, Reassign, and Unassign Workflows (October 24, 2026):**
+  - **Backend Mutations & Queries (`convex/`):**
+    - `convex/assignments.ts`:
+      - `reassignLead`: Validates duplicate assignment (`if (assignment.volunteerId === args.newVolunteerId) throw Error`), logs old owner name and new owner in `lead_reassigned` audit log event with reason.
+      - `unassignLead`: Sets active assignment status to `released`, reverts company status to `UNASSIGNED`, captures previous volunteer name in `lead_unassigned` audit log.
+    - `convex/companies.ts`:
+      - `getCompanyMetrics`: Added `assigned` count alongside `total` and `unassigned`.
+      - `getAllCompanies`: Added `ownership` (`"all" | "assigned" | "unassigned"`) and `volunteerId` filter support with indexing.
+    - `convex/pipeline.ts`:
+      - `getCompanyRelationshipTimeline`: Formats `lead_assigned`, `lead_reassigned`, and `lead_unassigned` audit events with actor names, volunteer transitions (`From: ... → To: ...`), and distinct badges.
+  - **Admin User Interface:**
+    - `components/admin/MasterLeadDirectoryView.tsx`:
+      - Segmented ownership tabs: `All Leads (${metrics.total})`, `Assigned (${metrics.assigned})`, and `Unassigned Pool (${metrics.unassigned})`.
+      - Volunteer dropdown filter (`Assigned to: All Volunteers` | specific volunteer).
+      - Table row actions: If unassigned (`[ Assign ]`, `[ Dossier ]`, `[ Edit ]`), if assigned (`[ Reassign ]`, `[ Unassign ]`, `[ Dossier ]`, `[ Edit ]`).
+      - Dismissible feedback alert banner showing successful operations.
+    - `components/admin/ReassignLeadModal.tsx`:
+      - Updated copy ("Reassign Lead" / "Move this sponsorship lead to another volunteer.").
+      - Warning banner if selecting current owner: "This lead is already assigned to this volunteer.", disabling the submit button.
+    - `components/admin/UnassignConfirmationModal.tsx`:
+      - Displays target company, previous owner, and non-destructive assurance.
+    - `components/admin/CompanyDossierDrawer.tsx`:
+      - Header buttons for Admins: `[ Assign Lead ]` for unassigned leads, `[ Reassign ]` and `[ Unassign ]` for assigned leads.
+  - **Call Safety Measures:**
+    - `components/volunteer/TodayWorkBar.tsx`: Disabled `Start next call` button when `metrics.totalAssigned === 0` with tooltip guidance.
+    - `app/workspace/page.tsx`: Prevents dialer activation if 0 assigned leads exist or if primary contact phone is missing.
+
+- **Lead Dossier Modal Viewport Fix (`components/admin/CompanyDossierDrawer.tsx` & `components/ui/dialog.tsx`):**
+  - Resolved vertical overflow issue where modal content exceeded viewport without internal scrolling.
+  - Updated `components/ui/dialog.tsx` to directly render children when `hideHeader={true}` to avoid breaking flex-grow and overflow properties.
+  - Added custom `.dossier-scroll` utility in `app/globals.css` with smooth, styled thin scrollbars.
+
+## Current state
+
 - **TypeScript Compilation:** Strict check passes with 0 errors (`npx tsc --noEmit`).
 - **Development Server:** Active and running smoothly on port 3000.
-- **Visual Auditing:** All admin routes (`/admin`, `/admin/verifications`, `/admin/leads`, `/admin/assignments`, `/admin/commitments`, `/admin/analytics`, `/admin/leaderboard`, `/admin/data-management`) and public routes (`/`, `/sign-in`, `/sign-up`, `/register/profile`, `/pending`) verified via browser subagent in light and dark mode.
+- **Git Status:** Working tree clean, changes verified.
 
 ## Next session starts with
 
@@ -59,3 +93,4 @@ Last updated: October 17, 2026 (13:32 IST)
 ## Open questions
 
 - For the voice debrief audio upload to Convex File Storage, what is the maximum recording duration limit (e.g., 60 seconds vs 120 seconds)?
+

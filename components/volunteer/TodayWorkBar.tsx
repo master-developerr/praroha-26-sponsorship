@@ -66,8 +66,18 @@ export function TodayWorkBar({
             <Button
               variant="primary"
               size="sm"
+              disabled={metrics.totalAssigned === 0}
               onClick={onQuickAction}
-              className="text-xs bg-primary hover:bg-primary-hover text-white font-semibold"
+              className={`text-xs font-semibold ${
+                metrics.totalAssigned === 0
+                  ? "opacity-60 cursor-not-allowed bg-muted text-muted-foreground"
+                  : "bg-primary hover:bg-primary-hover text-white"
+              }`}
+              title={
+                metrics.totalAssigned === 0
+                  ? "No assigned leads. Contact an admin to receive lead allocations."
+                  : "Start next outreach call"
+              }
             >
               <PhoneCall className="h-3.5 w-3.5 mr-1.5" />
               Start next call

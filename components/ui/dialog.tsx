@@ -36,13 +36,18 @@ export function Dialog({
       }
     };
     if (isOpen) {
+      const prevBodyOverflow = document.body.style.overflow;
+      const prevHtmlOverflow = document.documentElement.style.overflow;
       document.body.style.overflow = "hidden";
+      document.documentElement.style.overflow = "hidden";
       window.addEventListener("keydown", handleKeyDown);
+
+      return () => {
+        document.body.style.overflow = prevBodyOverflow || "unset";
+        document.documentElement.style.overflow = prevHtmlOverflow || "unset";
+        window.removeEventListener("keydown", handleKeyDown);
+      };
     }
-    return () => {
-      document.body.style.overflow = "unset";
-      window.removeEventListener("keydown", handleKeyDown);
-    };
   }, [isOpen, isDismissable, onClose]);
 
   if (!isOpen) return null;
@@ -59,10 +64,10 @@ export function Dialog({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 overscroll-contain">
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs transition-opacity animate-in fade-in"
+        className="fixed inset-0 bg-slate-900/60 dark:bg-black/75 backdrop-blur-xs transition-opacity animate-in fade-in"
         onClick={() => {
           if (isDismissable && onClose) onClose();
         }}
@@ -99,7 +104,13 @@ export function Dialog({
             )}
           </div>
         )}
-        <div className={contentClassName}>{children}</div>
+        {contentClassName ? (
+          <div className={contentClassName}>{children}</div>
+        ) : hideHeader ? (
+          children
+        ) : (
+          <div>{children}</div>
+        )}
       </div>
     </div>
   );

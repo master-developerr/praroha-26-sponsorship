@@ -56,10 +56,9 @@ export function ReassignLeadModal({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  // Filter candidates excluding the current owner
+  // Candidate volunteers list
   const candidateVolunteers = useMemo(() => {
     return volunteers.filter((v: any) => {
-      if (currentVolunteerId && v._id === currentVolunteerId) return false;
       if (
         searchTerm &&
         !v.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
@@ -69,14 +68,22 @@ export function ReassignLeadModal({
       }
       return true;
     });
-  }, [volunteers, currentVolunteerId, searchTerm]);
+  }, [volunteers, searchTerm]);
 
   const selectedVolunteer = useMemo(() => {
     return volunteers.find((v: any) => v._id === selectedVolunteerId);
   }, [volunteers, selectedVolunteerId]);
 
+  const isSameVolunteer = Boolean(
+    currentVolunteerId && selectedVolunteerId && currentVolunteerId === selectedVolunteerId
+  );
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSameVolunteer) {
+      setErrorMessage("This lead is already assigned to this volunteer.");
+      return;
+    }
     if (!companyId || !selectedVolunteerId || !reason.trim() || !user?.id) {
       setErrorMessage("Please select a new volunteer and provide an audit reason.");
       return;
@@ -108,8 +115,8 @@ export function ReassignLeadModal({
     <Dialog
       isOpen={isOpen}
       onClose={onClose}
-      title="Reassign lead"
-      description={`Move this lead from ${currentVolunteerName || "current volunteer"} to another approved volunteer?`}
+      title="Reassign Lead"
+      description="Move this sponsorship lead to another volunteer."
       maxWidth="lg"
     >
       <form onSubmit={handleSubmit} className="space-y-4 pt-2">
@@ -117,6 +124,13 @@ export function ReassignLeadModal({
           <div className="flex items-center gap-2 rounded-lg bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/60 p-3 text-xs text-rose-700 dark:text-rose-300">
             <AlertCircle className="h-4 w-4 shrink-0 text-rose-600 dark:text-rose-400" />
             <span>{errorMessage}</span>
+          </div>
+        )}
+
+        {isSameVolunteer && (
+          <div className="flex items-center gap-2 rounded-lg bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 p-3 text-xs text-amber-800 dark:text-amber-200">
+            <AlertCircle className="h-4 w-4 shrink-0 text-amber-600" />
+            <span className="font-semibold">This lead is already assigned to this volunteer.</span>
           </div>
         )}
 
@@ -273,7 +287,7 @@ export function ReassignLeadModal({
           <Button
             type="submit"
             size="sm"
-            disabled={isSubmitting || !selectedVolunteerId || !reason.trim()}
+            disabled={isSubmitting || !selectedVolunteerId || isSameVolunteer || !reason.trim()}
             className="bg-primary hover:bg-primary/90 text-white text-xs font-semibold"
           >
             {isSubmitting ? (

@@ -274,10 +274,20 @@ export const reassignLead = mutation({
       .filter((q) => q.eq(q.field("status"), "active"))
       .collect();
 
+    let previousVolunteerName = "Unknown";
+    let previousVolunteerId: Id<"users"> | null = null;
     for (const assignment of existingActive) {
+      if (assignment.volunteerId === args.newVolunteerId) {
+        throw new Error("Cannot reassign: Lead is already assigned to this volunteer.");
+      }
+      const prevVol = await ctx.db.get(assignment.volunteerId);
+      if (prevVol) {
+        previousVolunteerName = prevVol.name;
+        previousVolunteerId = prevVol._id;
+      }
       await ctx.db.patch(assignment._id, {
         status: "reassigned",
-        reassignReason: args.reassignReason.trim(),
+        reassignReason: args.reassignReason.trim() || "Administrative reassignment",
         updatedAt: now,
       });
     }
@@ -300,7 +310,7 @@ export const reassignLead = mutation({
       });
     }
 
-    // Audit log
+    // Immutable audit log
     await ctx.db.insert("auditLogs", {
       actorId: admin._id,
       action: "lead_reassigned",
@@ -308,9 +318,11 @@ export const reassignLead = mutation({
       entityId: args.companyId,
       changes: JSON.stringify({
         companyName: company.companyName,
+        fromVolunteer: previousVolunteerName,
+        fromVolunteerId: previousVolunteerId,
         reassignedTo: newVolunteer.name,
         newVolunteerId: newVolunteer._id,
-        reason: args.reassignReason.trim(),
+        reason: args.reassignReason.trim() || "Administrative reassignment",
         reassignedAt: now,
       }),
       timestamp: now,
@@ -357,9 +369,13 @@ export const unassignLead = mutation({
       .collect();
 
     let previousVolunteerName = "Unknown";
+    let previousVolunteerId: Id<"users"> | null = null;
     for (const a of activeAssignments) {
       const prevVol = await ctx.db.get(a.volunteerId);
-      if (prevVol) previousVolunteerName = prevVol.name;
+      if (prevVol) {
+        previousVolunteerName = prevVol.name;
+        previousVolunteerId = prevVol._id;
+      }
       await ctx.db.patch(a._id, {
         status: "released",
         updatedAt: now,
@@ -380,7 +396,9 @@ export const unassignLead = mutation({
       entityId: args.companyId,
       changes: JSON.stringify({
         companyName: company.companyName,
+        fromVolunteer: previousVolunteerName,
         previousVolunteer: previousVolunteerName,
+        previousVolunteerId,
         reason: args.reason || "Unassigned by Admin",
         unassignedAt: now,
       }),

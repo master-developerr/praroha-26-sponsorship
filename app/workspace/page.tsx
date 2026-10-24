@@ -95,7 +95,12 @@ export default function VolunteerDashboardPage() {
   }, [metrics, leads]);
 
   const handleStartNextCall = useCallback(() => {
-    // Only pick a lead that has a valid phone and is not in terminal stage
+    if (leads.length === 0) {
+      alert("No assigned leads: You do not have any active leads assigned. Contact an administrator to receive lead allocations.");
+      return;
+    }
+
+    // Only pick an assigned lead that has a valid phone and is not in terminal stage
     const nextCallableLead = prioritizedLeads.find(
       (lead) =>
         lead.leadStatus !== "WON" &&
@@ -106,9 +111,9 @@ export default function VolunteerDashboardPage() {
     if (nextCallableLead) {
       startCallMode(nextCallableLead);
     } else {
-      openGlobalLogCall();
+      alert("No verified contact available: None of your assigned leads have a valid phone number recorded.");
     }
-  }, [prioritizedLeads, startCallMode, openGlobalLogCall]);
+  }, [leads.length, prioritizedLeads, startCallMode]);
 
   return (
     <div className="space-y-8">

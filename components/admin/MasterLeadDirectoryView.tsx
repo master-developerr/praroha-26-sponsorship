@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useAuthUser } from "@/components/providers/AuthProvider";
@@ -34,11 +34,18 @@ import {
   Briefcase,
   Users,
   Users2,
+  UserPlus,
+  UserX,
+  ArrowRightLeft,
   Edit3,
   Trash2,
   Archive,
   ArchiveRestore,
 } from "lucide-react";
+import { AssignLeadModal } from "@/components/admin/AssignLeadModal";
+import { ReassignLeadModal } from "@/components/admin/ReassignLeadModal";
+import { UnassignConfirmationModal } from "@/components/admin/UnassignConfirmationModal";
+import { Id } from "@/convex/_generated/dataModel";
 
 export function MasterLeadDirectoryView() {
   const { user } = useAuthUser();
@@ -50,6 +57,8 @@ export function MasterLeadDirectoryView() {
   const [selectedIndustry, setSelectedIndustry] = useState("all");
   const [selectedStatus, setSelectedStatus] = useState("all");
   const [selectedPriority, setSelectedPriority] = useState("all");
+  const [selectedOwnership, setSelectedOwnership] = useState<"all" | "assigned" | "unassigned">("all");
+  const [selectedVolunteerFilter, setSelectedVolunteerFilter] = useState<string>("all");
   const [showArchived, setShowArchived] = useState(false);
 
   // Modals
@@ -57,6 +66,10 @@ export function MasterLeadDirectoryView() {
   const [isAddLeadModalOpen, setIsAddLeadModalOpen] = useState(false);
   const [selectedCompanyForDossier, setSelectedCompanyForDossier] = useState<any | null>(null);
   const [selectedCompanyForEdit, setSelectedCompanyForEdit] = useState<any | null>(null);
+  const [assigningLead, setAssigningLead] = useState<any | null>(null);
+  const [reassigningLead, setReassigningLead] = useState<any | null>(null);
+  const [unassigningLead, setUnassigningLead] = useState<any | null>(null);
+  const [feedbackMessage, setFeedbackMessage] = useState<{ type: "success" | "info"; text: string } | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [archivingId, setArchivingId] = useState<string | null>(null);
 
@@ -64,19 +77,39 @@ export function MasterLeadDirectoryView() {
   const metrics = useQuery(api.companies.getCompanyMetrics, {}) || {
     total: 0,
     unassigned: 0,
+    assigned: 0,
     inPipeline: 0,
     won: 0,
   };
 
   const industries = useQuery(api.companies.getDistinctIndustries, {}) || [];
+  const volunteers = useQuery(api.assignments.getVolunteerRosterWithWorkload, {}) || [];
 
-  const companies = useQuery(api.companies.getAllCompanies, {
+  const rawCompanies = useQuery(api.companies.getAllCompanies, {
     search: searchQuery || undefined,
     industry: selectedIndustry || undefined,
     status: selectedStatus || undefined,
     priority: selectedPriority || undefined,
     includeArchived: showArchived,
   }) || [];
+
+  const companies = useMemo(() => {
+    return rawCompanies.filter((comp: any) => {
+      // 1. Ownership Filter
+      if (selectedOwnership === "assigned") {
+        if (!comp.assignedVolunteer || comp.leadStatus === "UNASSIGNED") return false;
+      } else if (selectedOwnership === "unassigned") {
+        if (comp.assignedVolunteer && comp.leadStatus !== "UNASSIGNED") return false;
+      }
+
+      // 2. Volunteer Filter
+      if (selectedVolunteerFilter !== "all") {
+        if (comp.assignedVolunteer?._id !== selectedVolunteerFilter) return false;
+      }
+
+      return true;
+    });
+  }, [rawCompanies, selectedOwnership, selectedVolunteerFilter]);
 
   const handleDownloadTemplate = () => {
     const csv = generateCsvTemplate();
@@ -303,8 +336,70 @@ export function MasterLeadDirectoryView() {
 
       {/* 3. Main Data Grid & Filter Toolbar */}
       <div className="border border-border bg-surface overflow-hidden">
+        {/* Ownership Segmented Filter Bar */}
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 border-b border-border-subtle p-3 bg-surface-subtle/40">
+          <div className="flex items-center rounded-lg border border-border bg-surface p-0.5 text-xs font-medium">
+            <button
+              type="button"
+              onClick={() => setSelectedOwnership("all")}
+              className={`rounded-md px-3 py-1.5 transition-colors cursor-pointer ${
+                selectedOwnership === "all"
+                  ? "bg-primary text-white shadow-sm font-semibold"
+                  : "text-text-muted hover:text-text-primary"
+              }`}
+            >
+              All Leads ({metrics.total})
+            </button>
+            <button
+              type="button"
+              onClick={() => setSelectedOwnership("assigned")}
+              className={`rounded-md px-3 py-1.5 transition-colors cursor-pointer flex items-center gap-1.5 ${
+                selectedOwnership === "assigned"
+                  ? "bg-primary text-white shadow-sm font-semibold"
+                  : "text-text-muted hover:text-text-primary"
+              }`}
+            >
+              <Users className="h-3.5 w-3.5" />
+              Assigned ({metrics.assigned ?? (metrics.total - metrics.unassigned)})
+            </button>
+            <button
+              type="button"
+              onClick={() => setSelectedOwnership("unassigned")}
+              className={`rounded-md px-3 py-1.5 transition-colors cursor-pointer flex items-center gap-1.5 ${
+                selectedOwnership === "unassigned"
+                  ? "bg-amber-600 text-white shadow-sm font-semibold"
+                  : "text-text-muted hover:text-text-primary"
+              }`}
+            >
+              <UserX className="h-3.5 w-3.5" />
+              Unassigned Pool ({metrics.unassigned})
+            </button>
+          </div>
+
+          <div className="text-xs text-text-muted flex items-center gap-2">
+            <span>Showing <strong className="text-text-primary font-semibold">{companies.length}</strong> matching companies</span>
+          </div>
+        </div>
+
+        {/* Feedback Alert Banner */}
+        {feedbackMessage && (
+          <div className="flex items-center justify-between gap-2 border-b border-emerald-500/30 bg-emerald-50/90 dark:bg-emerald-950/40 px-4 py-2.5 text-xs text-emerald-800 dark:text-emerald-300 animate-in fade-in">
+            <div className="flex items-center gap-2">
+              <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+              <span className="font-medium">{feedbackMessage.text}</span>
+            </div>
+            <button
+              type="button"
+              onClick={() => setFeedbackMessage(null)}
+              className="text-emerald-700 hover:text-emerald-900 dark:text-emerald-300 dark:hover:text-emerald-100 font-bold px-1.5 py-0.5 rounded text-sm"
+            >
+              ×
+            </button>
+          </div>
+        )}
+
         {/* Toolbar */}
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 border-b border-border-subtle p-4 bg-surface-subtle/30">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 border-b border-border-subtle p-4 bg-surface-subtle/20">
           {/* Search Input */}
           <div className="relative w-full lg:w-72">
             <Search className="pointer-events-none absolute left-3 top-2.5 h-3.5 w-3.5 text-text-muted" />
@@ -319,6 +414,20 @@ export function MasterLeadDirectoryView() {
 
           {/* Filter Dropdowns */}
           <div className="flex flex-wrap items-center gap-2 text-xs">
+            {/* Volunteer Filter */}
+            <select
+              value={selectedVolunteerFilter}
+              onChange={(e) => setSelectedVolunteerFilter(e.target.value)}
+              className="h-8 rounded-lg border border-border bg-surface px-2.5 py-1 text-xs text-text-primary focus:border-primary focus:outline-none cursor-pointer"
+            >
+              <option value="all">Assigned to: All Volunteers</option>
+              {volunteers.map((vol: any) => (
+                <option key={vol._id} value={vol._id}>
+                  Assigned to: {vol.name} ({vol.activeLeadsCount ?? 0} leads)
+                </option>
+              ))}
+            </select>
+
             {/* Sector / Industry */}
             <select
               value={selectedIndustry}
@@ -378,6 +487,8 @@ export function MasterLeadDirectoryView() {
             </button>
 
             {(searchQuery ||
+              selectedOwnership !== "all" ||
+              selectedVolunteerFilter !== "all" ||
               selectedIndustry !== "all" ||
               selectedStatus !== "all" ||
               selectedPriority !== "all" ||
@@ -387,6 +498,8 @@ export function MasterLeadDirectoryView() {
                 size="sm"
                 onClick={() => {
                   setSearchQuery("");
+                  setSelectedOwnership("all");
+                  setSelectedVolunteerFilter("all");
                   setSelectedIndustry("all");
                   setSelectedStatus("all");
                   setSelectedPriority("all");
@@ -506,15 +619,17 @@ export function MasterLeadDirectoryView() {
                     <td className="px-4 py-3">
                       {comp.assignedVolunteer ? (
                         <div className="space-y-0.5">
-                          <span className="font-semibold text-text-primary block">
+                          <span className="font-semibold text-text-primary flex items-center gap-1">
+                            <Users className="h-3 w-3 text-primary" />
                             {comp.assignedVolunteer.name}
                           </span>
                           <span className="text-[10px] text-text-muted block">
-                            {comp.assignedVolunteer.department}
+                            {comp.assignedVolunteer.department || "Volunteer SDR"}
                           </span>
                         </div>
                       ) : (
-                        <span className="inline-flex items-center rounded bg-zinc-100 px-1.5 py-0.5 text-[10px] font-medium text-zinc-500">
+                        <span className="inline-flex items-center gap-1 rounded border border-amber-500/20 bg-amber-50/70 dark:bg-amber-950/30 px-1.5 py-0.5 text-[10px] font-semibold text-amber-800 dark:text-amber-300">
+                          <UserX className="h-2.5 w-2.5" />
                           Unassigned
                         </span>
                       )}
@@ -527,6 +642,42 @@ export function MasterLeadDirectoryView() {
 
                     {/* Action */}
                     <td className="px-4 py-3 text-right space-x-1 whitespace-nowrap">
+                      {/* Primary Lead Ownership Actions: Assign, Reassign, Unassign */}
+                      {(!comp.assignedVolunteer || comp.leadStatus === "UNASSIGNED") ? (
+                        <Button
+                          size="sm"
+                          onClick={() => setAssigningLead(comp)}
+                          className="h-7 px-2 text-xs bg-primary text-white hover:bg-primary-hover font-semibold"
+                          title="Assign lead to volunteer"
+                        >
+                          <UserPlus className="h-3 w-3 mr-1" />
+                          Assign
+                        </Button>
+                      ) : (
+                        <>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setReassigningLead(comp)}
+                            className="h-7 px-2 text-xs border-dashed text-text-primary hover:bg-surface-subtle"
+                            title="Reassign to another volunteer"
+                          >
+                            <ArrowRightLeft className="h-3 w-3 mr-1 text-primary" />
+                            Reassign
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setUnassigningLead(comp)}
+                            className="h-7 px-2 text-xs text-amber-700 dark:text-amber-400 border-amber-300 dark:border-amber-800/60 hover:bg-amber-50 dark:hover:bg-amber-950/30"
+                            title="Unassign lead and release to pool"
+                          >
+                            <UserX className="h-3 w-3 mr-1 text-amber-600" />
+                            Unassign
+                          </Button>
+                        </>
+                      )}
+
                       <Button
                         variant="outline"
                         size="sm"
@@ -612,6 +763,66 @@ export function MasterLeadDirectoryView() {
         isOpen={!!selectedCompanyForDossier}
         onClose={() => setSelectedCompanyForDossier(null)}
       />
+
+      {/* Assignment Workflow Modals */}
+      {assigningLead && (
+        <AssignLeadModal
+          isOpen={!!assigningLead}
+          onClose={() => setAssigningLead(null)}
+          companyId={assigningLead._id}
+          companyName={assigningLead.companyName}
+          defaultPriority={assigningLead.priority}
+          onSuccess={() => {
+            const leadName = assigningLead.companyName;
+            setAssigningLead(null);
+            setFeedbackMessage({
+              type: "success",
+              text: `Successfully assigned "${leadName}" to volunteer.`,
+            });
+            setTimeout(() => setFeedbackMessage(null), 5000);
+          }}
+        />
+      )}
+
+      {reassigningLead && (
+        <ReassignLeadModal
+          isOpen={!!reassigningLead}
+          onClose={() => setReassigningLead(null)}
+          companyId={reassigningLead._id}
+          companyName={reassigningLead.companyName}
+          currentVolunteerName={reassigningLead.assignedVolunteer?.name}
+          currentVolunteerId={reassigningLead.assignedVolunteer?._id}
+          leadStatus={reassigningLead.leadStatus}
+          onSuccess={() => {
+            const leadName = reassigningLead.companyName;
+            setReassigningLead(null);
+            setFeedbackMessage({
+              type: "success",
+              text: `Successfully reassigned "${leadName}". Previous owner logged in timeline.`,
+            });
+            setTimeout(() => setFeedbackMessage(null), 5000);
+          }}
+        />
+      )}
+
+      {unassigningLead && (
+        <UnassignConfirmationModal
+          isOpen={!!unassigningLead}
+          onClose={() => setUnassigningLead(null)}
+          companyId={unassigningLead._id}
+          companyName={unassigningLead.companyName}
+          currentVolunteerName={unassigningLead.assignedVolunteer?.name}
+          onSuccess={() => {
+            const leadName = unassigningLead.companyName;
+            setUnassigningLead(null);
+            setFeedbackMessage({
+              type: "success",
+              text: `Successfully unassigned "${leadName}" and returned to unassigned pool. All lead data and notes preserved.`,
+            });
+            setTimeout(() => setFeedbackMessage(null), 5000);
+          }}
+        />
+      )}
     </div>
   );
 }

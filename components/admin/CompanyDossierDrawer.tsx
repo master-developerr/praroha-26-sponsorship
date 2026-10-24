@@ -32,6 +32,8 @@ import {
   Sparkles,
   UserCheck,
   UserX,
+  UserPlus,
+  ArrowRightLeft,
   AlertTriangle,
   Lock,
   Tag,
@@ -47,6 +49,9 @@ import { useAuthUser } from "@/components/providers/AuthProvider";
 import { ConciseTalkingPoints } from "@/components/volunteer/ConciseTalkingPoints";
 import { CompanyTimeline } from "@/components/pipeline/CompanyTimeline";
 import { CreateProposalModal } from "@/components/pipeline/CreateProposalModal";
+import { AssignLeadModal } from "@/components/admin/AssignLeadModal";
+import { ReassignLeadModal } from "@/components/admin/ReassignLeadModal";
+import { UnassignConfirmationModal } from "@/components/admin/UnassignConfirmationModal";
 import {
   CompanyAIAnalysisCard,
   CallPreparationCard,
@@ -92,6 +97,20 @@ export function CompanyDossierDrawer({
     "overview" | "prep" | "ai" | "proposals" | "timeline"
   >("overview");
   const [isProposalModalOpen, setIsProposalModalOpen] = useState(false);
+  const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
+  const [isReassignModalOpen, setIsReassignModalOpen] = useState(false);
+  const [isUnassignModalOpen, setIsUnassignModalOpen] = useState(false);
+
+  const contentRef = React.useRef<HTMLDivElement>(null);
+
+  const handleTabChange = (
+    newTab: "overview" | "prep" | "ai" | "proposals" | "timeline"
+  ) => {
+    setActiveTab(newTab);
+    if (contentRef.current) {
+      contentRef.current.scrollTo({ top: 0, behavior: "instant" });
+    }
+  };
 
   const targetId = propCompany?._id || companyId;
   const fetchedCompany = useQuery(
@@ -162,15 +181,15 @@ export function CompanyDossierDrawer({
       <Dialog
         isOpen={isOpen}
         onClose={onClose}
-        maxWidth="4xl"
+        maxWidth="5xl"
         hideHeader={true}
-        className="max-h-[92vh] sm:max-h-[88vh] flex flex-col p-0 overflow-hidden rounded-xl border border-border bg-surface shadow-2xl"
+        className="h-[94vh] max-h-[94vh] sm:h-[90vh] sm:max-h-[90vh] w-full max-w-4xl lg:max-w-5xl flex flex-col p-0 overflow-hidden rounded-xl border border-border bg-surface shadow-2xl"
       >
         {/* ==================================================================== */}
         {/* STICKY DOSSIER HEADER (PART 2)                                       */}
         {/* ==================================================================== */}
-        <div className="shrink-0 border-b border-border bg-surface p-4 sm:px-6 sm:py-5">
-          <div className="flex items-start justify-between gap-4">
+        <div className="shrink-0 sticky top-0 z-20 border-b border-border bg-surface p-4 sm:px-6 sm:py-4">
+          <div className="flex items-start justify-between gap-3 sm:gap-4">
             <div className="min-w-0 flex-1 space-y-1.5">
               {/* Dominant Company Name */}
               <div className="flex items-center gap-2">
@@ -211,7 +230,7 @@ export function CompanyDossierDrawer({
               </p>
 
               {/* Status, Assignment & Priority Indicators */}
-              <div className="flex flex-wrap items-center gap-2 pt-1">
+              <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 pt-1">
                 {/* Assignment Status */}
                 {isAssignedToCurrentUser ? (
                   <span className="inline-flex items-center gap-1 rounded-md border border-emerald-500/20 bg-emerald-50/70 dark:bg-emerald-950/30 px-2 py-0.5 text-[11px] font-semibold text-emerald-800 dark:text-emerald-300">
@@ -230,6 +249,46 @@ export function CompanyDossierDrawer({
                   </span>
                 )}
 
+                {/* Admin Quick Assignment Controls */}
+                {isAdmin && (
+                  <span className="inline-flex items-center gap-1">
+                    {!isUnassigned && activeAssignment ? (
+                      <>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setIsReassignModalOpen(true)}
+                          className="h-5 text-[10px] px-2 py-0 text-text-primary hover:bg-surface-subtle flex items-center gap-1 border-dashed"
+                          title="Reassign lead to another volunteer"
+                        >
+                          <ArrowRightLeft className="h-2.5 w-2.5 text-primary" />
+                          Reassign
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setIsUnassignModalOpen(true)}
+                          className="h-5 text-[10px] px-1.5 py-0 text-amber-700 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/30 flex items-center gap-1 border-amber-300 dark:border-amber-800/60"
+                          title="Unassign lead and return to pool"
+                        >
+                          <UserX className="h-2.5 w-2.5 text-amber-600" />
+                          Unassign
+                        </Button>
+                      </>
+                    ) : (
+                      <Button
+                        size="sm"
+                        onClick={() => setIsAssignModalOpen(true)}
+                        className="h-5 text-[10px] px-2 py-0 bg-primary text-white hover:bg-primary-hover flex items-center gap-1"
+                        title="Assign lead to a volunteer"
+                      >
+                        <UserPlus className="h-2.5 w-2.5" />
+                        Assign Lead
+                      </Button>
+                    )}
+                  </span>
+                )}
+
                 <LeadStatusBadge status={company.leadStatus} />
                 <PriorityBadge priority={company.priority} />
 
@@ -240,11 +299,25 @@ export function CompanyDossierDrawer({
                 )}
 
                 <LeadPriorityExplainer company={company} />
+
+                {/* Mobile Target Ask Badge */}
+                {(company.recommendedAskMin || company.recommendedAskMax) && (
+                  <span className="inline-flex sm:hidden items-center gap-1 rounded-md border border-primary/20 bg-surface-subtle px-2 py-0.5 text-[11px] font-mono font-bold text-primary">
+                    Ask:{" "}
+                    {company.recommendedAskMin
+                      ? formatCurrencyINR(company.recommendedAskMin)
+                      : "—"}
+                    {" – "}
+                    {company.recommendedAskMax
+                      ? formatCurrencyINR(company.recommendedAskMax)
+                      : "—"}
+                  </span>
+                )}
               </div>
             </div>
 
-            {/* Target Ask & Close Button */}
-            <div className="flex items-start gap-3 shrink-0">
+            {/* Target Ask (Desktop) & Close Button */}
+            <div className="flex items-start gap-2.5 sm:gap-3 shrink-0">
               {(company.recommendedAskMin || company.recommendedAskMax) && (
                 <div className="text-right hidden sm:block p-2 rounded-lg bg-surface-subtle border border-border-subtle">
                   <span className="text-[10px] text-text-muted font-semibold uppercase tracking-wider block">
@@ -263,9 +336,11 @@ export function CompanyDossierDrawer({
               )}
 
               <button
+                type="button"
                 onClick={onClose}
-                className="rounded-lg p-1.5 text-text-muted hover:bg-surface-subtle hover:text-text-primary transition-colors cursor-pointer border border-transparent hover:border-border"
+                className="rounded-lg p-2 text-text-muted hover:bg-surface-subtle hover:text-text-primary transition-colors cursor-pointer border border-transparent hover:border-border"
                 aria-label="Close dossier"
+                title="Close dossier (Esc)"
               >
                 <X className="h-4 w-4" />
               </button>
@@ -274,11 +349,12 @@ export function CompanyDossierDrawer({
         </div>
 
         {/* ==================================================================== */}
-        {/* DOSSIER NAVIGATION TABS                                              */}
+        {/* STICKY DOSSIER NAVIGATION TABS                                       */}
         {/* ==================================================================== */}
-        <div className="shrink-0 flex border-b border-border bg-surface-subtle/30 px-4 sm:px-6 text-xs font-medium overflow-x-auto no-scrollbar gap-1">
+        <div className="shrink-0 sticky top-0 z-10 flex border-b border-border bg-surface px-4 sm:px-6 text-xs font-medium overflow-x-auto no-scrollbar gap-1">
           <button
-            onClick={() => setActiveTab("overview")}
+            type="button"
+            onClick={() => handleTabChange("overview")}
             className={`flex items-center gap-1.5 px-3 py-2.5 border-b-2 font-semibold transition-colors cursor-pointer whitespace-nowrap ${
               activeTab === "overview"
                 ? "border-primary text-primary"
@@ -289,7 +365,8 @@ export function CompanyDossierDrawer({
             Overview & Intelligence
           </button>
           <button
-            onClick={() => setActiveTab("prep")}
+            type="button"
+            onClick={() => handleTabChange("prep")}
             className={`flex items-center gap-1.5 px-3 py-2.5 border-b-2 font-semibold transition-colors cursor-pointer whitespace-nowrap ${
               activeTab === "prep"
                 ? "border-primary text-primary"
@@ -300,18 +377,20 @@ export function CompanyDossierDrawer({
             Call Prep Battlecards
           </button>
           <button
-            onClick={() => setActiveTab("ai")}
+            type="button"
+            onClick={() => handleTabChange("ai")}
             className={`flex items-center gap-1.5 px-3 py-2.5 border-b-2 font-semibold transition-colors cursor-pointer whitespace-nowrap ${
               activeTab === "ai"
-                ? "border-teal-600 text-teal-600 dark:text-teal-400"
+                ? "border-primary text-primary"
                 : "border-transparent text-text-secondary hover:text-text-primary"
             }`}
           >
-            <Sparkles className="h-3.5 w-3.5 text-teal-600 dark:text-teal-400" />
+            <Sparkles className="h-3.5 w-3.5" />
             AI Strategic Dossier
           </button>
           <button
-            onClick={() => setActiveTab("proposals")}
+            type="button"
+            onClick={() => handleTabChange("proposals")}
             className={`flex items-center gap-1.5 px-3 py-2.5 border-b-2 font-semibold transition-colors cursor-pointer whitespace-nowrap ${
               activeTab === "proposals"
                 ? "border-primary text-primary"
@@ -322,7 +401,8 @@ export function CompanyDossierDrawer({
             Proposals & In-Kind ({proposals?.length || 0})
           </button>
           <button
-            onClick={() => setActiveTab("timeline")}
+            type="button"
+            onClick={() => handleTabChange("timeline")}
             className={`flex items-center gap-1.5 px-3 py-2.5 border-b-2 font-semibold transition-colors cursor-pointer whitespace-nowrap ${
               activeTab === "timeline"
                 ? "border-primary text-primary"
@@ -337,7 +417,15 @@ export function CompanyDossierDrawer({
         {/* ==================================================================== */}
         {/* SCROLLABLE DOSSIER CONTENT                                           */}
         {/* ==================================================================== */}
-        <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6 overscroll-contain">
+        <div
+          ref={contentRef}
+          tabIndex={0}
+          className="flex-1 min-h-0 overflow-y-auto overscroll-contain p-4 sm:p-6 space-y-6 pb-8 focus:outline-none focus-visible:ring-1 focus-visible:ring-primary/20 dossier-scroll"
+          style={{
+            scrollbarWidth: "thin",
+            scrollbarColor: "var(--border-strong) transparent",
+          }}
+        >
           {/* TAB 1: OVERVIEW & INTELLIGENCE */}
           {activeTab === "overview" && (
             <div className="space-y-6">
@@ -583,8 +671,9 @@ export function CompanyDossierDrawer({
                     </div>
 
                     <button
-                      onClick={() => setActiveTab("ai")}
-                      className="px-3 py-1.5 rounded-lg bg-teal-600 hover:bg-teal-700 text-white font-semibold text-xs flex items-center gap-1.5 shadow-2xs transition-all cursor-pointer shrink-0"
+                      type="button"
+                      onClick={() => handleTabChange("ai")}
+                      className="px-3 py-1.5 rounded-lg bg-primary hover:bg-primary-hover text-white font-semibold text-xs flex items-center gap-1.5 shadow-2xs transition-all cursor-pointer shrink-0"
                     >
                       <Sparkles className="h-3.5 w-3.5" />
                       View AI Dossier
@@ -935,7 +1024,7 @@ export function CompanyDossierDrawer({
         {/* ==================================================================== */}
         {/* STICKY FOOTER ACTIONS (PART 4 & 7)                                   */}
         {/* ==================================================================== */}
-        <div className="shrink-0 border-t border-border bg-surface p-4 sm:px-6 sm:py-3.5 flex flex-wrap items-center justify-between gap-3">
+        <div className="shrink-0 sticky bottom-0 z-20 border-t border-border bg-surface p-3.5 sm:px-6 sm:py-3.5 flex flex-wrap items-center justify-between gap-2.5 shadow-xs">
           <div className="flex flex-wrap items-center gap-2">
             {/* Start Call Button with Strict Assignment Safety */}
             {onStartCall && (
@@ -1019,6 +1108,48 @@ export function CompanyDossierDrawer({
               ? "Title"
               : "Associate"
           }
+        />
+      )}
+
+      {/* Embedded Admin Assignment Modals */}
+      {isAssignModalOpen && (
+        <AssignLeadModal
+          isOpen={isAssignModalOpen}
+          onClose={() => setIsAssignModalOpen(false)}
+          companyId={company._id}
+          companyName={company.companyName}
+          defaultPriority={company.priority}
+          onSuccess={() => {
+            setIsAssignModalOpen(false);
+          }}
+        />
+      )}
+
+      {isReassignModalOpen && (
+        <ReassignLeadModal
+          isOpen={isReassignModalOpen}
+          onClose={() => setIsReassignModalOpen(false)}
+          companyId={company._id}
+          companyName={company.companyName}
+          currentVolunteerName={assignedVolunteerName}
+          currentVolunteerId={activeAssignment?.volunteerId}
+          leadStatus={company.leadStatus}
+          onSuccess={() => {
+            setIsReassignModalOpen(false);
+          }}
+        />
+      )}
+
+      {isUnassignModalOpen && (
+        <UnassignConfirmationModal
+          isOpen={isUnassignModalOpen}
+          onClose={() => setIsUnassignModalOpen(false)}
+          companyId={company._id}
+          companyName={company.companyName}
+          currentVolunteerName={assignedVolunteerName}
+          onSuccess={() => {
+            setIsUnassignModalOpen(false);
+          }}
         />
       )}
     </>
