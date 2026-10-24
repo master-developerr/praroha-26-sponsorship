@@ -9,12 +9,21 @@ export const getCompanyMetrics = query({
   args: {},
   handler: async (ctx) => {
     const all = await ctx.db.query("companies").collect();
+    const activeAssignments = await ctx.db
+      .query("leadAssignments")
+      .filter((q) => q.eq(q.field("status"), "active"))
+      .collect();
+
+    const assignedCompanyIds = new Set(activeAssignments.map((a) => a.companyId));
+
     const total = all.length;
-    const unassigned = all.filter((c) => c.leadStatus === "UNASSIGNED").length;
-    const assigned = total - unassigned;
+    const assigned = all.filter(
+      (c) => assignedCompanyIds.has(c._id) || (c.leadStatus !== "UNASSIGNED" && c.leadStatus !== "LOST")
+    ).length;
+    const unassigned = total - assigned;
     const won = all.filter((c) => c.leadStatus === "WON").length;
     const lost = all.filter((c) => c.leadStatus === "LOST").length;
-    const inPipeline = total - unassigned - won - lost;
+    const inPipeline = assigned - won;
 
     return {
       total,
@@ -936,3 +945,68 @@ export const restoreCompany = mutation({
     return { success: true };
   },
 });
+
+/**
+ * Remove all dummy test calls, reset orphaned company statuses, and ensure 100% sync
+ */
+export const cleanupDummyDataAndSyncStatus = mutation({
+  args: {},
+  handler: async (ctx) => {
+    // 1. Delete all dummy calls
+    const allCalls = await ctx.db.query("calls").collect();
+    let deletedCalls = 0;
+    for (const call of allCalls) {
+      await ctx.db.delete(call._id);
+      deletedCalls++;
+    }
+
+    // 2. Delete any dummy debriefs or notes if any
+    const allDebriefs = await ctx.db.query("callDebriefs").collect();
+    let deletedDebriefs = 0;
+    for (const debrief of allDebriefs) {
+      await ctx.db.delete(debrief._id);
+      deletedDebriefs++;
+    }
+
+    // 3. Sync companies status with active assignments
+    const companies = await ctx.db.query("companies").collect();
+    const activeAssignments = await ctx.db
+      .query("leadAssignments")
+      .filter((q) => q.eq(q.field("status"), "active"))
+      .collect();
+
+    const activeCompanyMap = new Map();
+    for (const a of activeAssignments) {
+      activeCompanyMap.set(a.companyId, a);
+    }
+
+    let syncedCompanies = 0;
+    for (const comp of companies) {
+      const hasActive = activeCompanyMap.has(comp._id);
+
+      // If company has NO active assignment but is marked non-UNASSIGNED (and not WON/LOST), reset to UNASSIGNED
+      if (!hasActive && comp.leadStatus !== "UNASSIGNED" && comp.leadStatus !== "WON" && comp.leadStatus !== "LOST") {
+        await ctx.db.patch(comp._id, {
+          leadStatus: "UNASSIGNED",
+          lastContactedAt: undefined,
+          updatedAt: Date.now(),
+        });
+        syncedCompanies++;
+      } else if (hasActive && comp.leadStatus === "UNASSIGNED") {
+        await ctx.db.patch(comp._id, {
+          leadStatus: "ASSIGNED",
+          updatedAt: Date.now(),
+        });
+        syncedCompanies++;
+      }
+    }
+
+    return {
+      deletedCalls,
+      deletedDebriefs,
+      syncedCompanies,
+      totalActiveAssignments: activeAssignments.length,
+    };
+  },
+});
+

@@ -93,13 +93,25 @@ export function MasterLeadDirectoryView() {
     includeArchived: showArchived,
   }) || [];
 
+  const assignedCount = useMemo(() => {
+    return rawCompanies.filter(
+      (c: any) => c.assignedVolunteer !== null || (c.leadStatus !== "UNASSIGNED" && c.leadStatus !== "LOST")
+    ).length;
+  }, [rawCompanies]);
+
+  const unassignedCount = useMemo(() => {
+    return Math.max(0, rawCompanies.length - assignedCount);
+  }, [rawCompanies, assignedCount]);
+
   const companies = useMemo(() => {
     return rawCompanies.filter((comp: any) => {
+      const isAssigned = Boolean(comp.assignedVolunteer !== null || (comp.leadStatus !== "UNASSIGNED" && comp.leadStatus !== "LOST"));
+
       // 1. Ownership Filter
       if (selectedOwnership === "assigned") {
-        if (!comp.assignedVolunteer || comp.leadStatus === "UNASSIGNED") return false;
+        if (!isAssigned) return false;
       } else if (selectedOwnership === "unassigned") {
-        if (comp.assignedVolunteer && comp.leadStatus !== "UNASSIGNED") return false;
+        if (isAssigned) return false;
       }
 
       // 2. Volunteer Filter
@@ -240,21 +252,21 @@ export function MasterLeadDirectoryView() {
   const kpiItems = [
     {
       label: "Total Leads",
-      value: metrics.total,
+      value: rawCompanies.length || metrics.total,
       subtext: "Ingested corporate entities",
       icon: Building2,
       variant: "primary" as const,
     },
     {
       label: "Unassigned Pool",
-      value: metrics.unassigned,
+      value: unassignedCount,
       subtext: "Awaiting volunteer allocation",
       icon: Layers,
-      variant: (metrics.unassigned > 0 ? "warning" : "neutral") as "warning" | "neutral",
+      variant: (unassignedCount > 0 ? "warning" : "neutral") as "warning" | "neutral",
     },
     {
       label: "In Outreach",
-      value: metrics.inPipeline,
+      value: assignedCount,
       subtext: "Assigned or under negotiation",
       icon: Briefcase,
       variant: "info" as const,
@@ -348,7 +360,7 @@ export function MasterLeadDirectoryView() {
                   : "text-text-muted hover:text-text-primary"
               }`}
             >
-              All Leads ({metrics.total})
+              All Leads ({rawCompanies.length})
             </button>
             <button
               type="button"
@@ -360,7 +372,7 @@ export function MasterLeadDirectoryView() {
               }`}
             >
               <Users className="h-3.5 w-3.5" />
-              Assigned ({metrics.assigned ?? (metrics.total - metrics.unassigned)})
+              Assigned ({assignedCount})
             </button>
             <button
               type="button"
@@ -372,7 +384,7 @@ export function MasterLeadDirectoryView() {
               }`}
             >
               <UserX className="h-3.5 w-3.5" />
-              Unassigned Pool ({metrics.unassigned})
+              Unassigned Pool ({unassignedCount})
             </button>
           </div>
 
