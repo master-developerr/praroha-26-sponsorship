@@ -453,6 +453,10 @@ export const getCompanyRelationshipTimeline = query({
 
     for (const d of debriefs) {
       const vol = await ctx.db.get(d.volunteerId);
+      const audioUrl = d.debriefAudioStorageId
+        ? await ctx.storage.getUrl(d.debriefAudioStorageId)
+        : null;
+
       timeline.push({
         id: `debrief-${d._id}`,
         type: "debrief",
@@ -466,6 +470,9 @@ export const getCompanyRelationshipTimeline = query({
           interestLevel: d.interestLevel,
           primaryObjection: d.primaryObjection,
           nextAction: d.nextAction,
+          debriefTranscript: d.debriefTranscript,
+          debriefAudioStorageId: d.debriefAudioStorageId,
+          audioUrl,
         },
       });
     }

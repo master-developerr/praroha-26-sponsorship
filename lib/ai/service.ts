@@ -7,6 +7,7 @@ import {
   alternativeAskSchema,
   callDebriefSchema,
   leadPrioritySchema,
+  voiceDebriefExtractionSchema,
 } from "./schemas";
 import {
   buildCompanyAnalysisPrompt,
@@ -26,6 +27,11 @@ import {
   DebriefAnalysisInput,
 } from "./prompts/callDebrief";
 import {
+  buildVoiceDebriefPrompt,
+  VOICE_DEBRIEF_PROMPT_VERSION,
+  VoiceDebriefPromptInput,
+} from "./prompts/voiceDebrief";
+import {
   buildLeadPrioritizationPrompt,
   LEAD_PRIORITIZATION_PROMPT_VERSION,
   LeadPrioritizationPromptInput,
@@ -36,6 +42,7 @@ import {
   AlternativeAskResult,
   CallDebriefAnalysisResult,
   LeadPriorityResult,
+  VoiceDebriefExtractionResult,
   AIServiceResponse,
 } from "./types";
 import {
@@ -44,6 +51,7 @@ import {
   getFallbackAlternativeAsk,
   getFallbackCallDebrief,
   getFallbackLeadPrioritization,
+  getFallbackVoiceDebriefExtraction,
 } from "./fallback";
 
 /**
@@ -71,6 +79,13 @@ export interface AIService {
     input: DebriefAnalysisInput,
     options?: { volunteerId?: string }
   ): Promise<AIServiceResponse<CallDebriefAnalysisResult>>;
+
+  transcribeAndAnalyzeVoiceDebrief(
+    audioBuffer: Buffer | null,
+    audioMimeType: string,
+    input: VoiceDebriefPromptInput,
+    options?: { volunteerId?: string }
+  ): Promise<AIServiceResponse<VoiceDebriefExtractionResult>>;
 
   prioritizeLead(
     company: any,
@@ -303,7 +318,80 @@ export class GeminiAIService implements AIService {
   }
 
   /**
-   * 5. Lead Prioritization Explanation
+   * 5. Live Voice Debrief Transcription & Structured Intelligence
+   */
+  async transcribeAndAnalyzeVoiceDebrief(
+    audioBuffer: Buffer | null,
+    audioMimeType: string,
+    input: VoiceDebriefPromptInput,
+    options?: { volunteerId?: string }
+  ): Promise<AIServiceResponse<VoiceDebriefExtractionResult>> {
+    const promptVersion = VOICE_DEBRIEF_PROMPT_VERSION;
+    const timestamp = Date.now();
+
+    const fallbackBaseline = getFallbackVoiceDebriefExtraction(input);
+
+    if (!isGeminiConfigured()) {
+      console.warn("[Gemini AI] GEMINI_API_KEY not configured. Running local debrief fallback.");
+      return {
+        success: true,
+        data: fallbackBaseline,
+        isFallback: true,
+        modelUsed: "local-operations-engine",
+        promptVersion,
+        timestamp,
+      };
+    }
+
+    try {
+      const promptText = buildVoiceDebriefPrompt(input);
+      let contents: any = promptText;
+
+      if (audioBuffer && audioBuffer.length > 0) {
+        const base64Data = audioBuffer.toString("base64");
+        contents = [
+          {
+            inlineData: {
+              mimeType: audioMimeType || "audio/webm",
+              data: base64Data,
+            },
+          },
+          {
+            text: promptText,
+          },
+        ];
+      }
+
+      const data = await callGeminiStructured<VoiceDebriefExtractionResult>(
+        contents,
+        voiceDebriefExtractionSchema,
+        { model: this.modelName }
+      );
+
+      return {
+        success: true,
+        data,
+        isFallback: false,
+        modelUsed: this.modelName,
+        promptVersion,
+        timestamp,
+      };
+    } catch (err: any) {
+      console.error("[Gemini AI] transcribeAndAnalyzeVoiceDebrief failed, falling back:", err?.message);
+      return {
+        success: true,
+        data: fallbackBaseline,
+        isFallback: true,
+        error: `AI provider error: ${err?.message}. Operating in high-reliability fallback mode.`,
+        modelUsed: "local-operations-engine",
+        promptVersion,
+        timestamp,
+      };
+    }
+  }
+
+  /**
+   * 6. Lead Prioritization Explanation
    */
   async prioritizeLead(
     company: any,

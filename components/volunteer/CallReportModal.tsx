@@ -18,6 +18,12 @@ import {
   Mic,
   Square,
   Volume2,
+  Sparkles,
+  ChevronDown,
+  ChevronUp,
+  ThumbsUp,
+  TrendingDown,
+  Loader2,
 } from "lucide-react";
 import {
   QuickCallOutcome,
@@ -27,6 +33,7 @@ import {
 } from "@/types";
 import { LeadStatusBadge } from "@/components/ui/badge";
 import { DebriefAnalysisCard } from "@/components/ai";
+import { VoiceDebriefExtractionResult } from "@/lib/ai/types";
 
 interface CallReportModalProps {
   isOpen: boolean;
@@ -61,6 +68,7 @@ export function CallReportModal({
 }: CallReportModalProps) {
   const { user } = useAuthUser();
   const logCallMutation = useMutation(api.calls.logCallAndDebrief);
+  const generateDebriefAudioUploadUrl = useMutation(api.calls.generateDebriefAudioUploadUrl);
 
   const [outcome, setOutcome] = useState<QuickCallOutcome>(initialOutcome);
   const [interestLevel, setInterestLevel] = useState<InterestLevel>("Medium");
@@ -71,6 +79,14 @@ export function CallReportModal({
   const [discussionSummary, setDiscussionSummary] = useState<string>("");
   const [targetLeadStatus, setTargetLeadStatus] = useState<LeadStage>("CONTACTED");
 
+  // Server-side audio storage & transcription state
+  const [debriefAudioStorageId, setDebriefAudioStorageId] = useState<string | undefined>(undefined);
+  const [debriefTranscript, setDebriefTranscript] = useState<string | undefined>(undefined);
+  const [isTranscribing, setIsTranscribing] = useState(false);
+  const [showTranscript, setShowTranscript] = useState(false);
+  const [aiResultData, setAiResultData] = useState<VoiceDebriefExtractionResult | null>(null);
+  const [aiSuggestedFields, setAiSuggestedFields] = useState<{ [field: string]: boolean }>({});
+
   // Voice Debrief Audio Recording & Live Speech Recognition state
   const [isRecording, setIsRecording] = useState(false);
   const [recordDuration, setRecordDuration] = useState(0);
@@ -79,6 +95,106 @@ export function CallReportModal({
   const audioChunksRef = useRef<Blob[]>([]);
   const recognitionRef = useRef<any>(null);
   const recordIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Upload to Convex storage & trigger AI transcription and structured extraction
+  const handleProcessAudioDebrief = async (audioBlob: Blob, liveTranscript: string) => {
+    if (!user?.id || !lead) return;
+
+    setIsTranscribing(true);
+    setErrorMessage(null);
+
+    let storageId: string | undefined = undefined;
+
+    // 1. Upload to Convex File Storage
+    try {
+      const uploadUrl = await generateDebriefAudioUploadUrl({ volunteerClerkId: user.id });
+      const uploadRes = await fetch(uploadUrl, {
+        method: "POST",
+        headers: { "Content-Type": audioBlob.type || "audio/webm" },
+        body: audioBlob,
+      });
+
+      if (uploadRes.ok) {
+        const uploadJson = await uploadRes.json();
+        storageId = uploadJson.storageId;
+        setDebriefAudioStorageId(storageId);
+      }
+    } catch (uploadErr: any) {
+      console.warn("[Debrief Audio Upload Warning]:", uploadErr?.message || uploadErr);
+    }
+
+    // 2. Send to Server Transcription & Intelligence Extraction Endpoint
+    try {
+      const formData = new FormData();
+      formData.append("audio", audioBlob, "debrief.webm");
+      formData.append("companyName", lead.companyName);
+      formData.append("industry", lead.industry);
+      formData.append("leadStatus", targetLeadStatus);
+      if (liveTranscript.trim()) {
+        formData.append("clientTranscript", liveTranscript.trim());
+      }
+      formData.append("volunteerId", user.id);
+
+      const aiRes = await fetch("/api/ai/transcribe-debrief", {
+        method: "POST",
+        body: formData,
+      });
+
+      const json = await aiRes.json();
+
+      if (json.success && json.data) {
+        const aiData = json.data as VoiceDebriefExtractionResult;
+        setAiResultData(aiData);
+
+        if (aiData.transcript) {
+          setDebriefTranscript(aiData.transcript);
+        }
+
+        // Pre-fill editable fields
+        if (aiData.discussionSummary) {
+          setDiscussionSummary(aiData.discussionSummary);
+        }
+        if (aiData.detectedOutcome) {
+          setOutcome(aiData.detectedOutcome);
+        }
+        if (aiData.targetLeadStatus) {
+          setTargetLeadStatus(aiData.targetLeadStatus);
+        }
+        if (aiData.interestLevel) {
+          setInterestLevel(aiData.interestLevel);
+        }
+        if (aiData.decisionMakerStatus) {
+          setDecisionMakerStatus(aiData.decisionMakerStatus);
+        }
+        if (aiData.primaryObjection) {
+          setPrimaryObjection(aiData.primaryObjection);
+        }
+
+        // Pre-fill follow-up if suggested
+        if (aiData.followUpSuggestion) {
+          setScheduleFollowUp(true);
+          const days = aiData.followUpSuggestion.recommendedDaysFromNow || 2;
+          const callbackDate = new Date(Date.now() + days * 24 * 60 * 60 * 1000);
+          callbackDate.setHours(10, 0, 0, 0);
+          setFollowUpDate(callbackDate.toISOString().slice(0, 16));
+          setFollowUpPriority(aiData.followUpSuggestion.priority || "Medium");
+          setFollowUpNotes(aiData.followUpSuggestion.notes || aiData.recommendedNextAction);
+        }
+
+        setAiSuggestedFields({
+          summary: true,
+          outcome: true,
+          interest: true,
+          decisionMaker: true,
+          followUp: Boolean(aiData.followUpSuggestion),
+        });
+      }
+    } catch (aiErr: any) {
+      console.warn("[Debrief AI Transcription Warning]:", aiErr?.message || aiErr);
+    } finally {
+      setIsTranscribing(false);
+    }
+  };
 
   const startVoiceRecording = async () => {
     try {
@@ -94,11 +210,16 @@ export function CallReportModal({
         }
       };
 
-      mediaRecorder.onstop = () => {
+      let liveSpokenTranscript = "";
+
+      mediaRecorder.onstop = async () => {
         const audioBlob = new Blob(audioChunksRef.current, { type: "audio/webm" });
         const url = URL.createObjectURL(audioBlob);
         setAudioUrl(url);
         stream.getTracks().forEach((track) => track.stop());
+
+        // Process audio via Convex Storage + Server AI Transcription
+        await handleProcessAudioDebrief(audioBlob, liveSpokenTranscript);
       };
 
       mediaRecorder.start(250);
@@ -123,6 +244,7 @@ export function CallReportModal({
             currentTranscript += event.results[i][0].transcript + " ";
           }
           if (currentTranscript.trim()) {
+            liveSpokenTranscript = currentTranscript.trim();
             setDiscussionSummary(currentTranscript.trim());
           }
         };
@@ -232,6 +354,8 @@ export function CallReportModal({
         decisionMakerStatus,
         primaryObjection: primaryObjection.trim() || undefined,
         targetLeadStatus,
+        debriefAudioStorageId,
+        debriefTranscript,
         scheduleFollowUp: followUpPayload,
       });
 
@@ -269,9 +393,16 @@ export function CallReportModal({
         {/* 1. Call Summary Banner */}
         <div className="rounded-xl border border-border-subtle bg-surface-subtle p-3.5 flex flex-wrap items-center justify-between gap-3 text-xs">
           <div className="space-y-0.5">
-            <span className="text-[10px] uppercase font-bold text-text-muted">
-              Logged Outcome
-            </span>
+            <div className="flex items-center gap-1.5">
+              <span className="text-[10px] uppercase font-bold text-text-muted">
+                Logged Outcome
+              </span>
+              {aiSuggestedFields.outcome && (
+                <span className="text-[9px] font-bold text-teal-600 dark:text-teal-400 bg-teal-500/10 px-1.5 py-0.2 rounded-full border border-teal-500/20">
+                  ✨ AI Detected
+                </span>
+              )}
+            </div>
             <div className="flex items-center gap-2">
               <span className="font-bold text-text-primary text-sm">
                 {outcome}
@@ -284,7 +415,14 @@ export function CallReportModal({
 
           {/* Stage Progression Selector */}
           <div className="flex items-center gap-2">
-            <span className="text-text-secondary font-medium">Progress to Stage:</span>
+            <div className="flex items-center gap-1">
+              <span className="text-text-secondary font-medium">Progress to Stage:</span>
+              {aiSuggestedFields.status && (
+                <span className="text-[9px] font-bold text-teal-600 dark:text-teal-400 bg-teal-500/10 px-1.5 py-0.2 rounded-full border border-teal-500/20">
+                  ✨ AI
+                </span>
+              )}
+            </div>
             <select
               value={targetLeadStatus}
               onChange={(e) => setTargetLeadStatus(e.target.value as LeadStage)}
@@ -306,9 +444,16 @@ export function CallReportModal({
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
           {/* Interest Level */}
           <div className="space-y-1.5">
-            <label className="font-semibold text-text-primary">
-              Interest Level <span className="text-rose-500">*</span>
-            </label>
+            <div className="flex items-center justify-between">
+              <label className="font-semibold text-text-primary">
+                Interest Level <span className="text-rose-500">*</span>
+              </label>
+              {aiSuggestedFields.interest && (
+                <span className="text-[9px] font-bold text-teal-600 dark:text-teal-400 bg-teal-500/10 px-1.5 py-0.2 rounded-full border border-teal-500/20">
+                  ✨ AI Suggested
+                </span>
+              )}
+            </div>
             <div className="grid grid-cols-4 gap-1.5">
               {(["High", "Medium", "Low", "None"] as InterestLevel[]).map(
                 (lvl) => (
@@ -337,9 +482,16 @@ export function CallReportModal({
 
           {/* Decision-Maker Status */}
           <div className="space-y-1.5">
-            <label className="font-semibold text-text-primary">
-              Decision-Maker Status <span className="text-rose-500">*</span>
-            </label>
+            <div className="flex items-center justify-between">
+              <label className="font-semibold text-text-primary">
+                Decision-Maker Status <span className="text-rose-500">*</span>
+              </label>
+              {aiSuggestedFields.decisionMaker && (
+                <span className="text-[9px] font-bold text-teal-600 dark:text-teal-400 bg-teal-500/10 px-1.5 py-0.2 rounded-full border border-teal-500/20">
+                  ✨ AI Inferred
+                </span>
+              )}
+            </div>
             <select
               value={decisionMakerStatus}
               onChange={(e) => setDecisionMakerStatus(e.target.value)}
@@ -413,7 +565,7 @@ export function CallReportModal({
                     Voice Debrief Recorder
                   </span>
                   <span className="text-[11px] text-text-muted">
-                    Record your natural spoken debrief; speech is automatically transcribed into the notes below.
+                    Record your natural spoken debrief; audio is saved to Convex storage and transcribed with AI.
                   </span>
                 </div>
               </div>
@@ -436,6 +588,7 @@ export function CallReportModal({
                     variant="outline"
                     size="sm"
                     onClick={startVoiceRecording}
+                    disabled={isTranscribing}
                     className="h-7 text-xs text-primary border-primary/30 hover:bg-teal-500/10 flex items-center gap-1.5"
                   >
                     <Mic className="h-3.5 w-3.5 text-primary" />
@@ -445,17 +598,108 @@ export function CallReportModal({
               </div>
             </div>
 
+            {/* In-Flight Transcription Progress Banner */}
+            {isTranscribing && (
+              <div className="rounded-lg border border-teal-500/30 bg-teal-500/10 p-2.5 flex items-center gap-2.5 text-xs animate-pulse">
+                <Loader2 className="h-4 w-4 text-teal-600 dark:text-teal-400 animate-spin shrink-0" />
+                <div className="space-y-0.5">
+                  <span className="font-bold text-text-primary block flex items-center gap-1">
+                    <Sparkles className="h-3 w-3 text-teal-600 dark:text-teal-400" />
+                    Uploading & Transcribing Debrief Audio...
+                  </span>
+                  <span className="text-[11px] text-text-muted block">
+                    Synthesizing notes, detecting outcomes, and extracting follow-up directives with AI.
+                  </span>
+                </div>
+              </div>
+            )}
+
             {audioUrl && (
-              <div className="flex items-center gap-3 pt-2 border-t border-teal-500/15">
-                <span className="text-[11px] font-semibold text-text-secondary">Debrief Audio:</span>
-                <audio controls src={audioUrl} className="h-7 w-full max-w-xs text-xs" />
+              <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-teal-500/15">
+                <div className="flex items-center gap-2">
+                  <span className="text-[11px] font-semibold text-text-secondary">Debrief Audio:</span>
+                  <audio controls src={audioUrl} className="h-7 w-full max-w-xs text-xs" />
+                </div>
+                {debriefAudioStorageId && (
+                  <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-mono flex items-center gap-1">
+                    <CheckCircle2 className="h-3 w-3" />
+                    Saved to Storage
+                  </span>
+                )}
+              </div>
+            )}
+
+            {/* Verbatim Voice Transcript Accordion */}
+            {debriefTranscript && (
+              <div className="rounded-lg border border-teal-500/20 bg-surface/80 p-2.5 space-y-1.5 text-xs">
+                <button
+                  type="button"
+                  onClick={() => setShowTranscript((prev) => !prev)}
+                  className="w-full flex items-center justify-between font-semibold text-text-primary text-xs cursor-pointer hover:text-primary transition-colors"
+                >
+                  <span className="flex items-center gap-1.5 text-[11px]">
+                    <FileText className="h-3.5 w-3.5 text-primary" />
+                    Verbatim Spoken Transcript ({debriefTranscript.length} chars)
+                  </span>
+                  <span className="text-[10px] text-text-muted flex items-center gap-1">
+                    {showTranscript ? "Hide" : "Review"}
+                    {showTranscript ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+                  </span>
+                </button>
+                {showTranscript && (
+                  <p className="text-[11px] text-text-secondary italic bg-surface p-2 rounded border border-border-subtle leading-relaxed whitespace-pre-wrap">
+                    &ldquo;{debriefTranscript}&rdquo;
+                  </p>
+                )}
+              </div>
+            )}
+
+            {/* Spoken AI Signals & Next Action Preview */}
+            {aiResultData && !isTranscribing && (
+              <div className="rounded-lg border border-teal-500/20 bg-teal-500/5 p-2.5 space-y-1.5 text-xs">
+                <div className="flex items-center justify-between">
+                  <span className="font-bold text-text-primary text-[10px] uppercase flex items-center gap-1">
+                    <Sparkles className="h-3 w-3 text-teal-600 dark:text-teal-400" />
+                    Spoken Signals Extracted
+                  </span>
+                  <span className="text-[10px] text-teal-700 dark:text-teal-300 font-medium">
+                    Editable Below
+                  </span>
+                </div>
+
+                {aiResultData.positiveSignals?.length > 0 && (
+                  <div className="space-y-0.5">
+                    {aiResultData.positiveSignals.map((sig, i) => (
+                      <div key={i} className="text-[11px] text-text-secondary flex items-start gap-1">
+                        <span className="text-emerald-500 font-bold">•</span>
+                        <span>{sig}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {aiResultData.recommendedNextAction && (
+                  <div className="pt-1 border-t border-teal-500/15">
+                    <span className="text-[10px] font-bold text-text-primary">Recommended Action: </span>
+                    <span className="text-[11px] text-text-secondary font-medium">
+                      {aiResultData.recommendedNextAction}
+                    </span>
+                  </div>
+                )}
               </div>
             )}
           </div>
 
-          <label className="font-semibold text-text-primary block">
-            Discussion Summary & Key Facts (Editable) <span className="text-rose-500">*</span>
-          </label>
+          <div className="flex items-center justify-between">
+            <label className="font-semibold text-text-primary block">
+              Discussion Summary & Key Facts (Editable) <span className="text-rose-500">*</span>
+            </label>
+            {aiSuggestedFields.summary && (
+              <span className="text-[9px] font-bold text-teal-600 dark:text-teal-400 bg-teal-500/10 px-1.5 py-0.2 rounded-full border border-teal-500/20">
+                ✨ AI Extracted
+              </span>
+            )}
+          </div>
           <textarea
             rows={3}
             required
@@ -471,6 +715,7 @@ export function CallReportModal({
             industry={lead.industry}
             leadStatus={targetLeadStatus}
             discussionSummary={discussionSummary}
+            debriefTranscript={debriefTranscript}
             primaryObjection={primaryObjection}
             onApplySuggestions={(aiResult) => {
               if (aiResult.detectedOutcome === "PROPOSAL_REQUESTED") {

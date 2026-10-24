@@ -24,12 +24,19 @@ export function getGeminiClient(): GoogleGenAI {
   return geminiClient;
 }
 
+export type GeminiContentPart =
+  | string
+  | { text: string }
+  | { inlineData: { mimeType: string; data: string } };
+
+export type GeminiContents = string | GeminiContentPart[];
+
 /**
  * Executes a Gemini request with structured JSON mode and validates the output with Zod.
  * Never leaks the API key in logs or error messages.
  */
 export async function callGeminiStructured<T>(
-  prompt: string,
+  prompt: GeminiContents,
   schema: ZodSchema<T>,
   options?: {
     model?: string;
@@ -41,9 +48,10 @@ export async function callGeminiStructured<T>(
   const candidateModels = Array.from(
     new Set([
       options?.model || AI_CONFIG.MODEL_NAME,
+      "gemini-2.5-flash",
+      "gemini-2.0-flash",
+      "gemini-1.5-flash",
       "gemini-3.5-flash",
-      "gemini-3.8-flash",
-      "gemini-3.1-flash-lite",
     ])
   );
 
@@ -54,7 +62,7 @@ export async function callGeminiStructured<T>(
     try {
       const response = await client.models.generateContent({
         model,
-        contents: prompt,
+        contents: prompt as any,
         config: {
           responseMimeType: "application/json",
           temperature: options?.temperature ?? AI_CONFIG.TEMPERATURE,

@@ -109,3 +109,47 @@ export const leadPrioritySchema = z.object({
     civilEngineeringFit: z.number(),
   }),
 });
+
+export const voiceDebriefExtractionSchema = z.object({
+  transcript: z.string(),
+  discussionSummary: z.string(),
+  detectedOutcome: z.enum([
+    "Interested",
+    "Asked for proposal",
+    "Asked for budget",
+    "Wrong person",
+    "Call back",
+    "Rejected",
+    "Non-cash opportunity",
+    "Meeting requested",
+    "Other",
+  ]),
+  targetLeadStatus: z.enum([
+    "UNASSIGNED",
+    "ASSIGNED",
+    "CONTACTED",
+    "INTERESTED",
+    "FOLLOW_UP",
+    "PROPOSAL_REQUESTED",
+    "PROPOSAL_SENT",
+    "NEGOTIATION",
+    "WON",
+    "LOST",
+  ]),
+  interestLevel: z.enum(["High", "Medium", "Low", "None"]),
+  decisionMakerStatus: z.string(),
+  primaryObjection: z.string().optional(),
+  positiveSignals: z.array(z.string()),
+  negativeSignals: z.array(z.string()),
+  whatVolunteerDidWell: z.array(z.string()),
+  whatCouldImprove: z.array(z.string()),
+  recommendedNextAction: z.string(),
+  followUpSuggestion: z
+    .object({
+      recommendedDaysFromNow: z.number(),
+      priority: z.enum(["High", "Medium", "Low"]),
+      notes: z.string(),
+    })
+    .optional(),
+});
+

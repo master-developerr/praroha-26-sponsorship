@@ -33,6 +33,8 @@ export const logCallAndDebrief = mutation({
     importantInfoLearned: v.optional(v.string()),
     requestedAction: v.optional(v.string()),
     nextAction: v.optional(v.string()),
+    debriefAudioStorageId: v.optional(v.string()),
+    debriefTranscript: v.optional(v.string()),
     targetLeadStatus: v.optional(
       v.union(
         v.literal("UNASSIGNED"),
@@ -103,6 +105,8 @@ export const logCallAndDebrief = mutation({
       importantInfoLearned: args.importantInfoLearned?.trim(),
       requestedAction: args.requestedAction?.trim(),
       nextAction: args.nextAction?.trim(),
+      debriefAudioStorageId: args.debriefAudioStorageId,
+      debriefTranscript: args.debriefTranscript?.trim(),
       isVerifiedByAdmin: false,
       createdAt: now,
     });
@@ -232,6 +236,42 @@ export const logCallAndDebrief = mutation({
 });
 
 /**
+ * Generate a secure upload URL for debrief audio recording in Convex Storage
+ */
+export const generateDebriefAudioUploadUrl = mutation({
+  args: {
+    volunteerClerkId: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_clerk_id", (q) => q.eq("clerkId", args.volunteerClerkId))
+      .unique();
+
+    if (!user || user.verificationStatus === "suspended" || user.verificationStatus === "rejected") {
+      throw new Error("Unauthorized: Account is suspended or rejected");
+    }
+    if (user.role === "volunteer" && user.verificationStatus !== "approved") {
+      throw new Error("Unauthorized: Only approved volunteers and active admins can upload audio debriefs");
+    }
+
+    return await ctx.storage.generateUploadUrl();
+  },
+});
+
+/**
+ * Get download/playback URL for stored audio debrief
+ */
+export const getDebriefAudioUrl = query({
+  args: {
+    storageId: v.string(),
+  },
+  handler: async (ctx, args) => {
+    return await ctx.storage.getUrl(args.storageId);
+  },
+});
+
+/**
  * Get call and debrief interaction history for a company
  */
 export const getCallsByCompany = query({
@@ -252,12 +292,16 @@ export const getCallsByCompany = query({
           .withIndex("by_call_id", (q) => q.eq("callId", call._id))
           .unique();
 
+        const audioUrl = debrief?.debriefAudioStorageId
+          ? await ctx.storage.getUrl(debrief.debriefAudioStorageId)
+          : null;
+
         const volunteer = await ctx.db.get(call.volunteerId);
         const contact = call.contactId ? await ctx.db.get(call.contactId) : null;
 
         return {
           ...call,
-          debrief,
+          debrief: debrief ? { ...debrief, audioUrl } : null,
           volunteerName: volunteer?.name || "Unknown SDR",
           contactName: contact?.contactName || "Direct / Reception",
           contactDesignation: contact?.designation || "",
@@ -298,11 +342,15 @@ export const getMyRecentCalls = query({
           .withIndex("by_call_id", (q) => q.eq("callId", call._id))
           .unique();
 
+        const audioUrl = debrief?.debriefAudioStorageId
+          ? await ctx.storage.getUrl(debrief.debriefAudioStorageId)
+          : null;
+
         return {
           ...call,
           companyName: company?.companyName || "Unknown Company",
           companyIndustry: company?.industry || "",
-          debrief,
+          debrief: debrief ? { ...debrief, audioUrl } : null,
         };
       })
     );

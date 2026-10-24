@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
@@ -15,6 +15,10 @@ import {
   User,
   Sparkles,
   CheckCircle2,
+  Volume2,
+  Mic,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
 
 interface CompanyTimelineProps {
@@ -138,6 +142,34 @@ export function CompanyTimeline({ companyId }: CompanyTimelineProps) {
                   {event.description}
                 </p>
 
+                {/* Debrief Special Metadata: Audio Player & Verbatim Transcript */}
+                {event.type === "debrief" && event.metadata && (
+                  <div className="space-y-2 pt-1 border-t border-border-subtle/60">
+                    {event.metadata.primaryObjection && (
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-[10px] font-bold text-amber-700 dark:text-amber-400">
+                          Objection Noted:
+                        </span>
+                        <span className="text-[11px] text-text-secondary">
+                          {event.metadata.primaryObjection}
+                        </span>
+                      </div>
+                    )}
+
+                    {event.metadata.audioUrl && (
+                      <div className="flex items-center gap-2 pt-1">
+                        <Volume2 className="h-3.5 w-3.5 text-primary shrink-0" />
+                        <span className="text-[10px] font-semibold text-text-secondary shrink-0">Debrief Audio:</span>
+                        <audio controls src={event.metadata.audioUrl} className="h-7 w-full max-w-xs text-xs" />
+                      </div>
+                    )}
+
+                    {event.metadata.debriefTranscript && (
+                      <TimelineTranscriptSnippet transcript={event.metadata.debriefTranscript} />
+                    )}
+                  </div>
+                )}
+
                 {event.actorName && (
                   <div className="flex items-center gap-1 text-[11px] text-text-muted pt-1">
                     <User className="h-3 w-3" />
@@ -149,6 +181,35 @@ export function CompanyTimeline({ companyId }: CompanyTimelineProps) {
           );
         })}
       </div>
+    </div>
+  );
+}
+
+function TimelineTranscriptSnippet({ transcript }: { transcript: string }) {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <div className="rounded-lg border border-border-subtle bg-surface-subtle/50 p-2 text-xs space-y-1">
+      <button
+        type="button"
+        onClick={() => setIsOpen((prev) => !prev)}
+        className="w-full flex items-center justify-between text-text-secondary hover:text-primary transition-colors cursor-pointer text-[11px] font-semibold"
+      >
+        <span className="flex items-center gap-1.5">
+          <Mic className="h-3 w-3 text-primary" />
+          Verbatim Spoken Transcript
+        </span>
+        <span className="text-[10px] flex items-center gap-0.5 text-text-muted">
+          {isOpen ? "Hide" : "Show"}
+          {isOpen ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+        </span>
+      </button>
+
+      {isOpen && (
+        <p className="text-[11px] text-text-secondary italic bg-surface p-2 rounded border border-border-subtle leading-relaxed whitespace-pre-wrap">
+          &ldquo;{transcript}&rdquo;
+        </p>
+      )}
     </div>
   );
 }

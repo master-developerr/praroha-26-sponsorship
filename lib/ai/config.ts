@@ -13,6 +13,7 @@ export const AI_CONFIG = {
     CALL_PREPARATION: "v1.0",
     ALTERNATIVE_ASK: "v1.0",
     CALL_DEBRIEF: "v1.0",
+    VOICE_DEBRIEF: "v1.0",
     LEAD_PRIORITIZATION: "v1.0",
   },
 

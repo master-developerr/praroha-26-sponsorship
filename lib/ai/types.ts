@@ -69,6 +69,35 @@ export interface CallDebriefAnalysisResult {
   };
 }
 
+export interface VoiceDebriefExtractionResult {
+  transcript: string;
+  discussionSummary: string;
+  detectedOutcome:
+    | "Interested"
+    | "Asked for proposal"
+    | "Asked for budget"
+    | "Wrong person"
+    | "Call back"
+    | "Rejected"
+    | "Non-cash opportunity"
+    | "Meeting requested"
+    | "Other";
+  targetLeadStatus: LeadStage;
+  interestLevel: "High" | "Medium" | "Low" | "None";
+  decisionMakerStatus: string;
+  primaryObjection?: string;
+  positiveSignals: string[];
+  negativeSignals: string[];
+  whatVolunteerDidWell: string[];
+  whatCouldImprove: string[];
+  recommendedNextAction: string;
+  followUpSuggestion?: {
+    recommendedDaysFromNow: number;
+    priority: "High" | "Medium" | "Low";
+    notes: string;
+  };
+}
+
 export interface LeadPriorityResult {
   priorityScore: number;
   priorityLevel: "HIGH" | "MEDIUM" | "NORMAL" | "LOW";

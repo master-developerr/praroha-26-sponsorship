@@ -4,9 +4,10 @@ import {
   AlternativeAskResult,
   CallDebriefAnalysisResult,
   LeadPriorityResult,
+  VoiceDebriefExtractionResult,
 } from "./types";
 import { DebriefAnalysisInput } from "./prompts/callDebrief";
-import { SponsorshipCategory, SponsorshipTier } from "@/types";
+import { LeadStage, SponsorshipCategory, SponsorshipTier } from "@/types";
 
 /**
  * Deterministic Operations-First Fallback Engine for PRAROHA'26.
@@ -392,3 +393,84 @@ export function getFallbackLeadPrioritization(company: any): LeadPriorityResult 
     },
   };
 }
+
+export function getFallbackVoiceDebriefExtraction(input: {
+  companyName: string;
+  industry: string;
+  leadStatus: string;
+  clientTranscript?: string;
+}): VoiceDebriefExtractionResult {
+  const text = (input.clientTranscript || "").toLowerCase();
+
+  let detectedOutcome: VoiceDebriefExtractionResult["detectedOutcome"] = "Interested";
+  let targetLeadStatus: LeadStage = "INTERESTED";
+  let interestLevel: "High" | "Medium" | "Low" | "None" = "Medium";
+  let decisionMakerStatus = "Spoke directly to decision-maker";
+  let primaryObjection: string | undefined = undefined;
+
+  if (text.includes("proposal") || text.includes("send deck") || text.includes("tier")) {
+    detectedOutcome = "Asked for proposal";
+    targetLeadStatus = "PROPOSAL_REQUESTED";
+    interestLevel = "High";
+  } else if (text.includes("budget") || text.includes("cost") || text.includes("pricing") || text.includes("how much")) {
+    detectedOutcome = "Asked for budget";
+    targetLeadStatus = "INTERESTED";
+    interestLevel = "High";
+  } else if (text.includes("wrong person") || text.includes("wrong number") || text.includes("redirect") || text.includes("marketing team")) {
+    detectedOutcome = "Wrong person";
+    targetLeadStatus = "CONTACTED";
+    decisionMakerStatus = "Gatekeeper redirected to marketing";
+    interestLevel = "Low";
+  } else if (text.includes("busy") || text.includes("call back") || text.includes("later") || text.includes("tomorrow") || text.includes("next week")) {
+    detectedOutcome = "Call back";
+    targetLeadStatus = "FOLLOW_UP";
+    interestLevel = "Medium";
+  } else if (text.includes("not interested") || text.includes("no budget") || text.includes("reject") || text.includes("cannot sponsor")) {
+    detectedOutcome = "Rejected";
+    targetLeadStatus = "LOST";
+    interestLevel = "None";
+    primaryObjection = "Sponsorship budget exhausted for FY26";
+  } else if (text.includes("in-kind") || text.includes("non-cash") || text.includes("product") || text.includes("merchandise")) {
+    detectedOutcome = "Non-cash opportunity";
+    targetLeadStatus = "INTERESTED";
+    interestLevel = "High";
+  } else if (text.includes("meet") || text.includes("presentation") || text.includes("in person")) {
+    detectedOutcome = "Meeting requested";
+    targetLeadStatus = "INTERESTED";
+    interestLevel = "High";
+  }
+
+  const transcript = input.clientTranscript || "Voice debrief audio logged.";
+  const discussionSummary = input.clientTranscript
+    ? `Debrief notes: ${input.clientTranscript.slice(0, 300)}`
+    : `Recorded debrief with ${input.companyName}. Outcome: ${detectedOutcome}.`;
+
+  return {
+    transcript,
+    discussionSummary,
+    detectedOutcome,
+    targetLeadStatus,
+    interestLevel,
+    decisionMakerStatus,
+    primaryObjection,
+    positiveSignals: ["Outreach call completed and verified by volunteer"],
+    negativeSignals: [],
+    whatVolunteerDidWell: ["Promptly recorded post-call debrief while conversation context is fresh"],
+    whatCouldImprove: ["Verify decision-maker's direct email for formal dispatch"],
+    recommendedNextAction:
+      detectedOutcome === "Asked for proposal"
+        ? "Prepare and dispatch sponsorship proposal deck"
+        : detectedOutcome === "Call back"
+        ? "Schedule follow-up callback at the agreed time"
+        : "Follow up with official PRAROHA'26 festival brochure",
+    followUpSuggestion:
+      detectedOutcome === "Call back"
+        ? {
+            recommendedDaysFromNow: 2,
+            priority: "Medium",
+            notes: `Follow up callback with ${input.companyName}`,
+          }
+        : undefined,
+  };
+}
+
