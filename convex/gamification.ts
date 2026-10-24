@@ -1,6 +1,5 @@
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
-import { Id } from "./_generated/dataModel";
 
 export const DEFAULT_POINT_RULES = [
   { eventType: "call_completed", points: 5, label: "Call Completed", description: "Logged structured call outcome" },
@@ -47,7 +46,7 @@ export const updatePointConfiguration = mutation({
       .withIndex("by_clerk_id", (q) => q.eq("clerkId", args.adminClerkId))
       .first();
 
-    if (!admin || admin.role !== "admin") {
+    if (!admin || admin.role !== "admin" || admin.verificationStatus !== "approved") {
       throw new Error("Unauthorized: Only verified administrators can configure point weights.");
     }
 
@@ -123,6 +122,10 @@ export const awardPoints = mutation({
     awardedBy: v.optional(v.id("users")),
   },
   handler: async (ctx, args) => {
+    if (args.category === "admin_adjustment") {
+      throw new Error("Direct admin_adjustment via awardPoints is forbidden. Use adminAdjustPoints.");
+    }
+
     // 1. Idempotency Check
     const existing = await ctx.db
       .query("pointTransactions")
@@ -347,12 +350,20 @@ export const adminAdjustPoints = mutation({
       .withIndex("by_clerk_id", (q) => q.eq("clerkId", args.adminClerkId))
       .first();
 
-    if (!admin || admin.role !== "admin") {
+    if (!admin || admin.role !== "admin" || admin.verificationStatus !== "approved") {
       throw new Error("Unauthorized: Only verified administrators can adjust volunteer points.");
     }
 
     if (!args.reason || args.reason.trim() === "") {
       throw new Error("A justification reason is required for administrative points adjustments.");
+    }
+
+    if (args.points === 0) {
+      throw new Error("Point adjustment must be a non-zero value.");
+    }
+
+    if (Math.abs(args.points) > 10000) {
+      throw new Error("Point adjustment magnitude cannot exceed 10,000 points in a single transaction.");
     }
 
     const targetUser = await ctx.db.get(args.targetUserId);

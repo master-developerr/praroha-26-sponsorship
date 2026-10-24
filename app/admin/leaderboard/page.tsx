@@ -32,7 +32,8 @@ import { StatCard } from "@/components/ui/stat-card";
 type TimeframeOption = "today" | "this_week" | "this_month" | "all_time";
 
 function HonorsLeaderboardContent() {
-  const { user } = useAuthUser();
+  const { user, role, profile } = useAuthUser();
+  const canAdjust = role === "admin" && profile?.verificationStatus === "approved";
   const [timeframe, setTimeframe] = useState<TimeframeOption>("all_time");
   const [searchQuery, setSearchQuery] = useState("");
   const [isConfigDrawerOpen, setIsConfigDrawerOpen] = useState(false);
@@ -250,13 +251,13 @@ function HonorsLeaderboardContent() {
                 <th className="p-3 text-center">Won</th>
                 <th className="p-3 text-center">Conversion</th>
                 <th className="p-3 text-right">Points</th>
-                <th className="p-3 text-right">Action</th>
+                {canAdjust && <th className="p-3 text-right">Action</th>}
               </tr>
             </thead>
             <tbody className="divide-y divide-border-subtle">
               {filteredLeaderboard.length === 0 ? (
                 <tr>
-                  <td colSpan={10} className="p-8 text-center text-text-muted text-xs">
+                  <td colSpan={canAdjust ? 10 : 9} className="p-8 text-center text-text-muted text-xs">
                     No volunteers found matching your query.
                   </td>
                 </tr>
@@ -341,23 +342,25 @@ function HonorsLeaderboardContent() {
                       </td>
 
                       {/* Action */}
-                      <td className="p-3 text-right">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() =>
-                            setSelectedUserForAdjustment({
-                              _id: v._id,
-                              name: v.name,
-                              totalPoints: v.totalPoints,
-                              department: v.department,
-                            })
-                          }
-                          className="h-6 px-2 text-[11px] text-text-muted hover:text-primary hover:bg-primary/5"
-                        >
-                          Adjust Pts
-                        </Button>
-                      </td>
+                      {canAdjust && (
+                        <td className="p-3 text-right">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() =>
+                              setSelectedUserForAdjustment({
+                                _id: v._id,
+                                name: v.name,
+                                totalPoints: v.totalPoints,
+                                department: v.department,
+                              })
+                            }
+                            className="h-6 px-2 text-[11px] text-text-muted hover:text-primary hover:bg-primary/5"
+                          >
+                            Adjust Pts
+                          </Button>
+                        </td>
+                      )}
                     </tr>
                   );
                 })
@@ -374,11 +377,13 @@ function HonorsLeaderboardContent() {
       />
 
       {/* Adjust Points Modal */}
-      <AdjustPointsModal
-        isOpen={!!selectedUserForAdjustment}
-        onClose={() => setSelectedUserForAdjustment(null)}
-        targetUser={selectedUserForAdjustment}
-      />
+      {canAdjust && selectedUserForAdjustment && (
+        <AdjustPointsModal
+          isOpen={!!selectedUserForAdjustment}
+          onClose={() => setSelectedUserForAdjustment(null)}
+          targetUser={selectedUserForAdjustment}
+        />
+      )}
     </div>
   );
 }

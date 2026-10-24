@@ -27,7 +27,7 @@ export function AdjustPointsModal({
   targetUser,
   onSuccess,
 }: AdjustPointsModalProps) {
-  const { user } = useAuthUser();
+  const { user, role, profile } = useAuthUser();
   const adjustPointsMutation = useMutation(api.gamification.adminAdjustPoints);
 
   const [pointsDelta, setPointsDelta] = useState<number>(25);
@@ -37,12 +37,12 @@ export function AdjustPointsModal({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  if (!isOpen || !targetUser) return null;
+  if (!isOpen || !targetUser || role !== "admin" || profile?.verificationStatus !== "approved") return null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user?.id) {
-      setErrorMessage("Authentication error. Please re-login.");
+    if (!user?.id || role !== "admin" || profile?.verificationStatus !== "approved") {
+      setErrorMessage("Unauthorized: Only verified administrators can adjust points.");
       return;
     }
 

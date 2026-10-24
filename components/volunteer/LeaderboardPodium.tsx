@@ -1,27 +1,29 @@
 "use client";
 
 import React, { useState } from "react";
+import { usePathname } from "next/navigation";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { useAuthUser } from "@/components/providers/AuthProvider";
 import {
-  Trophy,
-  Award,
   Crown,
   Search,
-  PhoneCall,
-  CheckCircle2,
 } from "lucide-react";
 import { AdjustPointsModal } from "@/components/admin/AdjustPointsModal";
 
 interface LeaderboardPodiumProps {
   compact?: boolean;
   onClose?: () => void;
+  isAdminView?: boolean;
 }
 
-export function LeaderboardPodium({ compact = false, onClose }: LeaderboardPodiumProps) {
-  const { user, profile, role } = useAuthUser();
+export function LeaderboardPodium({ compact = false, onClose, isAdminView }: LeaderboardPodiumProps) {
+  const pathname = usePathname();
+  const { profile, role } = useAuthUser();
+  const isAdminContext = isAdminView ?? (pathname ? pathname.startsWith("/admin") : false);
+  const canAdjust = Boolean(isAdminContext && role === "admin" && profile?.verificationStatus === "approved");
+
   const leaderboard = useQuery(api.gamification.getLeaderboard, {});
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedUserForAdjustment, setSelectedUserForAdjustment] = useState<{
@@ -133,7 +135,7 @@ export function LeaderboardPodium({ compact = false, onClose }: LeaderboardPodiu
                 <th className="py-3 px-4">Interested</th>
                 <th className="py-3 px-4">Deals</th>
                 <th className="py-3 px-4 text-right">Points</th>
-                {role === "admin" && (
+                {canAdjust && (
                   <th className="py-3 px-4 text-center">Admin</th>
                 )}
               </tr>
@@ -141,7 +143,7 @@ export function LeaderboardPodium({ compact = false, onClose }: LeaderboardPodiu
             <tbody className="divide-y divide-border-subtle text-xs">
               {filteredLeaderboard.length === 0 ? (
                 <tr>
-                  <td colSpan={role === "admin" ? 8 : 7} className="py-12 text-center text-text-muted">
+                  <td colSpan={canAdjust ? 8 : 7} className="py-12 text-center text-text-muted">
                     <p className="font-semibold text-text-primary">No volunteers match search</p>
                     <p className="text-xs text-text-secondary mt-1">Try searching another name or department</p>
                   </td>
@@ -217,7 +219,7 @@ export function LeaderboardPodium({ compact = false, onClose }: LeaderboardPodiu
                       </td>
 
                       {/* Admin Actions */}
-                      {role === "admin" && (
+                      {canAdjust && (
                         <td className="py-3 px-4 text-center">
                           <button
                             onClick={() =>
@@ -244,7 +246,7 @@ export function LeaderboardPodium({ compact = false, onClose }: LeaderboardPodiu
       </div>
 
       {/* Admin Point Adjustment Modal */}
-      {selectedUserForAdjustment && (
+      {canAdjust && selectedUserForAdjustment && (
         <AdjustPointsModal
           isOpen={!!selectedUserForAdjustment}
           onClose={() => setSelectedUserForAdjustment(null)}
